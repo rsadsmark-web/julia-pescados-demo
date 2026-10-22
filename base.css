@@ -40,7 +40,7 @@ input, textarea { caret-color: var(--lata); }
 .btn:hover { background: var(--lata-escuro); transform: translateY(-2px); }
 .btn:active { transform: translateY(0) scale(.98); }
 .btn.mar { background: var(--marinho); color: var(--papel); }
-.btn.mar:hover { background: #0b1537; }
+.btn.mar:hover { background: #073644; }
 .btn.claro { background: var(--kraft); color: var(--marinho); }
 .btn.claro:hover { background: #dac99f; }
 .btn.linha { background: transparent; color: var(--marinho); }
@@ -64,7 +64,7 @@ input, textarea { caret-color: var(--lata); }
 .chip { display: inline-block; font-family: var(--rotulo); font-size: 14px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 1px 9px; border-radius: 4px; background: var(--marinho-claro); color: var(--marinho); border: 1.5px solid currentColor; line-height: 1.5; }
 .chip.ok { background: #d9efe0; color: #14633a; } .chip.alerta { background: #fbe6b0; color: #6b4700; }
 .chip.perigo { background: var(--lata-claro); color: #8f1810; } .chip.laranja { background: #fde7ad; color: #6b4700; }
-.chip.rosa { background: #f6d6e3; color: #86204a; } .chip.cinza { background: #e9e5da; color: #4a4d60; }
+.chip.rosa { background: #f6d6e3; color: #86204a; } .chip.cinza { background: #e9e5da; color: #5a4338; }
 
 .motoboy-pin { background: var(--lata); color: #fff; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; box-shadow: 0 2px 8px rgba(0,0,0,.35); border: 3px solid var(--papel); font-size: 11px; font-weight: 800; }
 .destino-pin { background: var(--marinho); width: 22px; height: 22px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid var(--papel); box-shadow: 0 2px 6px rgba(0,0,0,.35); }

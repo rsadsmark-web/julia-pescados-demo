@@ -6,7 +6,7 @@ body.cfg-rs { background: var(--creme, #f4efe4); min-height: 100dvh; }
 .cfg-rs .rs-selo { font: 700 12px/1 var(--corpo); letter-spacing: .06em; text-transform: uppercase; background: var(--marinho); color: #fff; padding: 6px 10px; border-radius: 6px; }
 .cfg-rs h1 { font-size: 22px; margin: 0; }
 .cfg-rs .rs-aviso { background: var(--aviso); border: 1px solid var(--aviso-borda); color: var(--aviso-texto); border-radius: 8px; padding: 10px 14px; font-size: 13.5px; margin-bottom: 16px; }
-.cfg-rs .rs-login { max-width: 420px; margin: 12vh auto 0; background: #fff; border: var(--borda); border-radius: 12px; padding: 28px; }
+.cfg-rs .rs-login { max-width: 420px; margin: 12vh auto 0; background: var(--papel); border: var(--borda); border-radius: 12px; padding: 28px; }
 .cfg-rs .rs-login h1 { margin-bottom: 6px; } .cfg-rs .rs-login p { color: var(--suave); font-size: 14px; margin: 0 0 16px; }
 .cfg-rs .rs-login .campo { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; } .cfg-rs .rs-login input { width: 100%; }
 .cfg-rs .rs-erro { color: var(--perigo, #b3261e); font-size: 13.5px; min-height: 20px; margin: 0 0 8px; }

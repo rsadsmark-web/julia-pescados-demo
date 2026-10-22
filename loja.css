@@ -67,7 +67,7 @@
 .grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 28px 24px; margin-top: 26px; }
 .card { background: var(--papel); border: 2px solid var(--marinho); border-radius: 10px; padding: 8px; display: flex; flex-direction: column; transition: transform .3s var(--suave-ease), background .2s; animation: entra .6s var(--suave-ease) both; }
 .card:nth-child(4n+2) { animation-delay: .06s; } .card:nth-child(4n+3) { animation-delay: .12s; } .card:nth-child(4n+4) { animation-delay: .18s; }
-.card:hover { transform: translateY(-6px) rotate(-.6deg); background: #fff; }
+.card:hover { transform: translateY(-6px) rotate(-.6deg); background: var(--papel); }
 .card-foto { aspect-ratio: 4 / 3; background: var(--kraft) center / cover; position: relative; border: 2px solid var(--marinho); border-radius: 5px; overflow: hidden; }
 .card-foto .chip { position: absolute; top: 10px; left: -4px; background: var(--lata); color: var(--papel); border: 0; border-radius: 0 4px 4px 0; padding: 2px 14px 2px 12px; font-size: 16px; }
 .card-corpo { padding: 14px 10px 10px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
@@ -87,11 +87,11 @@
 .tabela-taxas { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 0 32px; }
 .taxa { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 13px 0; border-bottom: 2px dotted rgba(246, 236, 210, .35); font-size: 17px; }
 .taxa span { font-family: var(--rotulo); font-weight: 600; font-size: 22px; letter-spacing: .03em; text-transform: uppercase; }
-.taxa small { display: block; font-family: var(--corpo); text-transform: none; letter-spacing: 0; font-weight: 400; color: #b8bfdc; font-size: 13.5px; }
+.taxa small { display: block; font-family: var(--corpo); text-transform: none; letter-spacing: 0; font-weight: 400; color: #f1d6c2; font-size: 13.5px; }
 .taxa b { font-family: var(--titulo); font-weight: 400; color: var(--ouro); font-size: 21px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .nota { color: var(--suave); font-size: 13.5px; text-align: center; margin: 18px 0 0; }
-.entrega .nota { grid-column: 1 / -1; text-align: left; color: #b8bfdc; }
-.nota.claro { color: #ffd8d2; }
+.entrega .nota { grid-column: 1 / -1; text-align: left; color: #f1d6c2; }
+.nota.claro { color: #ffe3cf; }
 
 .rodape { background: var(--lata); color: var(--papel); padding: 56px clamp(16px, 5vw, 72px) 40px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; border-top: 3px solid var(--marinho); }
 .rodape .logo-marca img { width: 88px; height: 88px; } .rodape .logo-marca b { font-size: 46px; }
@@ -125,7 +125,7 @@
 .opcao.ativa { background: var(--marinho); color: var(--ouro); }
 .campo { display: flex; flex-direction: column; gap: 4px; }
 .campo label { font-family: var(--rotulo); font-size: 17px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
-.campo input, .campo select, .campo textarea { border: 2px solid var(--marinho); border-radius: 6px; padding: 10px 12px; background: #fff; width: 100%; }
+.campo input, .campo select, .campo textarea { border: 2px solid var(--marinho); border-radius: 6px; padding: 10px 12px; background: var(--papel); width: 100%; }
 .campo input:focus, .campo select:focus, .campo textarea:focus { border-color: var(--lata); outline: none; box-shadow: 0 0 0 3px var(--ouro); }
 .erro-campo { color: var(--perigo); font-size: 13.5px; font-weight: 600; }
 .resumo { background: var(--creme); border: 2px solid var(--marinho); border-radius: 8px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; font-size: 15px; }
