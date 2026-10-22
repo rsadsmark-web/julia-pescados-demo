@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <link rel="stylesheet" href="base.css">
 <link rel="stylesheet" href="admin.css">
+<link rel="stylesheet" href="crm.css">
 </head>
 <body>
 <div class="app">
@@ -21,7 +22,9 @@
     <nav id="menu" aria-label="Módulos">
       <a href="#visao" data-m="visao"><i>◧</i>Visão geral</a>
       <a href="#pedidos" data-m="pedidos"><i>▤</i>Pedidos e delivery<span class="selo" id="seloPedidos"></span></a>
-      <a href="#crm" data-m="crm"><i>◎</i>CRM e vendas</a>
+      <a href="#conversas" data-m="conversas"><i>◎</i>Conversas<span class="selo" id="seloConversas"></span></a>
+      <a href="#funil" data-m="funil"><i>◈</i>Funil de vendas</a>
+      <a href="#campanhas" data-m="campanhas"><i>◆</i>Campanhas</a>
       <a href="#clientes" data-m="clientes"><i>◉</i>Carteira de clientes</a>
       <a href="#nf" data-m="nf"><i>▦</i>Nota fiscal</a>
       <a href="#estoque" data-m="estoque"><i>▣</i>Estoque<span class="selo alerta" id="seloEstoque"></span></a>
@@ -39,6 +42,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="shared.js"></script>
+<script src="crm.js"></script>
+<script src="campanhas.js"></script>
 <script src="admin.js"></script>
 </body>
 </html>

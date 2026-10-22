@@ -5,7 +5,7 @@
   var tela = $('#tela');
   var modulo = 'visao', mapa = null, mapaCam = null, ticker = null;
   var filtroCli = 'todos', buscaCli = '', ordCli = 'total';
-  var leadAberto = null, nfSel = null;
+  var nfSel = null, parametro = '';
   var CORES = { m1: '#e8622a', m2: '#0d5c6b', m3: '#8a4fbf' };
 
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -34,6 +34,7 @@
     var pend = S.pedidos.filter(function (p) { return !p.confirmado; }).length;
     var baixo = S.produtos.filter(function (p) { return p.estoque <= p.min; }).length;
     $('#seloPedidos').textContent = pend || ''; $('#seloEstoque').textContent = baixo || '';
+    var nl = window.CRM ? CRM.naoLidas() : 0; $('#seloConversas').textContent = nl || '';
   }
 
   /* ---------- Visão geral ---------- */
@@ -113,47 +114,6 @@
     }).join('');
   }
 
-  /* ---------- CRM ---------- */
-  var ETAPAS = [['novo', 'Novo contato'], ['conversa', 'Em conversa'], ['orcamento', 'Orçamento enviado'], ['pago', 'Pagamento recebido'], ['vendido', 'Vendido']];
-  function crm() {
-    var total = S.leads.filter(function (l) { return l.etapa !== 'vendido'; }).reduce(function (s, l) { return s + l.valor; }, 0);
-    tela.innerHTML = '<div class="cab"><div><h1>CRM e vendas</h1><p>Arraste os cartões entre as etapas. Em cada lead, confirme a venda quando o pagamento for recebido.</p></div><span class="chip laranja">' + JP.brl(total) + ' em negociação</span></div>' +
-      '<div class="kanban" id="kanban"></div>' +
-      '<aside class="gaveta-lead" id="gl" aria-hidden="true"></aside>';
-    desenhaKanban();
-    if (leadAberto) abreLead(leadAberto);
-  }
-  function desenhaKanban() {
-    $('#kanban').innerHTML = ETAPAS.map(function (e) {
-      var ls = S.leads.filter(function (l) { return l.etapa === e[0]; }), tot = ls.reduce(function (s, l) { return s + l.valor; }, 0);
-      return '<div class="coluna" data-etapa="' + e[0] + '"><h3>' + e[1] + '<small>' + ls.length + ' · ' + JP.brl(tot) + '</small></h3>' +
-        ls.map(function (l) {
-          return '<button class="lead" draggable="true" data-lead="' + l.id + '"><b>' + esc(l.nome) + '</b><small>' + esc(l.origem) + '</small><small>' + esc(l.itens) + '</small>' +
-            '<div class="linha-fim"><span>' + JP.brl(l.valor) + '</span>' + (l.vendido ? '<span class="chip ok">Venda confirmada</span>' : '') + '</div></button>';
-        }).join('') + '</div>';
-    }).join('');
-  }
-  function abreLead(id) {
-    var l = S.leads.filter(function (x) { return x.id === id; })[0]; if (!l) return;
-    leadAberto = id;
-    var g = $('#gl');
-    g.innerHTML = '<div class="gl-cab"><div><h2 style="font-size:22px">' + esc(l.nome) + '</h2><span class="dica" style="color:var(--suave);font-size:13px">' + esc(l.fone) + ' · ' + esc(l.origem) + '</span></div><button class="fechar" data-fechalead aria-label="Fechar">×</button></div>' +
-      '<div class="gl-corpo"><div><span class="chip">' + (ETAPAS.filter(function (e) { return e[0] === l.etapa; })[0] || [0, ''])[1] + '</span> <span class="chip laranja">' + JP.brl(l.valor) + '</span><p style="margin:10px 0 0;color:var(--suave);font-size:13.5px">' + esc(l.itens) + '</p></div>' +
-      '<div class="conversa" aria-label="Conversa de exemplo">' + l.msgs.map(function (m) { return '<div class="msg ' + m[0] + '">' + esc(m[1]) + '</div>'; }).join('') + '</div>' +
-      (l.vendido
-        ? '<div class="caixa-venda venda-feita"><h3>Venda confirmada</h3><p>Venda de ' + JP.brl(l.valor) + ' registrada.</p></div>'
-        : '<div class="caixa-venda"><h3>Confirmar a venda</h3><p>Ao confirmar, o lead vai para Vendido com o valor de ' + JP.brl(l.valor) + '.</p><button class="btn verde" data-confvenda="' + l.id + '">Confirmar venda</button></div>') + '</div>';
-    g.classList.add('aberta'); g.setAttribute('aria-hidden', 'false');
-  }
-  function fechaLead() { leadAberto = null; var g = $('#gl'); if (g) { g.classList.remove('aberta'); g.setAttribute('aria-hidden', 'true'); } }
-  function confirmaVendaLead(id) {
-    var l = S.leads.filter(function (x) { return x.id === id; })[0]; if (!l || l.vendido) return;
-    l.etapa = 'vendido'; l.vendido = true; JP.salvar();
-    if (l.pedidoId) { var p = pedido(l.pedidoId); if (p) { JP.confirmarPedido(p.id); recarrega(); p = pedido(l.pedidoId); p.vendaConfirmada = true; JP.salvar(); } }
-    recarrega(); toast('Venda confirmada. Valor de ' + JP.brl(l.valor) + ' registrado.');
-    desenhaKanban(); abreLead(id); selos();
-  }
-
   /* ---------- Carteira de clientes ---------- */
   function clientes() {
     tela.innerHTML = '<div class="cab"><div><h1>Carteira de clientes</h1><p>Categorias automáticas por frequência, valor e tempo sem comprar.</p></div></div>' +
@@ -221,15 +181,16 @@
   }
 
   /* ---------- roteamento ---------- */
-  var MODULOS = { visao: visao, pedidos: pedidosTela, crm: crm, clientes: clientes, nf: nf, estoque: estoque };
+  var MODULOS = { visao: visao, pedidos: pedidosTela, conversas: crmTela, funil: crmTela, campanhas: crmTela, clientes: clientes, nf: nf, estoque: estoque };
+  function crmTela() { CRM.render(modulo, parametro, tela); }
   function ir() {
-    var h = (location.hash || '#visao').slice(1); if (!MODULOS[h]) h = 'visao';
-    modulo = h; recarrega(); fechaLeadSeguro();
+    var h = (location.hash || '#visao').slice(1).split('/'), param = h[1] || '';
+    h = h[0]; if (h === 'crm') h = 'funil'; if (!MODULOS[h]) h = 'visao';
+    modulo = h; parametro = param; recarrega();
     if (mapa && h !== 'pedidos') { mapa.remove(); mapa = null; }
     document.querySelectorAll('#menu a').forEach(function (a) { a.classList.toggle('ativo', a.dataset.m === h); });
     MODULOS[h](); selos(); window.scrollTo(0, 0);
   }
-  function fechaLeadSeguro() { leadAberto = null; }
 
   /* ---------- eventos ---------- */
   document.addEventListener('click', function (e) {
@@ -239,9 +200,6 @@
       var p = pedido(t.dataset.venda); p.vendaConfirmada = true; JP.salvar();
       recarrega(); toast('Venda de ' + JP.brl(JP.totalPedido(p)) + ' confirmada.'); desenhaPedidos();
     }
-    else if (t.dataset.lead) abreLead(t.dataset.lead);
-    else if (t.dataset.fechalead !== undefined) fechaLead();
-    else if (t.dataset.confvenda) confirmaVendaLead(t.dataset.confvenda);
     else if (t.dataset.fcli) { filtroCli = t.dataset.fcli; desenhaClientes(); }
     else if (t.dataset.entrada) {
       var inp = $('#ent-' + t.dataset.entrada), q = parseFloat(inp.value);
@@ -249,7 +207,7 @@
       var pr = S.produtos.filter(function (x) { return x.id === t.dataset.entrada; })[0]; pr.estoque = +(pr.estoque + q).toFixed(1); JP.salvar(); toast('Entrada de ' + q + ' ' + pr.un + ' em ' + pr.nome + '.'); estoque(); selos();
     }
     else if (t.id === 'emitirNf') emitirNf();
-    else if (t.id === 'resetar') { JP.resetar(); recarrega(); toast('Dados de exemplo restaurados.'); ir(); }
+    else if (t.id === 'resetar') { JP.resetar(); CRM.reset(); recarrega(); toast('Dados de exemplo restaurados.'); ir(); }
   });
   document.addEventListener('change', function (e) {
     if (e.target.dataset.moto !== undefined) {
@@ -258,28 +216,11 @@
   });
   document.addEventListener('input', function (e) { if (e.target.id === 'buscaCli') { buscaCli = e.target.value; var pos = e.target.selectionStart; desenhaClientes(); var b = $('#buscaCli'); b.focus(); b.setSelectionRange(pos, pos); } });
 
-  // arrastar leads entre colunas
-  var arrastando = null;
-  document.addEventListener('dragstart', function (e) { var l = e.target.closest && e.target.closest('.lead'); if (l) { arrastando = l.dataset.lead; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', arrastando); } catch (x) {} } });
-  document.addEventListener('dragover', function (e) { var c = e.target.closest && e.target.closest('.coluna'); if (c && arrastando) { e.preventDefault(); document.querySelectorAll('.coluna').forEach(function (x) { x.classList.toggle('sobre', x === c); }); } });
-  document.addEventListener('drop', function (e) {
-    var c = e.target.closest && e.target.closest('.coluna'); if (!c || !arrastando) return; e.preventDefault();
-    var l = S.leads.filter(function (x) { return x.id === arrastando; })[0];
-    if (l && l.etapa !== c.dataset.etapa) {
-      if (c.dataset.etapa === 'vendido') { l.etapa = 'vendido'; JP.salvar(); desenhaKanban(); abreLead(l.id); toast('Para registrar a venda, use “Confirmar venda” neste lead.'); }
-      else { l.etapa = c.dataset.etapa; l.vendido = false; JP.salvar(); desenhaKanban(); }
-    }
-    arrastando = null;
-  });
-  document.addEventListener('dragend', function () { arrastando = null; document.querySelectorAll('.coluna').forEach(function (x) { x.classList.remove('sobre'); }); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') fechaLead(); });
-
   // pedidos feitos na loja (outra aba) chegam aqui sozinhos
   window.addEventListener('storage', function (e) {
     if (e.key !== 'jp_demo_v1') return;
     recarrega(); selos();
     if (modulo === 'pedidos') { desenhaPedidos(); atualizaMapaAdmin(); } else if (modulo === 'visao') visao();
-    else if (modulo === 'crm' && !leadAberto) { desenhaKanban(); }
     else if (modulo === 'estoque') estoque();
     else if (modulo === 'clientes') desenhaClientes();
   });
@@ -293,6 +234,10 @@
     }
   }, 1000);
 
+  CRM.init({
+    estado: function () { return S; }, salvarEstado: function () { JP.salvar(); }, esc: esc, toast: toast, brl: JP.brl, dataHora: JP.dataHora, ha: ha,
+    totalPedido: JP.totalPedido, categoria: categoria, selos: selos, modulo: function () { return modulo; }
+  });
   window.addEventListener('hashchange', ir);
   ir();
 })();
