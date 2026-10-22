@@ -154,3 +154,36 @@ tr.sel { background: var(--mar-claro); }
   .cp-banner { flex-wrap: wrap; }
 }
 .cv-cab { gap: 8px; } .cv-cab select.peq { max-width: 128px; }
+
+/* v2 — conversas, funil, campanhas */
+.cv { border-radius: 18px; box-shadow: var(--sombra-1); }
+.cv-lista { background: #fff; }
+.cv-busca { padding: 16px 16px 8px; } .cv-busca input { padding: 11px 18px; background: #f1f5f6; border-color: transparent; transition: background .15s, box-shadow .15s; } .cv-busca input:focus { box-shadow: 0 0 0 3px rgba(13,92,107,.15); }
+.cv-item { position: relative; padding: 14px 16px; gap: 12px; cursor: pointer; border-bottom-color: #eef2f3; }
+.cv-item:hover { background: #f5f9fa; }
+.cv-item.ativo { background: var(--mar-claro); } .cv-item.ativo::before { content: ''; position: absolute; left: 0; top: 12px; bottom: 12px; width: 4px; border-radius: 0 4px 4px 0; background: var(--mar); }
+.cv-av { width: 44px; height: 44px; font-size: 15px; box-shadow: 0 0 0 3px #fff, 0 2px 8px rgba(8,50,61,.2); }
+.cv-item-topo b { font-size: 14.5px; }
+.cv-pre { font-size: 13px; }
+.cv-chat { background: #ece5d8 radial-gradient(circle at 20% 10%, rgba(255,255,255,.35), transparent 40%); }
+.cv-cab { padding: 14px 18px; box-shadow: 0 1px 0 var(--linha), 0 8px 18px -14px rgba(8,50,61,.3); position: relative; z-index: 1; }
+.cv-cab-nome b { font-family: var(--titulo); font-size: 17px; }
+.cv-msgs { padding: 20px 26px; gap: 8px; }
+.cv-msg { padding: 9px 13px 5px; border-radius: 4px 14px 14px 14px; box-shadow: 0 1px 2px rgba(8,50,61,.1); line-height: 1.45; }
+.cv-msg.j { border-radius: 14px 4px 14px 14px; background: #d4efc0; }
+.cv-compor { padding: 12px 16px 10px; box-shadow: 0 -8px 18px -14px rgba(8,50,61,.3); }
+.cv-vazio h2 { font-size: 24px; }
+.cv-dia span { box-shadow: var(--sombra-1); }
+
+.cp-banner { border-radius: 16px; }
+.cp-fs { border-radius: 14px; border-color: #dbe5e7; }
+.cp-res { background: var(--mar-claro); border-radius: 12px; }
+.cp-msg { border-radius: 4px 14px 14px 14px; }
+.cp-modal { border-radius: 22px; box-shadow: 0 30px 80px rgba(0,0,0,.4); animation: sobe .35s var(--suave-ease) both; }
+.cp-fundo { backdrop-filter: blur(4px); }
+.cp-check li { border-radius: 12px; padding-block: 10px; }
+.cp-kpis .kpi { background: #f1f6f7; border-radius: 14px; } 
+.cp-kpis .kpi:first-child { background: var(--mar-escuro); } .cp-kpis .kpi:first-child b { color: #fff; }
+tr.sel { background: var(--mar-claro); box-shadow: inset 4px 0 0 var(--mar); }
+@media (max-width: 860px) { .cv-msgs { padding: 14px; } .cv-item.ativo::before { display: none; } }
+.cv-busca input { font-size: 14px; padding: 10px 16px; }

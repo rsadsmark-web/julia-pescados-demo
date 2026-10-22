@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,800;1,9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="base.css?v=20261021c">
-<link rel="stylesheet" href="loja.css?v=20261021c">
+<link rel="stylesheet" href="base.css?v=20261022a">
+<link rel="stylesheet" href="loja.css?v=20261022a">
 </head>
 <body>
 <div class="aviso-demo">Demonstração — pedidos e pagamentos são simulados. <a href="admin.html">Abrir painel administrativo</a></div>
@@ -35,25 +35,25 @@
 <section class="heroi">
   <div class="heroi-texto">
     <span class="chip laranja">Varejo e atacado</span>
-    <h1>O universo do camarão, direto na sua casa.</h1>
+    <h1>O universo do <em>camarão</em>, direto na sua casa.</h1>
     <p>Camarão e pescados frescos e congelados, com delivery em Fortaleza e Caucaia. Funcionamos das 6h às 14h, de segunda a sábado.</p>
     <div class="heroi-acoes">
       <a class="btn" href="#catalogo">Escolher produtos</a>
       <a class="btn linha branco" href="#entrega">Ver taxas de entrega</a>
     </div>
   </div>
-  <div class="heroi-foto" role="img" aria-label="Camarão fresco"></div>
+  <div class="heroi-foto" role="img" aria-label="Camarão fresco"><div class="heroi-selo"><b>6h às 14h</b><span>segunda a sábado</span></div></div>
 </section>
 
 <section class="faixa">
-  <div><b>Delivery</b><span>Fortaleza e Caucaia</span></div>
-  <div><b>Embalado a vácuo</b><span>Cadeia do frio mantida</span></div>
-  <div><b>Atacado</b><span>Preço especial para restaurantes</span></div>
+  <div><svg class="fx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.5h11v9h-11z"/><path d="M13.5 9.5h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.7"/><circle cx="17" cy="17.5" r="1.7"/></svg><p><b>Delivery</b><span>Fortaleza e Caucaia</span></p></div>
+  <div><svg class="fx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M4.9 6l14.2 12M19.1 6 4.9 18M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5"/></svg><p><b>Embalado a vácuo</b><span>Cadeia do frio mantida</span></p></div>
+  <div><svg class="fx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg><p><b>Atacado</b><span>Preço especial para restaurantes</span></p></div>
 </section>
 
 <main id="catalogo" class="miolo">
   <div class="miolo-cab">
-    <h2>Nossos produtos</h2>
+    <div><h2>Nossos produtos</h2><p class="sub">Frescos e congelados, embalados a vácuo.</p></div>
     <div class="busca"><input id="busca" type="search" placeholder="Buscar produto" aria-label="Buscar produto"></div>
   </div>
   <div class="cats" id="cats" role="tablist" aria-label="Categorias"></div>
@@ -62,7 +62,7 @@
 
 <section id="entrega" class="entrega">
   <div class="entrega-cab">
-    <h2>Taxa de entrega por bairro</h2>
+    <h2>Taxa de entrega<br>por bairro</h2>
     <p>A taxa do bairro vale até 8 km da nossa base. Acima disso, somamos R$ 1,50 por km excedente. A taxa final aparece no carrinho assim que o bairro é escolhido.</p>
   </div>
   <div class="tabela-taxas" id="tabelaTaxas"></div>
@@ -92,7 +92,7 @@
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="shared.js"></script>
-<script src="loja.js"></script>
+<script src="shared.js?v=20261022a"></script>
+<script src="loja.js?v=20261022a"></script>
 </body>
 </html>

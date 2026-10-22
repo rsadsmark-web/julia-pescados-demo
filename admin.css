@@ -145,3 +145,82 @@ td.num, td.num * { white-space: nowrap; }
 .painel h2 { flex-wrap: wrap; }
 .lead-resp small, .lead .linha-fim { font-size: 12.5px; }
 @media (max-width: 860px) { .painel table { min-width: 620px; } }
+
+/* v2 — painel */
+body { background: #eef3f4; }
+.app { grid-template-columns: 264px 1fr; }
+.lateral { background: linear-gradient(180deg, #0a3b47 0%, var(--mar-escuro) 60%); padding: 26px 16px 20px; box-shadow: 1px 0 0 rgba(255,255,255,.04); }
+.lateral .logo { padding: 0 12px 20px; border-bottom: 1px solid rgba(255,255,255,.09); margin-bottom: -8px; }
+.lateral .logo b { font-size: 34px; }
+#menu { gap: 3px; }
+#menu a { position: relative; padding: 11px 14px; border-radius: 12px; font-size: 14.5px; color: #b9d3d9; transition: background .18s, color .18s, transform .2s var(--suave-ease); }
+#menu a:hover { background: rgba(255,255,255,.08); color: #fff; transform: translateX(2px); }
+#menu a.ativo { background: linear-gradient(90deg, rgba(255,180,143,.2), rgba(255,255,255,.06)); color: #fff; }
+#menu a.ativo::before { content: ''; position: absolute; left: -16px; top: 9px; bottom: 9px; width: 4px; border-radius: 0 4px 4px 0; background: var(--laranja); }
+.selo { box-shadow: 0 0 0 3px rgba(232,98,42,.22); }
+.lateral-rodape a { padding: 10px 12px; border-radius: 10px; background: rgba(255,180,143,.1); text-align: center; font-weight: 600; transition: background .15s; }
+.lateral-rodape a:hover { background: rgba(255,180,143,.2); }
+.lateral-rodape button { transition: background .15s, color .15s; cursor: pointer; }
+
+#tela { padding-top: 34px; }
+.cab { margin-bottom: 26px; align-items: flex-end; }
+.cab h1 { font-size: clamp(30px, 3vw, 40px); letter-spacing: -.015em; }
+.cab p { font-size: 15.5px; margin-top: 6px; max-width: 70ch; }
+.painel { border-radius: 18px; padding: 22px 24px; box-shadow: var(--sombra-1); }
+.painel h2 { font-size: 20px; margin-bottom: 16px; letter-spacing: -.015em; }
+
+.kpis { gap: 16px; margin-bottom: 22px; }
+.kpi { position: relative; padding: 20px 22px; border-radius: 18px; box-shadow: var(--sombra-1); overflow: hidden; }
+.kpi:hover { transform: translateY(-3px); box-shadow: var(--sombra-2); }
+.kpi span { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; }
+.kpi b { font-size: 38px; margin: 10px 0 6px; letter-spacing: -.01em; line-height: 1; }
+.kpi small { font-size: 12.5px; }
+.kpi:first-child { background: linear-gradient(145deg, #0f6a7a, var(--mar-escuro)); color: #fff; }
+.kpi:first-child span, .kpi:first-child small { color: #bfe0e6; } .kpi:first-child b { color: #fff; }
+.kpi.alerta { background: #fff7e6; } .kpi.alerta span, .kpi.alerta small { color: #8a5406; }
+
+table { font-size: 14px; }
+th { background: #f5f8f9; color: #4a6168; padding: 11px 12px; border-bottom: 1px solid var(--linha); font-size: 11px; letter-spacing: .08em; position: sticky; top: 0; }
+th:first-child { border-radius: 10px 0 0 10px; } th:last-child { border-radius: 0 10px 10px 0; }
+td { padding: 14px 12px; border-bottom: 1px solid #eef2f3; }
+td:first-child { font-weight: 700; color: var(--mar-escuro); }
+tbody tr { transition: background .15s; } tbody tr:hover { background: #f3f9fa; }
+select.peq, input.peq { border-radius: 10px; padding: 8px 10px; transition: border-color .15s, box-shadow .15s; cursor: pointer; }
+select.peq:hover { border-color: #b8cdd1; }
+.filtro { padding: 8px 16px; transition: background .15s, border-color .15s, color .15s, box-shadow .15s; cursor: pointer; border-color: transparent; box-shadow: var(--sombra-1); }
+.filtro:not(.ativo):hover { color: var(--mar); box-shadow: 0 0 0 1.5px var(--mar); }
+.filtro.ativo { box-shadow: 0 8px 18px -8px rgba(13,92,107,.7); }
+.filtros input[type=search] { border-color: transparent; box-shadow: var(--sombra-1); padding: 10px 18px; }
+.rota { background: #f3f8f9; padding: 12px 14px; border-radius: 14px; transition: background .15s; } .rota:hover { background: var(--mar-claro); }
+#mapaAdmin { border-radius: 14px; }
+
+.kanban { gap: 16px; }
+.coluna { background: #e4ecee; border-radius: 18px; padding: 14px; position: relative; }
+.coluna h3 { color: var(--mar-escuro); font-size: 12.5px; margin-bottom: 14px; padding: 2px 4px 0; position: relative; }
+.coluna h3::before { content: ''; width: 28px; height: 4px; border-radius: 4px; background: var(--mar); margin-bottom: 6px; }
+.coluna:nth-child(1) h3::before { background: #8aa7ae; } .coluna:nth-child(2) h3::before { background: #2f8fa1; } .coluna:nth-child(3) h3::before { background: var(--alerta); } .coluna:nth-child(4) h3::before { background: var(--laranja); } .coluna:nth-child(5) h3::before { background: var(--ok); }
+.lead { border-radius: 14px; padding: 13px 14px; box-shadow: 0 1px 2px rgba(8,50,61,.08); transition: transform .2s var(--suave-ease), box-shadow .2s; }
+.lead:hover { transform: translateY(-2px); box-shadow: 0 10px 22px -8px rgba(8,50,61,.28); }
+.lead b { font-size: 14.5px; }
+.lead .linha-fim { font-family: var(--titulo); font-size: 15px; font-variant-numeric: tabular-nums; }
+.gaveta-lead { border-radius: 22px 0 0 22px; }
+.caixa-venda { border-radius: 16px; }
+.banner { border-radius: 14px; padding: 14px 18px; }
+.toast { border-radius: 14px; padding: 14px 22px; box-shadow: 0 18px 44px rgba(0,0,0,.32); animation: sobe .35s var(--suave-ease) both; }
+.cartao-nf { border-radius: 16px; box-shadow: var(--sombra-1); border: 0; }
+.barra { height: 10px; background: #e1e9eb; }
+.vazio { padding: 48px 24px; }
+@keyframes sobe { from { opacity: 0; transform: translate(var(--tx, 0), 14px); } to { opacity: 1; transform: translate(var(--tx, 0), 0); } }
+.toast { --tx: -50%; }
+#tela > * { animation: sobe .5s var(--suave-ease) both; } #tela > *:nth-child(2) { animation-delay: .05s; } #tela > *:nth-child(3) { animation-delay: .1s; }
+@media (max-width: 860px) {
+  .app { grid-template-columns: 1fr; }
+  .lateral { background: var(--mar-escuro); padding: 10px 12px; } .lateral .logo { padding: 0 6px 0 0; border: 0; margin: 0; } #menu a.ativo::before { display: none; } #menu a { padding: 9px 14px; font-size: 13.5px; } #menu a:hover { transform: none; }
+  .kpi b { font-size: 30px; } .kpi { padding: 16px; } .painel { padding: 16px; border-radius: 16px; }
+  #tela { padding-top: 22px; } .cab h1 { font-size: 28px; }
+}
+
+.painel h2 .btn, .painel h2 a { font-family: var(--corpo); letter-spacing: 0; }
+.lead .linha-fim { font-family: var(--corpo); font-size: 13px; }
+.lead .linha-fim > span:first-child { font-family: var(--titulo); font-size: 15.5px; letter-spacing: -.01em; }
+.lead-resp small { font-size: 11.5px; }
