@@ -43,14 +43,12 @@
     var abertos = S.pedidos.filter(function (p) { return p.confirmado && p.fixo !== 'entregue' && JP.situacao(p).cod !== 'chegou'; }).length;
     var pend = S.pedidos.filter(function (p) { return !p.confirmado; }).length;
     var baixo = S.produtos.filter(function (p) { return p.estoque <= p.min; });
-    var gasto = S.campanhas.reduce(function (s, c) { return s + c.gasto; }, 0), rec = S.campanhas.reduce(function (s, c) { return s + c.receita; }, 0);
     tela.innerHTML = '<div class="cab"><div><h1>Bom dia, Júlia</h1><p>Resumo da operação de hoje.</p></div></div>' +
       '<div class="kpis">' +
       kpi('Pedidos hoje', hoje.length, JP.brl(fat) + ' faturados') +
       kpi('Aguardando confirmação', pend, 'confirme para dar baixa no estoque', pend ? 'alerta' : '') +
       kpi('Entregas em andamento', abertos, S.motoboys.length + ' motoboys na equipe') +
-      kpi('Estoque baixo', baixo.length, baixo.length ? 'repor em breve' : 'tudo em dia', baixo.length ? 'alerta' : '') +
-      kpi('Retorno do tráfego', (rec / gasto).toFixed(1).replace('.', ',') + 'x', JP.brl(gasto) + ' investidos') + '</div>' +
+      kpi('Estoque baixo', baixo.length, baixo.length ? 'repor em breve' : 'tudo em dia', baixo.length ? 'alerta' : '') + '</div>' +
       '<div class="duas"><div class="painel"><h2>Últimos pedidos <a class="btn pequeno claro" href="#pedidos">Ver todos</a></h2><div class="rolagem"><table><thead><tr><th>Pedido</th><th>Cliente</th><th class="num">Total</th><th>Situação</th></tr></thead><tbody>' +
       S.pedidos.slice(0, 6).map(function (p) { return '<tr><td><b>' + p.id + '</b></td><td>' + esc(p.cliente) + '</td><td class="num">' + JP.brl(JP.totalPedido(p)) + '</td><td>' + chipSit(p) + '</td></tr>'; }).join('') +
       '</tbody></table></div></div>' +
@@ -119,11 +117,10 @@
   var ETAPAS = [['novo', 'Novo contato'], ['conversa', 'Em conversa'], ['orcamento', 'Orçamento enviado'], ['pago', 'Pagamento recebido'], ['vendido', 'Vendido']];
   function crm() {
     var total = S.leads.filter(function (l) { return l.etapa !== 'vendido'; }).reduce(function (s, l) { return s + l.valor; }, 0);
-    tela.innerHTML = '<div class="cab"><div><h1>CRM e vendas</h1><p>Arraste os cartões entre as etapas. Em cada lead, confirme a venda para simular o evento Purchase da Meta.</p></div><span class="chip laranja">' + JP.brl(total) + ' em negociação</span></div>' +
+    tela.innerHTML = '<div class="cab"><div><h1>CRM e vendas</h1><p>Arraste os cartões entre as etapas. Em cada lead, confirme a venda quando o pagamento for recebido.</p></div><span class="chip laranja">' + JP.brl(total) + ' em negociação</span></div>' +
       '<div class="kanban" id="kanban"></div>' +
-      '<div class="painel" style="margin-top:18px"><h2>Eventos Purchase enviados à Meta <small>simulação — nenhum dado sai deste navegador</small></h2><div class="log" id="logEv"></div></div>' +
       '<aside class="gaveta-lead" id="gl" aria-hidden="true"></aside>';
-    desenhaKanban(); desenhaLog();
+    desenhaKanban();
     if (leadAberto) abreLead(leadAberto);
   }
   function desenhaKanban() {
@@ -144,26 +141,17 @@
       '<div class="gl-corpo"><div><span class="chip">' + (ETAPAS.filter(function (e) { return e[0] === l.etapa; })[0] || [0, ''])[1] + '</span> <span class="chip laranja">' + JP.brl(l.valor) + '</span><p style="margin:10px 0 0;color:var(--suave);font-size:13.5px">' + esc(l.itens) + '</p></div>' +
       '<div class="conversa" aria-label="Conversa de exemplo">' + l.msgs.map(function (m) { return '<div class="msg ' + m[0] + '">' + esc(m[1]) + '</div>'; }).join('') + '</div>' +
       (l.vendido
-        ? '<div class="caixa-venda venda-feita"><h3>Venda confirmada</h3><p>O evento Purchase de ' + JP.brl(l.valor) + ' foi registrado no log abaixo (simulado, sem envio real).</p></div>'
-        : '<div class="caixa-venda"><h3>Confirmar a venda</h3><p>Ao confirmar, o lead vai para Vendido e o painel simula o disparo do evento Purchase para a Meta com o valor de ' + JP.brl(l.valor) + '.</p><button class="btn verde" data-confvenda="' + l.id + '">Confirmar venda e disparar Purchase</button></div>') + '</div>';
+        ? '<div class="caixa-venda venda-feita"><h3>Venda confirmada</h3><p>Venda de ' + JP.brl(l.valor) + ' registrada.</p></div>'
+        : '<div class="caixa-venda"><h3>Confirmar a venda</h3><p>Ao confirmar, o lead vai para Vendido com o valor de ' + JP.brl(l.valor) + '.</p><button class="btn verde" data-confvenda="' + l.id + '">Confirmar venda</button></div>') + '</div>';
     g.classList.add('aberta'); g.setAttribute('aria-hidden', 'false');
   }
   function fechaLead() { leadAberto = null; var g = $('#gl'); if (g) { g.classList.remove('aberta'); g.setAttribute('aria-hidden', 'true'); } }
-  function desenhaLog() {
-    var el = $('#logEv'); if (!el) return;
-    if (!S.eventos.length) { el.textContent = 'Nenhum evento ainda. Confirme uma venda para ver o registro aqui.'; return; }
-    el.innerHTML = S.eventos.map(function (ev) {
-      var j = { event_name: 'Purchase', event_id: ev.id, event_time: Math.floor(ev.quando / 1000), action_source: 'chat', user_data: { ph: [ev.fone_hash], fn: ev.nome }, custom_data: { currency: ev.moeda, value: +ev.valor.toFixed(2), content_name: ev.itens } };
-      return esc(JP.dataHora(ev.quando)) + '  →  ' + esc(ev.origem) + '\n' + esc(JSON.stringify(j, null, 2)) + '\n<span class="erro">' + esc(ev.status) + '</span>\n';
-    }).join('\n');
-  }
   function confirmaVendaLead(id) {
     var l = S.leads.filter(function (x) { return x.id === id; })[0]; if (!l || l.vendido) return;
     l.etapa = 'vendido'; l.vendido = true; JP.salvar();
     if (l.pedidoId) { var p = pedido(l.pedidoId); if (p) { JP.confirmarPedido(p.id); recarrega(); p = pedido(l.pedidoId); p.vendaConfirmada = true; JP.salvar(); } }
-    JP.disparoPurchase('CRM — ' + l.nome, l.nome, l.fone, l.valor, l.itens, l.id);
-    recarrega(); toast('Venda confirmada. Evento Purchase de ' + JP.brl(l.valor) + ' registrado (simulado).');
-    desenhaKanban(); desenhaLog(); abreLead(id); selos();
+    recarrega(); toast('Venda confirmada. Valor de ' + JP.brl(l.valor) + ' registrado.');
+    desenhaKanban(); abreLead(id); selos();
   }
 
   /* ---------- Carteira de clientes ---------- */
@@ -232,33 +220,8 @@
         : '<p class="vazio">Nenhuma baixa ainda.<br>Confirme um pedido em “Pedidos e delivery” e veja o saldo cair aqui.</p>') + '</div></div>';
   }
 
-  /* ---------- Tráfego pago ---------- */
-  function trafego() {
-    var C = S.campanhas, tot = { gasto: 0, cliques: 0, conversas: 0, vendas: 0, receita: 0, imp: 0 };
-    C.forEach(function (c) { tot.gasto += c.gasto; tot.cliques += c.cliques; tot.conversas += c.conversas; tot.vendas += c.vendas; tot.receita += c.receita; tot.imp += c.impressoes; });
-    var f = function (v) { return String(v).replace('.', ','); };
-    tela.innerHTML = '<div class="cab"><div><h1>Tráfego pago</h1><p>Resultado dos anúncios por campanha — últimos 30 dias (dados de exemplo).</p></div><span class="chip cinza">Exemplo — sem conexão real com a Meta</span></div>' +
-      '<div class="kpis">' + kpi('Investido', JP.brl(tot.gasto), JP.brl(tot.gasto / tot.cliques) + ' por clique') + kpi('Cliques', tot.cliques.toLocaleString('pt-BR'), (tot.cliques / tot.imp * 100).toFixed(2).replace('.', ',') + '% de CTR') +
-      kpi('Conversas no WhatsApp', tot.conversas, JP.brl(tot.gasto / tot.conversas) + ' por conversa') + kpi('Vendas', tot.vendas, JP.brl(tot.gasto / tot.vendas) + ' por venda') + kpi('Receita', JP.brl(tot.receita), 'retorno de ' + f((tot.receita / tot.gasto).toFixed(1)) + 'x') + '</div>' +
-      '<div class="duas"><div class="painel"><h2>Campanhas</h2><div class="rolagem"><table><thead><tr><th>Campanha</th><th class="num">Gasto</th><th class="num">Cliques</th><th class="num">Conversas</th><th class="num">Vendas</th><th class="num">Custo/venda</th><th class="num">Retorno</th></tr></thead><tbody>' +
-      C.map(function (c) { return '<tr><td><b>' + esc(c.nome) + '</b><small><span class="chip ' + (c.status === 'Ativa' ? 'ok' : 'cinza') + '">' + c.status + '</span></small></td><td class="num">' + JP.brl(c.gasto) + '</td><td class="num">' + c.cliques.toLocaleString('pt-BR') + '</td><td class="num">' + c.conversas + '</td><td class="num">' + c.vendas + '</td><td class="num">' + JP.brl(c.gasto / c.vendas) + '</td><td class="num"><b>' + f((c.receita / c.gasto).toFixed(1)) + 'x</b></td></tr>'; }).join('') + '</tbody></table></div></div>' +
-      '<div class="painel"><h2>Gasto e vendas por dia <small>últimos 14 dias</small></h2>' + grafico() + '<div class="legenda"><span><i style="background:#0d5c6b"></i>Gasto (R$)</span><span><i style="background:#e8622a"></i>Vendas</span></div></div></div>';
-  }
-  function grafico() {
-    var gasto = [92, 104, 98, 121, 133, 160, 148, 101, 96, 118, 127, 152, 171, 139], vendas = [11, 13, 12, 17, 19, 24, 22, 12, 11, 16, 18, 23, 27, 20];
-    var W = 520, H = 190, pl = 8, pb = 22, n = gasto.length, bw = (W - pl * 2) / n;
-    var mg = 180, mv = 30, s = '<svg class="grafico" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Gráfico de gasto e vendas por dia">';
-    for (var g = 0; g < 4; g++) { var y = 8 + g * ((H - pb - 8) / 3); s += '<line x1="0" x2="' + W + '" y1="' + y + '" y2="' + y + '" stroke="#e3e8e9"/>'; }
-    gasto.forEach(function (v, i) { var h = v / mg * (H - pb - 8); s += '<rect x="' + (pl + i * bw + 6) + '" y="' + (H - pb - h) + '" width="' + (bw - 12) + '" height="' + h + '" rx="4" fill="#0d5c6b" opacity=".85"/>'; });
-    var pts = vendas.map(function (v, i) { return (pl + i * bw + bw / 2) + ',' + (H - pb - v / mv * (H - pb - 8)); });
-    s += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="#e8622a" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>';
-    pts.forEach(function (p) { var a = p.split(','); s += '<circle cx="' + a[0] + '" cy="' + a[1] + '" r="3.5" fill="#fff" stroke="#e8622a" stroke-width="2"/>'; });
-    for (var i = 0; i < n; i += 2) s += '<text x="' + (pl + i * bw + bw / 2) + '" y="' + (H - 6) + '" font-size="10" text-anchor="middle" fill="#5b6f75">' + (8 + i) + '/10</text>';
-    return s + '</svg>';
-  }
-
   /* ---------- roteamento ---------- */
-  var MODULOS = { visao: visao, pedidos: pedidosTela, crm: crm, clientes: clientes, nf: nf, estoque: estoque, trafego: trafego };
+  var MODULOS = { visao: visao, pedidos: pedidosTela, crm: crm, clientes: clientes, nf: nf, estoque: estoque };
   function ir() {
     var h = (location.hash || '#visao').slice(1); if (!MODULOS[h]) h = 'visao';
     modulo = h; recarrega(); fechaLeadSeguro();
@@ -274,8 +237,7 @@
     if (t.dataset.conf) { JP.confirmarPedido(t.dataset.conf); recarrega(); toast('Pedido ' + t.dataset.conf + ' confirmado. Estoque baixado e motoboy atribuído.'); desenhaPedidos(); atualizaMapaAdmin(); selos(); }
     else if (t.dataset.venda) {
       var p = pedido(t.dataset.venda); p.vendaConfirmada = true; JP.salvar();
-      JP.disparoPurchase('Pedido ' + p.id, p.cliente, p.fone, JP.totalPedido(p), p.itens.map(function (i) { return i.nome; }).join(', '), p.id);
-      recarrega(); toast('Venda de ' + JP.brl(JP.totalPedido(p)) + ' confirmada. Purchase simulado — veja o log no CRM.'); desenhaPedidos();
+      recarrega(); toast('Venda de ' + JP.brl(JP.totalPedido(p)) + ' confirmada.'); desenhaPedidos();
     }
     else if (t.dataset.lead) abreLead(t.dataset.lead);
     else if (t.dataset.fechalead !== undefined) fechaLead();
@@ -317,7 +279,7 @@
     if (e.key !== 'jp_demo_v1') return;
     recarrega(); selos();
     if (modulo === 'pedidos') { desenhaPedidos(); atualizaMapaAdmin(); } else if (modulo === 'visao') visao();
-    else if (modulo === 'crm' && !leadAberto) { desenhaKanban(); desenhaLog(); }
+    else if (modulo === 'crm' && !leadAberto) { desenhaKanban(); }
     else if (modulo === 'estoque') estoque();
     else if (modulo === 'clientes') desenhaClientes();
   });

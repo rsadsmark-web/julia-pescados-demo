@@ -83,26 +83,19 @@
     ];
 
     var leads = [
-      { id: 'l1', nome: 'Hotel Terral Praia', fone: '(85) 98701-3321', origem: 'Anúncio — Atacado camarão', etapa: 'novo', valor: 2400, itens: 'Camarão VG 30 kg/semana', msgs: [['c', 'Boa tarde! Vi o anúncio. Vocês entregam camarão no atacado para hotel?'], ['j', 'Boa tarde! Entregamos sim, Fortaleza e Caucaia. Qual volume semanal?'], ['c', 'Em torno de 30 kg de camarão VG.']] },
+      { id: 'l1', nome: 'Hotel Terral Praia', fone: '(85) 98701-3321', origem: 'Indicação', etapa: 'novo', valor: 2400, itens: 'Camarão VG 30 kg/semana', msgs: [['c', 'Boa tarde! Vi vocês no Instagram. Vocês entregam camarão no atacado para hotel?'], ['j', 'Boa tarde! Entregamos sim, Fortaleza e Caucaia. Qual volume semanal?'], ['c', 'Em torno de 30 kg de camarão VG.']] },
       { id: 'l2', nome: 'Sabrina Oliveira', fone: '(85) 98604-7712', origem: 'Instagram — Stories', etapa: 'novo', valor: 190, itens: 'Kit Churrasco do Mar', msgs: [['c', 'Oi, quanto está o kit churrasco?'], ['j', 'Oi, Sabrina! O Kit Churrasco do Mar está R$ 84,90.']] },
       { id: 'l3', nome: 'Bar do Zeca', fone: '(85) 98219-0045', origem: 'Indicação', etapa: 'conversa', valor: 1850, itens: 'Anéis de lula 20 kg + camarão 15 kg', msgs: [['c', 'Preciso de lula e camarão para sexta.'], ['j', 'Consigo entregar na quinta à tarde. Fecha?'], ['c', 'Me passa o valor fechado.']] },
-      { id: 'l4', nome: 'Rodrigo Brandão', fone: '(85) 98903-5521', origem: 'Anúncio — Delivery Fortaleza', etapa: 'conversa', valor: 260, itens: 'Camarão descascado 2 kg + filé 1 kg', msgs: [['c', 'Entregam no Cambeba?'], ['j', 'Entregamos! A taxa é R$ 14,00.']] },
+      { id: 'l4', nome: 'Rodrigo Brandão', fone: '(85) 98903-5521', origem: 'Instagram', etapa: 'conversa', valor: 260, itens: 'Camarão descascado 2 kg + filé 1 kg', msgs: [['c', 'Entregam no Cambeba?'], ['j', 'Entregamos! A taxa é R$ 14,00.']] },
       { id: 'l5', nome: 'Cantina da Nona', fone: '(85) 98650-1177', origem: 'Cliente recorrente', etapa: 'orcamento', valor: 1320, itens: 'Camarão cinza 15 kg + mix frutos do mar 5 kg', msgs: [['j', 'Segue o orçamento do pedido semanal.'], ['c', 'Pode fechar, pago no Pix.']] },
-      { id: 'l6', nome: 'Helena Barros', fone: '(85) 98305-8870', origem: 'Anúncio — Delivery Fortaleza', etapa: 'orcamento', valor: 215, itens: 'Filé de salmão 1 kg + camarão 2 kg', msgs: [['j', 'Total R$ 215,00 com entrega.'], ['c', 'Vou confirmar com meu marido e já retorno.']] },
+      { id: 'l6', nome: 'Helena Barros', fone: '(85) 98305-8870', origem: 'Instagram', etapa: 'orcamento', valor: 215, itens: 'Filé de salmão 1 kg + camarão 2 kg', msgs: [['j', 'Total R$ 215,00 com entrega.'], ['c', 'Vou confirmar com meu marido e já retorno.']] },
       { id: 'l7', nome: 'Eduardo Pinheiro', fone: '(85) 98211-3340', origem: 'Cliente recorrente', etapa: 'pago', valor: 358, itens: 'Camarão cinza 3 kg + filé 2 kg', msgs: [['c', 'Comprovante do Pix enviado.'], ['j', 'Recebido! Já separamos o pedido.']] },
-      { id: 'l8', nome: 'Gustavo Nogueira', fone: '(85) 98177-2209', origem: 'Anúncio — Atacado camarão', etapa: 'vendido', valor: 980, itens: 'Camarão sem cabeça 15 kg + posta de serra 3 kg', msgs: [['c', 'Entrega recebida, tudo certo.']], vendido: true }
-    ];
-
-    var campanhas = [
-      { id: 'k1', nome: 'Delivery Fortaleza — Conversas', status: 'Ativa', gasto: 1286.4, impressoes: 148200, cliques: 3920, conversas: 412, vendas: 138, receita: 21740 },
-      { id: 'k2', nome: 'Atacado Camarão — Restaurantes', status: 'Ativa', gasto: 842.9, impressoes: 61400, cliques: 1780, conversas: 96, vendas: 31, receita: 16280 },
-      { id: 'k3', nome: 'Kit Churrasco do Mar — Fim de semana', status: 'Ativa', gasto: 428.0, impressoes: 83100, cliques: 2210, conversas: 188, vendas: 74, receita: 6280 },
-      { id: 'k4', nome: 'Outubro Rosa — Remarketing', status: 'Pausada', gasto: 210.5, impressoes: 27800, cliques: 590, conversas: 33, vendas: 9, receita: 1130 }
+      { id: 'l8', nome: 'Gustavo Nogueira', fone: '(85) 98177-2209', origem: 'Indicação', etapa: 'vendido', valor: 980, itens: 'Camarão sem cabeça 15 kg + posta de serra 3 kg', msgs: [['c', 'Entrega recebida, tudo certo.']], vendido: true }
     ];
 
     return {
       produtos: PRODUTOS, clientes: clientes, motoboys: motoboys, pedidos: pedidos, leads: leads,
-      campanhas: campanhas, eventos: [], notas: [], baixas: [], seq: 1052
+      notas: [], baixas: [], seq: 1052
     };
   }
 
@@ -198,24 +191,12 @@
     salvar(); return p;
   }
 
-  // Simula o disparo do evento Purchase (Conversions API). NÃO envia nada.
-  function disparoPurchase(origem, nome, fone, valor, itens, refId) {
-    var s = carregar();
-    var ev = {
-      id: 'ev_' + Math.random().toString(36).slice(2, 10),
-      quando: agoraMs(), origem: origem, nome: nome, valor: valor, moeda: 'BRL', itens: itens, ref: refId,
-      fone_hash: 'sha256:' + Math.random().toString(16).slice(2, 10) + '…' + Math.random().toString(16).slice(2, 6),
-      acao: 'chat', status: 'SIMULADO — não enviado à Meta'
-    };
-    s.eventos.unshift(ev); salvar(); return ev;
-  }
-
   window.JP = {
     WHATS: WHATS, BASE: BASE, BAIRROS: BAIRROS, CATEGORIAS: CATEGORIAS,
     estado: carregar, salvar: salvar, resetar: resetar,
     brl: brl, dataHora: dataHora, km: km, frete: frete, subtotal: subtotal, totalPedido: totalPedido,
     rota: rota, pontoNaRota: pontoNaRota, situacao: situacao,
-    confirmarPedido: confirmarPedido, disparoPurchase: disparoPurchase,
+    confirmarPedido: confirmarPedido,
     agora: agoraMs, T_PREP: T_PREP, T_ROTA: T_ROTA, T_VIAGEM: T_VIAGEM
   };
 })();
