@@ -17,7 +17,7 @@
   function logado() { try { return sessionStorage.getItem(SESSAO) === HASH.slice(0, 16); } catch (e) { return false; } }
 
   function login(erro) {
-    raiz.innerHTML = '<form class="rs-login" id="rsForm" autocomplete="off"><span class="rs-selo">RS Tech</span><h1 style="margin-top:12px">Área restrita</h1><p>Configuração do atendimento por IA. Acesso só da equipe da RS Tech.</p>' +
+    raiz.innerHTML = '<form class="rs-login" id="rsForm" autocomplete="off"><img class="rs-logo" src="img/marca/logo-julia-192.png" width="96" height="96" alt="Julia Pescados"><br><span class="rs-selo">RS Tech</span><h1 style="margin-top:12px">Área restrita</h1><p>Configuração do atendimento por IA. Acesso só da equipe da RS Tech.</p>' +
       '<div class="campo"><label for="rsSenha">Senha de administrador</label><input type="password" id="rsSenha" autocomplete="current-password" required></div>' +
       '<p class="rs-erro" id="rsErro" role="alert">' + esc(erro || '') + '</p><button class="btn" type="submit">Entrar</button></form>';
     $('#rsSenha').focus();
@@ -41,7 +41,7 @@
   function painel() {
     C = window.JPIA.ler();
     function opt(v, rot) { return '<option value="' + v + '"' + (C.quando === v ? ' selected' : '') + '>' + rot + '</option>'; }
-    raiz.innerHTML = '<div class="rs-topo"><div class="rs-marca"><span class="rs-selo">RS Tech</span><h1>Atendimento por IA · Júlia Pescados</h1></div><div class="rs-acoes" style="display:flex;gap:10px"><a class="btn pequeno linha" href="admin.html#conversas" target="_blank" rel="noopener">Ver conversas do cliente ↗</a><button class="btn pequeno linha" id="rsSair" type="button">Sair</button></div></div>' +
+    raiz.innerHTML = '<div class="rs-topo"><div class="rs-marca"><img class="rs-logo-topo" src="img/marca/logo-julia-96.png" width="44" height="44" alt="Julia Pescados"><span class="rs-selo">RS Tech</span><h1>Atendimento por IA · Júlia Pescados</h1></div><div class="rs-acoes" style="display:flex;gap:10px"><a class="btn pequeno linha" href="admin.html#conversas" target="_blank" rel="noopener">Ver conversas do cliente ↗</a><button class="btn pequeno linha" id="rsSair" type="button">Sair</button></div></div>' +
       '<div class="rs-aviso">Esta tela é da RS Tech: o cliente não vê nem edita nada daqui. No painel dele só existe o interruptor de ligar e desligar a IA (geral e por conversa) e a opção de assumir a conversa. Demonstração: a IA é simulada e as alterações valem só neste navegador.</div>' +
       '<div class="xia-grade"><div class="xia-col">' +
       '<section class="painel xcfg"><h2>Prompt do negócio <small>instruções fixas da IA da Júlia Pescados</small></h2><div class="campo"><label for="cfgPrompt" class="sr">Prompt do negócio</label><textarea id="cfgPrompt" spellcheck="false">' + esc(C.prompt) + '</textarea></div>' +

@@ -1,11 +1,11 @@
 /* Painel administrativo — padrão de sistema de gestão: neutro, tipografia de sistema, um azul discreto de destaque.
    Carregado por último e escopado em body.adm; a loja pública não usa este arquivo. */
 body.adm {
-  --lata: #2a5db0; --lata-escuro: #1f4a91; --lata-claro: #e8eefa;
+  --lata: #0a6f86; --lata-escuro: #075266; --lata-claro: #e1f1f4;
   --creme: #f4f5f7; --papel: #fff; --kraft: #f4f5f7;
-  --marinho: #1f2937; --marinho-claro: #e9edf4;
-  --ouro: #dfe8f7; --ouro-escuro: #8a5d00;
-  --tinta: #1f2937; --suave: #5b6372; --linha: #e1e4ea; --regua: #cfd4dc;
+  --marinho: #17323c; --marinho-claro: #e3eef1;
+  --ouro: #fde7cc; --ouro-escuro: #8a5d00;
+  --tinta: #17323c; --suave: #5b6372; --linha: #e1e4ea; --regua: #cfd4dc;
   --ok: #1d7a43; --perigo: #b3261e; --raio: 6px;
   --titulo: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --rotulo: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -31,22 +31,23 @@ body.adm {
 .adm .btn.pequeno { padding: 4px 10px; font-size: 13px; border-width: 1px; }
 .adm .chip { font-family: var(--corpo); font-size: 12px; font-weight: 600; letter-spacing: 0; text-transform: none; padding: 1px 8px; border: 0; border-radius: 99px; }
 .adm .aviso-demo { background: #fff8e1; color: #6b4700; border-bottom: 1px solid #f0dca0; font-family: var(--corpo); font-size: 13px; letter-spacing: 0; text-transform: none; font-weight: 500; padding: 7px 14px; }
+.adm .logo-marca img { width: 44px; height: 44px; } .adm .logo-marca b { font-family: var(--corpo); font-weight: 700; font-size: 20px; letter-spacing: -.01em; color: #fff; } .adm .logo-marca small { font-family: var(--corpo); font-size: 10.5px; letter-spacing: .22em; font-weight: 600; margin: 3px 0 0; color: #a9c3cb; }
 .adm .logo b { font-family: var(--corpo); font-weight: 700; font-size: 22px; text-shadow: none; letter-spacing: -.01em; }
 .adm .logo.branca b { color: #fff; } .adm .logo small { font-family: var(--corpo); font-size: 10.5px; letter-spacing: .22em; font-weight: 600; margin: 3px 0 0; }
 .adm .logo.branca small { color: #9aa4b5; }
 
 /* menu lateral */
 .adm .app { grid-template-columns: 236px 1fr; }
-.adm .lateral { background: #1f2937; color: #d5dae3; padding: 18px 12px; gap: 20px; border-right: 0; }
+.adm .lateral { background: #17323c; color: #d5dae3; padding: 18px 12px; gap: 20px; border-right: 0; }
 .adm .lateral .logo { padding: 0 8px 16px; border-bottom: 1px solid rgba(255, 255, 255, .1); }
 .adm #menu { gap: 2px; }
 .adm #menu a { color: #c3cad6; padding: 8px 10px; gap: 10px; font-family: var(--corpo); font-weight: 500; font-size: 14px; letter-spacing: 0; text-transform: none; border-radius: var(--raio); transition: background .12s, color .12s; }
 .adm #menu a .ic { width: 18px; height: 18px; opacity: .75; }
 .adm #menu a:hover { background: rgba(255, 255, 255, .07); color: #fff; transform: none; }
-.adm #menu a.ativo { background: rgba(255, 255, 255, .12); color: #fff; font-weight: 600; box-shadow: inset 3px 0 0 #7aa2e3; }
+.adm #menu a.ativo { background: rgba(255, 255, 255, .12); color: #fff; font-weight: 600; box-shadow: inset 3px 0 0 #f79a2e; }
 .adm .selo { font-family: var(--corpo); font-size: 11.5px; font-weight: 600; padding: 0 7px; border-radius: 99px; background: var(--lata); color: #fff; }
 .adm .selo.alerta { background: #e9b949; color: #3b2a00; }
-.adm #menu a.ativo .selo { background: #fff; color: #1f2937; }
+.adm #menu a.ativo .selo { background: #fff; color: #17323c; }
 .adm .lateral-rodape a { color: #d5dae3; font-family: var(--corpo); font-weight: 500; font-size: 13px; letter-spacing: 0; text-transform: none; border: 1px solid rgba(255, 255, 255, .22); padding: 7px 10px; }
 .adm .lateral-rodape a:hover { background: rgba(255, 255, 255, .1); color: #fff; }
 .adm .lateral-rodape button { color: #94a0b3; } .adm .lateral-rodape button:hover { color: #fff; }
@@ -104,7 +105,7 @@ body.adm {
 .adm .coluna.sobre { outline: 2px dashed var(--lata); outline-offset: 2px; background: var(--lata-claro); }
 .adm .coluna h3 { font-family: var(--corpo); font-size: 13px; font-weight: 600; text-transform: none; letter-spacing: 0; margin: 0 -10px 10px; padding: 9px 12px; border-radius: 7px 7px 0 0; color: #fff; }
 .adm .coluna h3 small { color: rgba(255, 255, 255, .8); font-size: 12px; }
-.adm .coluna:nth-child(1) h3 { background: #6b7384; } .adm .coluna:nth-child(2) h3 { background: #2a5db0; } .adm .coluna:nth-child(3) h3 { background: #8a6a1c; } .adm .coluna:nth-child(4) h3 { background: #5b4a9e; } .adm .coluna:nth-child(5) h3 { background: var(--ok); }
+.adm .coluna:nth-child(1) h3 { background: #6b7384; } .adm .coluna:nth-child(2) h3 { background: #0a6f86; } .adm .coluna:nth-child(3) h3 { background: #8a6a1c; } .adm .coluna:nth-child(4) h3 { background: #5b4a9e; } .adm .coluna:nth-child(5) h3 { background: var(--ok); }
 .adm .lead { border: var(--borda); border-radius: var(--raio); box-shadow: 0 1px 2px rgba(16, 24, 40, .05); transition: box-shadow .15s, border-color .15s; }
 .adm .lead:hover { transform: none; border-color: #aab3c2; box-shadow: 0 2px 6px rgba(16, 24, 40, .1); }
 .adm .lead .linha-fim > span:first-child { font-family: var(--corpo); font-weight: 650; font-size: 14px; color: var(--tinta); }
@@ -122,7 +123,7 @@ body.adm {
 .adm .log .erro { color: #f2c46d; }
 .adm .cartao-nf { border: var(--borda); }
 .adm .cartao-nf::before { font-family: var(--corpo); font-weight: 700; color: rgba(179, 38, 30, .08); }
-.adm .toast { background: #1f2937; color: #fff; border: 0; border-radius: var(--raio); box-shadow: 0 8px 24px rgba(16, 24, 40, .3); }
+.adm .toast { background: #17323c; color: #fff; border: 0; border-radius: var(--raio); box-shadow: 0 8px 24px rgba(16, 24, 40, .3); }
 
 .adm .cv { background: #fff; border: var(--borda); border-radius: 8px; }
 .adm .cv-lista { border-right: var(--borda); background: #fff; }
@@ -176,9 +177,9 @@ body.adm {
 @media (max-width: 860px) {
   .adm .app { grid-template-columns: 1fr; }
   .adm .lateral { padding: 8px 10px; border-bottom: 1px solid rgba(255, 255, 255, .12); }
-  .adm .lateral .logo b { font-size: 18px; }
+  .adm .lateral .logo b { font-size: 18px; } .adm .logo-marca img { width: 34px; height: 34px; } .adm .logo-marca small { display: none; } .adm .logo-marca b { font-size: 17px; }
   .adm #menu a { font-size: 13.5px; padding: 7px 11px; }
-  .adm #menu a.ativo { box-shadow: inset 0 -2px 0 #7aa2e3; }
+  .adm #menu a.ativo { box-shadow: inset 0 -2px 0 #f79a2e; }
   .adm .cab h1 { font-size: 20px; }
   .adm .kpi b { font-size: 22px; }
 }

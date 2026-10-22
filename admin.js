@@ -6,7 +6,7 @@
   var modulo = 'visao', mapa = null, mapaCam = null, ticker = null;
   var filtroCli = 'todos', buscaCli = '', ordCli = 'total';
   var nfSel = null, parametro = '';
-  var CORES = { m1: '#d4281c', m2: '#14224f', m3: '#e09a00' };
+  var CORES = { m1: '#9c2417', m2: '#0b4a5c', m3: '#e0861a' };
 
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function recarrega() { S = JP.estado(); }
@@ -97,7 +97,7 @@
       mapaCam.clearLayers(); mapa._motos = {}; mapa._rotas = assinatura;
       at.forEach(function (p) {
         var b = JP.BAIRROS.filter(function (x) { return x.nome === p.bairro; })[0]; if (!b) return;
-        var pts = JP.rota(b), cor = CORES[p.motoboy] || '#14224f';
+        var pts = JP.rota(b), cor = CORES[p.motoboy] || '#0b4a5c';
         p._pts = pts;
         L.polyline(pts, { color: cor, weight: 4, opacity: .7, dashArray: '2 8' }).addTo(mapaCam);
         L.marker([b.lat, b.lng], { icon: L.divIcon({ className: '', html: '<div class="destino-pin" style="background:' + cor + '"></div>', iconSize: [22, 22], iconAnchor: [11, 22] }) }).addTo(mapaCam).bindTooltip(p.id + ' · ' + p.bairro);

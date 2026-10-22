@@ -127,6 +127,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: non
   .lateral::-webkit-scrollbar { display: none; }
   .lateral .logo { padding: 0 6px 0 0; border: 0; } .lateral .logo small, .lateral .logo svg, .lateral-rodape { display: none; }
   .lateral .logo b { font-size: 24px; }
+  .lateral .logo-marca small { display: none; } .lateral .logo-marca img { width: 40px; height: 40px; } .lateral .logo-marca b { font-size: 20px; }
   #menu { flex-direction: row; gap: 4px; }
   #menu a { white-space: nowrap; padding: 7px 12px; font-size: 18px; } #menu a .ic { display: none; } #menu a:hover { transform: none; }
   #tela { padding-top: 22px; }

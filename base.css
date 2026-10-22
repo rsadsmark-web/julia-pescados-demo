@@ -1,19 +1,19 @@
-/* Julia Pescados — rótulo de lata de conserva: vermelho lata, creme de papel, azul-marinho de tinta, ouro de selo */
+/* Julia Pescados — paleta da logo: vinho, laranja, azul-petróleo e pêssego claro */
 :root {
-  --lata: #d4281c;
-  --lata-escuro: #a71a11;
-  --lata-claro: #fbd9d3;
-  --creme: #f6ecd2;
-  --papel: #fffaee;
-  --kraft: #e8d9b5;
-  --marinho: #14224f;
-  --marinho-claro: #e2e5f1;
-  --ouro: #f4b72d;
-  --ouro-escuro: #8a5d00;
-  --tinta: #14224f;
-  --suave: #565a73;
-  --linha: rgba(20, 34, 79, .2);
-  --regua: #14224f;
+  --lata: #9c2417;
+  --lata-escuro: #6f1710;
+  --lata-claro: #f8ddd6;
+  --creme: #fdf0e2;
+  --papel: #fffaf4;
+  --kraft: #f4dcc0;
+  --marinho: #0b4a5c;
+  --marinho-claro: #dcedf1;
+  --ouro: #f79a2e;
+  --ouro-escuro: #8a4a00;
+  --tinta: #0f3340;
+  --suave: #5a5f66;
+  --linha: rgba(11, 74, 92, .22);
+  --regua: #0b4a5c;
   --ok: #1d7a43;
   --alerta: #8a5d00;
   --perigo: #b3261e;
@@ -50,6 +50,12 @@ input, textarea { caret-color: var(--lata); }
 .btn[disabled] { opacity: .45; pointer-events: none; }
 
 .logo { display: inline-flex; flex-direction: column; align-items: flex-start; line-height: 1; text-decoration: none; }
+.logo-marca { display: inline-flex; flex-direction: row; align-items: center; gap: 10px; text-decoration: none; }
+.logo-marca img { display: block; width: 64px; height: 64px; border-radius: 50%; flex: none; }
+.logo-marca span { display: flex; flex-direction: column; line-height: 1; }
+.logo-marca b { font-family: var(--titulo); font-weight: 400; font-size: 30px; color: var(--lata); letter-spacing: -.01em; }
+.logo-marca small { font-family: var(--rotulo); font-size: 13px; letter-spacing: .5em; font-weight: 700; color: var(--marinho); margin: 5px 0 0 2px; }
+.logo-marca.branca b { color: var(--ouro); } .logo-marca.branca small { color: var(--creme); }
 .logo b { font-family: var(--titulo); font-weight: 400; font-size: 34px; color: var(--lata); letter-spacing: -.01em; text-shadow: 2px 2px 0 var(--ouro); }
 .logo small { font-family: var(--rotulo); font-size: 13px; letter-spacing: .5em; font-weight: 700; color: var(--marinho); margin: 5px 0 0 2px; }
 .logo svg { width: 78px; height: 8px; margin: 3px 0 0 1px; color: var(--marinho); }

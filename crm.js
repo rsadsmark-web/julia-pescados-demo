@@ -31,7 +31,7 @@
     return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
   }
   function iniciais(n) { var p = String(n).split(' ').filter(function (x) { return x.length > 2 || /^[A-Z]/.test(x); }); return ((p[0] || '?')[0] + ((p[1] || '')[0] || '')).toUpperCase(); }
-  function corAvatar(n) { var s = 0; for (var i = 0; i < n.length; i++) s += n.charCodeAt(i); return ['#14224f', '#d4281c', '#6b3fa0', '#1d7a43', '#8a5d00', '#b02a63'][s % 6]; }
+  function corAvatar(n) { var s = 0; for (var i = 0; i < n.length; i++) s += n.charCodeAt(i); return ['#0b4a5c', '#9c2417', '#6b3fa0', '#1d7a43', '#8a5d00', '#b02a63'][s % 6]; }
   function avatar(n) { return '<span class="cv-av" style="background:' + corAvatar(n) + '" aria-hidden="true">' + esc(iniciais(n)) + '</span>'; }
 
   /* ---------- dados de exemplo ---------- */

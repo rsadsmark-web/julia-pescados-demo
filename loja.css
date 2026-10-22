@@ -94,14 +94,14 @@
 .nota.claro { color: #ffd8d2; }
 
 .rodape { background: var(--lata); color: var(--papel); padding: 56px clamp(16px, 5vw, 72px) 40px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; border-top: 3px solid var(--marinho); }
-.rodape .logo b { font-size: 46px; }
+.rodape .logo-marca img { width: 88px; height: 88px; } .rodape .logo-marca b { font-size: 46px; }
 .rodape p { margin: 4px 0 0; max-width: 60ch; line-height: 1.6; font-size: 17px; }
 .rodape a { color: var(--ouro); font-weight: 600; } .rodape a:hover { color: var(--papel); }
 .rodape .nota { text-align: left; margin-top: 22px; padding-top: 18px; border-top: 2px solid rgba(255, 250, 238, .35); width: 100%; max-width: none; }
 
 /* carrinho e acompanhamento */
-.veu { position: fixed; inset: 0; background: rgba(20, 34, 79, .6); z-index: 40; }
-.gaveta { position: fixed; top: 0; right: 0; bottom: 0; width: min(470px, 100%); background: var(--papel); border-left: 3px solid var(--marinho); z-index: 50; transform: translateX(105%); transition: transform .4s var(--suave-ease); display: flex; flex-direction: column; box-shadow: -14px 0 40px rgba(20, 34, 79, .3); }
+.veu { position: fixed; inset: 0; background: rgba(11, 74, 92, .6); z-index: 40; }
+.gaveta { position: fixed; top: 0; right: 0; bottom: 0; width: min(470px, 100%); background: var(--papel); border-left: 3px solid var(--marinho); z-index: 50; transform: translateX(105%); transition: transform .4s var(--suave-ease); display: flex; flex-direction: column; box-shadow: -14px 0 40px rgba(11, 74, 92, .3); }
 .gaveta.aberta { transform: none; }
 .gaveta-cab { display: flex; justify-content: space-between; align-items: center; padding: 16px 22px; background: var(--lata); color: var(--papel); border-bottom: 3px solid var(--marinho); }
 .gaveta-cab h2 { font-size: 28px; text-shadow: 2px 2px 0 var(--lata-escuro); }
@@ -133,7 +133,7 @@
 .resumo .total { font-family: var(--titulo); font-size: 24px; border-top: 2px dotted var(--marinho); padding-top: 10px; margin-top: 4px; color: var(--lata); }
 .dica { font-size: 13.5px; color: var(--suave); }
 
-.modal { position: fixed; inset: 0; z-index: 60; background: rgba(20, 34, 79, .7); display: grid; place-items: center; padding: 14px; }
+.modal { position: fixed; inset: 0; z-index: 60; background: rgba(11, 74, 92, .7); display: grid; place-items: center; padding: 14px; }
 .modal[hidden] { display: none; }
 .modal-caixa { background: var(--papel); border: 3px solid var(--marinho); border-radius: 12px; width: min(780px, 100%); max-height: 94vh; overflow-y: auto; }
 .modal-caixa .gaveta-cab { border-radius: 8px 8px 0 0; }
@@ -162,7 +162,7 @@
   .entrega { grid-template-columns: 1fr; } .entrega-cab { position: static; }
 }
 @media (max-width: 820px) {
-  .topo { gap: 10px; } .topo .logo b { font-size: 28px; } .topo .logo svg { display: none; } .topo-nav a { display: none; } .link-btn { font-size: 17px; }
+  .topo { gap: 10px; } .topo .logo-marca img { width: 44px; height: 44px; } .topo .logo-marca b { font-size: 24px; } .topo .logo-marca small { font-size: 11px; } .topo .logo svg { display: none; } .topo-nav a { display: none; } .link-btn { font-size: 17px; }
   .heroi .btn { flex: 1 1 auto; font-size: 19px; padding: 12px 18px; }
   .heroi p { font-size: 17px; margin-top: 20px; }
   .grade { gap: 16px 12px; grid-template-columns: repeat(2, 1fr); }

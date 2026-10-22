@@ -16,3 +16,6 @@ body.cfg-rs { background: var(--creme, #f4efe4); min-height: 100dvh; }
 .cfg-rs .xfaixa { display: flex; gap: 12px; flex-wrap: wrap; } .cfg-rs .xfaixa[hidden] { display: none; }
 .cfg-rs .rs-rodape { margin-top: 20px; font-size: 13px; color: var(--suave); }
 @media (max-width: 860px) { .cfg-rs main { padding: 16px 12px 48px; } .cfg-rs textarea#cfgPrompt { min-height: 320px; } }
+
+.cfg-rs .rs-logo { display: block; margin: 0 auto 14px; border-radius: 50%; } .cfg-rs .rs-logo-topo { border-radius: 50%; }
+.cfg-rs .rs-login { text-align: center; } .cfg-rs .rs-login .campo, .cfg-rs .rs-login p { text-align: left; }
