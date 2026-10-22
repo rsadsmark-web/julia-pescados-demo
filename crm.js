@@ -15,7 +15,6 @@
     ['/obrigado', 'Obrigada pela preferência, {nome}! Qualquer coisa é só chamar por aqui.']
   ];
   var RESPOSTAS = ['Beleza, pode ser!', 'Obrigado, vou ver aqui e já te falo.', 'Pode mandar o Pix então.', 'Combinado, fico no aguardo.', 'Perfeito! Qual o prazo de entrega?', 'Tem como entregar ainda hoje?'];
-  var cv = { sel: null, busca: '', filtro: 'todas', etq: '', resp: '', etapa: '', perfil: true, aba: 'msg', rap: false, mobile: 'lista' };
   var fn = { busca: '', etq: '', resp: '' };
 
   function esc(t) { return ctx.esc(t); }
@@ -123,148 +122,6 @@
     hist(l, (i >= 0 ? 'Etiqueta removida: ' : 'Etiqueta adicionada: ') + e); salvar();
   }
 
-  /* ---------- CONVERSAS ---------- */
-  function filtradas() {
-    var b = cv.busca.toLowerCase().trim(), nb = digitos(cv.busca);
-    return D.leads.filter(function (l) {
-      if (cv.filtro === 'nao' && !l.nao) return false;
-      if (cv.etq && l.etq.indexOf(cv.etq) < 0) return false;
-      if (cv.resp === '__sem' ? !!l.resp : (cv.resp && l.resp !== cv.resp)) return false;
-      if (cv.etapa && l.etapa !== cv.etapa) return false;
-      if (b) {
-        var achou = l.nome.toLowerCase().indexOf(b) >= 0 || (nb && digitos(l.fone).indexOf(nb) >= 0) ||
-          l.msgs.some(function (m) { return m.d !== 's' && m.t.toLowerCase().indexOf(b) >= 0; });
-        if (!achou) return false;
-      }
-      return true;
-    }).sort(function (a, b2) { return ordemUlt(b2) - ordemUlt(a); });
-  }
-  function conversas(param, tela) {
-    if (param && lead(param)) { cv.sel = param; cv.mobile = 'chat'; }
-    if (!cv.sel) cv.sel = null;
-    var opResp = '<option value="">Todos os responsáveis</option><option value="__sem"' + (cv.resp === '__sem' ? ' selected' : '') + '>Sem responsável</option>' +
-      ATENDENTES.map(function (a) { return '<option' + (cv.resp === a ? ' selected' : '') + '>' + a + '</option>'; }).join('');
-    var opEtq = '<option value="">Todas as etiquetas</option>' + D.etiquetas.map(function (e) { return '<option' + (cv.etq === e ? ' selected' : '') + '>' + esc(e) + '</option>'; }).join('');
-    var opEtapa = '<option value="">Todas as etapas</option>' + ETAPAS.map(function (e) { return '<option value="' + e[0] + '"' + (cv.etapa === e[0] ? ' selected' : '') + '>' + e[1] + '</option>'; }).join('');
-    tela.innerHTML = '<div class="cab"><div><h1>Conversas</h1><p>Atendimento dos leads no estilo WhatsApp Web. Demonstração: as mensagens enviadas aqui são simuladas e não saem do navegador.</p></div></div>' +
-      '<div class="cv ' + (cv.perfil ? 'com-perfil ' : '') + 'm-' + cv.mobile + '">' +
-      '<section class="cv-lista" aria-label="Lista de conversas">' +
-      '<div class="cv-busca"><input type="search" id="cvBusca" placeholder="Buscar nome, telefone ou mensagem" value="' + esc(cv.busca) + '" aria-label="Buscar conversas"></div>' +
-      '<div class="cv-chips" id="cvChips"></div>' +
-      '<div class="cv-selects"><select id="cvResp" aria-label="Responsável">' + opResp + '</select><select id="cvEtq" aria-label="Etiqueta">' + opEtq + '</select><select id="cvEtapa" aria-label="Etapa do funil">' + opEtapa + '</select></div>' +
-      '<div class="cv-itens" id="cvItens"></div></section>' +
-      '<section class="cv-chat" id="cvChat" aria-label="Conversa"></section>' +
-      '<aside class="cv-perfil" id="cvPerfil" aria-label="Perfil do lead"></aside></div>';
-    desenhaLista(); desenhaChat(); desenhaPerfil();
-  }
-  function desenhaLista() {
-    var todas = D.leads.length, nao = D.leads.filter(function (l) { return l.nao; }).length;
-    $('#cvChips').innerHTML = '<button class="filtro' + (cv.filtro === 'todas' ? ' ativo' : '') + '" data-cvf="todas">Todas<b>' + todas + '</b></button><button class="filtro' + (cv.filtro === 'nao' ? ' ativo' : '') + '" data-cvf="nao">Não lidas<b>' + nao + '</b></button>';
-    var ls = filtradas();
-    $('#cvItens').innerHTML = ls.length ? ls.map(function (l) {
-      var u = ultima(l), pre = u ? (u.d === 'j' ? 'Você: ' : '') + u.t : '';
-      return '<button class="cv-item' + (cv.sel === l.id ? ' ativo' : '') + '" data-cvabre="' + l.id + '">' + avatar(l.nome) +
-        '<span class="cv-item-meio"><span class="cv-item-topo"><b>' + esc(l.nome) + '</b><time>' + (u ? hora(u.ts) : '') + '</time></span>' +
-        '<span class="cv-pre">' + esc(pre) + '</span>' +
-        '<span class="cv-item-pe">' + l.etq.slice(0, 2).map(chipEtq).join('') + '<span class="cv-etapa">' + esc(etapaRot(l.etapa)) + '</span></span></span>' +
-        (l.nao ? '<span class="cv-nao" aria-label="' + l.nao + ' não lidas">' + l.nao + '</span>' : '') + '</button>';
-    }).join('') : '<p class="vazio">Nenhuma conversa neste filtro.</p>';
-  }
-  function bolha(m) {
-    if (m.d === 's') return '<div class="cv-sis"><span>' + esc(m.t) + '</span></div>';
-    if (m.d === 'n') return '<div class="cv-nota"><small>Nota interna · ' + esc(m.por || '') + ' · só a equipe vê</small>' + esc(m.t) + '<time>' + hora(m.ts) + '</time></div>';
-    var tick = m.d === 'j' ? '<span class="cv-tick ' + (m.st === 'lida' ? 'lida' : '') + '" aria-label="' + (m.st || 'enviada') + '">' + (m.st === 'enviada' ? '✓' : '✓✓') + '</span>' : '';
-    return '<div class="cv-msg ' + m.d + '">' + (m.camp ? '<small class="cv-camp">Campanha: ' + esc(m.camp) + '</small>' : '') + esc(m.t).replace(/\n/g, '<br>') + '<time>' + hora(m.ts) + tick + '</time></div>';
-  }
-  function desenhaChat() {
-    var el = $('#cvChat'); if (!el) return;
-    var l = cv.sel ? lead(cv.sel) : null;
-    if (!l) { el.innerHTML = '<div class="cv-vazio"><div class="cv-vazio-ic">◎</div><h2>Selecione uma conversa</h2><p>Escolha um lead na lista para ver o histórico, responder, anotar e mover no funil.</p></div>'; return; }
-    var msgs = '', dia = '';
-    l.msgs.forEach(function (m) { var r = diaRotulo(m.ts); if (r !== dia) { dia = r; msgs += '<div class="cv-dia"><span>' + esc(r) + '</span></div>'; } msgs += bolha(m); });
-    var opEtapa = ETAPAS.map(function (e) { return '<option value="' + e[0] + '"' + (l.etapa === e[0] ? ' selected' : '') + '>' + e[1] + '</option>'; }).join('');
-    var opResp = '<option value="">Sem responsável</option>' + ATENDENTES.map(function (a) { return '<option' + (l.resp === a ? ' selected' : '') + '>' + a + '</option>'; }).join('');
-    el.innerHTML = '<header class="cv-cab"><button class="cv-volta" data-cvvolta aria-label="Voltar à lista">←</button>' + avatar(l.nome) +
-      '<div class="cv-cab-nome"><b>' + esc(l.nome) + '</b><small>' + esc(l.fone) + ' · ' + esc(catOf(l).rot) + '</small></div>' +
-      '<label class="sr" for="cvEtapaL">Etapa</label><select id="cvEtapaL" class="peq" data-cvetapa="' + l.id + '">' + opEtapa + '</select>' +
-      '<label class="sr" for="cvRespL">Responsável</label><select id="cvRespL" class="peq" data-cvresp="' + l.id + '">' + opResp + '</select>' +
-      '<button class="btn pequeno linha" data-cvperfil>' + (cv.perfil ? 'Ocultar perfil' : 'Ver perfil') + '</button></header>' +
-      (l.optout ? '<div class="cv-aviso">Este contato pediu para sair (SAIR). Está fora de todas as campanhas; você ainda pode responder manualmente se ele escrever.</div>' : '') +
-      '<div class="cv-msgs" id="cvMsgs">' + msgs + '</div>' +
-      '<div class="cv-compor"><div class="cv-abas" role="tablist"><button role="tab" class="' + (cv.aba === 'msg' ? 'ativo' : '') + '" data-cvaba="msg">Mensagem</button><button role="tab" class="' + (cv.aba === 'nota' ? 'ativo nota' : '') + '" data-cvaba="nota">Nota interna</button>' +
-      '<button class="cv-rap-b" data-cvrap aria-expanded="' + cv.rap + '">⚡ Respostas rápidas</button></div>' +
-      '<div class="cv-rap" id="cvRap"' + (cv.rap ? '' : ' hidden') + '></div>' +
-      '<div class="cv-linha ' + (cv.aba === 'nota' ? 'nota' : '') + '"><textarea id="cvTexto" rows="2" placeholder="' + (cv.aba === 'nota' ? 'Anotação interna (o cliente não recebe)' : 'Escreva uma mensagem — digite / para respostas rápidas') + '" aria-label="Mensagem"></textarea>' +
-      '<button class="btn mar" data-cvenviar>' + (cv.aba === 'nota' ? 'Salvar nota' : 'Enviar') + '</button></div>' +
-      '<small class="cv-dica">Envio simulado — nada sai deste navegador. Enter envia, Shift+Enter quebra a linha.</small></div>';
-    desenhaRapidas('');
-    var m = $('#cvMsgs'); if (m) m.scrollTop = m.scrollHeight;
-  }
-  function desenhaRapidas(filtro) {
-    var el = $('#cvRap'); if (!el) return;
-    var l = lead(cv.sel);
-    var lista = RAPIDAS.filter(function (r) { return !filtro || r[0].indexOf(filtro) === 0 || r[1].toLowerCase().indexOf(filtro.slice(1)) >= 0; });
-    el.innerHTML = lista.length ? lista.map(function (r, i) { return '<button data-cvusa="' + RAPIDAS.indexOf(r) + '"><b>' + r[0] + '</b><span>' + esc(r[1].replace(/\{nome\}/g, primeiro(l.nome))) + '</span></button>'; }).join('') : '<p class="vazio">Nenhuma resposta rápida com esse atalho.</p>';
-  }
-  function desenhaPerfil() {
-    var el = $('#cvPerfil'); if (!el) return;
-    var l = cv.sel ? lead(cv.sel) : null;
-    el.hidden = !l || !cv.perfil;
-    if (!l) { el.innerHTML = ''; return; }
-    var c = cliente(l), cat = catOf(l), S = ctx.estado();
-    var peds = S.pedidos.filter(function (p) { return p.cliente === l.nome; }).slice(0, 4);
-    var etqs = D.etiquetas.map(function (e) { return '<button class="cv-etq ' + etqCls(e) + (l.etq.indexOf(e) >= 0 ? ' on' : '') + '" data-cvetq="' + esc(e) + '" aria-pressed="' + (l.etq.indexOf(e) >= 0) + '">' + esc(e) + '</button>'; }).join('');
-    el.innerHTML = '<div class="cv-p-topo">' + avatar(l.nome) + '<div><h2>' + esc(l.nome) + '</h2><span class="chip ' + cat.cls + '">' + cat.rot + '</span></div></div>' +
-      '<dl class="cv-dl"><dt>Telefone</dt><dd>' + esc(l.fone) + '</dd><dt>Origem</dt><dd>' + esc(l.origem) + '</dd>' +
-      (l.bairro ? '<dt>Bairro</dt><dd>' + esc(l.bairro) + '</dd>' : '') +
-      '<dt>Interesse</dt><dd>' + esc(l.itens) + '</dd><dt>Valor em negociação</dt><dd>' + ctx.brl(l.valor) + '</dd>' +
-      '<dt>Etapa</dt><dd>' + esc(etapaRot(l.etapa)) + '</dd><dt>Responsável</dt><dd>' + esc(l.resp || 'Sem responsável') + '</dd>' +
-      '<dt>Disparos</dt><dd>' + (l.optout ? '<span class="chip perigo">Pediu para sair (opt-out)</span>' : '<span class="chip ok">Pode receber campanhas</span>') + '</dd></dl>' +
-      '<h3 class="cv-h3">Carteira</h3>' + (c ? '<p class="cv-p">' + c.pedidos + ' pedidos · ' + ctx.brl(c.total) + ' comprados · última compra ' + ctx.ha(c.ultima) + '.</p>' : '<p class="cv-p">Ainda não comprou: classificado como prospect.</p>') +
-      '<h3 class="cv-h3">Etiquetas</h3><div class="cv-etqs">' + etqs + '</div>' +
-      '<form class="cv-novaetq" data-cvnova><input id="cvNovaEtq" maxlength="20" placeholder="Nova etiqueta" aria-label="Nova etiqueta"><button class="btn pequeno claro">Criar</button></form>' +
-      '<h3 class="cv-h3">Pedidos</h3>' + (peds.length ? peds.map(function (p) { return '<div class="cv-ped"><b>' + p.id + '</b><span>' + ctx.brl(ctx.totalPedido(p)) + '</span><small>' + (p.confirmado ? 'Confirmado' : 'Aguardando confirmação') + '</small></div>'; }).join('') : '<p class="cv-p">Nenhum pedido registrado na loja.</p>') +
-      (l.vendido ? '<div class="caixa-venda venda-feita"><h3>Venda confirmada</h3><p>Venda de ' + ctx.brl(l.valor) + ' registrada. Veja o registro no Funil.</p></div>'
-        : '<div class="caixa-venda"><h3>Confirmar a venda</h3><p>Move o lead para Vendido, soma na carteira e gera o registro do evento de venda (simulado).</p><button class="btn verde" data-cvvenda="' + l.id + '">Confirmar venda</button></div>') +
-      '<h3 class="cv-h3">Histórico</h3><ol class="cv-hist">' + l.hist.slice().reverse().slice(0, 12).map(function (h) { return '<li><time>' + ctx.dataHora(h.ts) + '</time>' + esc(h.t) + '</li>'; }).join('') + '</ol>' +
-      '<button class="btn pequeno linha cv-sair" data-cvsair="' + l.id + '"' + (l.optout ? ' disabled' : '') + '>Simular cliente respondendo SAIR</button>';
-  }
-  function abreConversa(id) {
-    var l = lead(id); if (!l) return;
-    cv.sel = id; cv.mobile = 'chat'; l.nao = 0; salvar();
-    desenhaLista(); desenhaChat(); desenhaPerfil();
-    var raiz = $('.cv'); if (raiz) raiz.className = 'cv ' + (cv.perfil ? 'com-perfil ' : '') + 'm-' + cv.mobile;
-    ctx.selos();
-  }
-  function enviar() {
-    var l = lead(cv.sel), ta = $('#cvTexto'); if (!l || !ta) return;
-    var t = ta.value.trim(); if (!t) { toast('Escreva algo antes de enviar.'); return; }
-    if (cv.aba === 'nota') {
-      l.msgs.push({ d: 'n', t: t, ts: agora(), por: l.resp || 'Júlia' }); hist(l, 'Nota interna adicionada.'); salvar();
-      cv.rap = false; desenhaChat(); desenhaPerfil(); desenhaLista(); toast('Nota salva. O cliente não vê.'); return;
-    }
-    if (!l.resp) { l.resp = 'Júlia'; sistema(l, 'Conversa atribuída a Júlia ao responder.'); }
-    var m = { d: 'j', t: t, ts: agora(), st: 'enviada' }; l.msgs.push(m); l.nao = 0; salvar();
-    cv.rap = false; desenhaChat(); desenhaLista(); desenhaPerfil(); ctx.selos();
-    var id = l.id;
-    setTimeout(function () { m.st = 'entregue'; salvar(); if (cv.sel === id && ctx.modulo() === 'conversas') desenhaChat(); }, 900);
-    setTimeout(function () { m.st = 'lida'; salvar(); if (cv.sel === id && ctx.modulo() === 'conversas') desenhaChat(); }, 2000);
-    if (!l.optout) setTimeout(function () {
-      var r = RESPOSTAS[Math.floor(Math.random() * RESPOSTAS.length)];
-      l.msgs.push({ d: 'c', t: r, ts: agora() });
-      if (!(cv.sel === id && ctx.modulo() === 'conversas')) l.nao = (l.nao || 0) + 1;
-      salvar(); ctx.selos();
-      if (ctx.modulo() === 'conversas') { desenhaLista(); if (cv.sel === id) desenhaChat(); }
-    }, 4200);
-  }
-  function clienteSair(l) {
-    if (l.optout) return;
-    l.msgs.push({ d: 'c', t: 'SAIR', ts: agora() });
-    CRM.registraOptout(l, 'Cliente respondeu SAIR: removido de todas as campanhas futuras.');
-    desenhaChat(); desenhaLista(); desenhaPerfil();
-    toast(primeiro(l.nome) + ' entrou na lista de opt-out e não recebe mais disparos.');
-  }
-
   /* ---------- FUNIL (kanban integrado às conversas) ---------- */
   function funil(param, tela) {
     var total = D.leads.filter(function (l) { return l.etapa !== 'vendido'; }).reduce(function (s, l) { return s + l.valor; }, 0);
@@ -310,59 +167,22 @@
     if (!D) return;
     var t = e.target.closest('button'); if (!t) return;
     var m = ctx.modulo();
-    if (m === 'conversas') {
-      if (t.dataset.cvabre) abreConversa(t.dataset.cvabre);
-      else if (t.dataset.cvf) { cv.filtro = t.dataset.cvf; desenhaLista(); }
-      else if (t.dataset.cvvolta !== undefined) { cv.mobile = 'lista'; $('.cv').className = 'cv ' + (cv.perfil ? 'com-perfil ' : '') + 'm-lista'; }
-      else if (t.dataset.cvperfil !== undefined) { cv.perfil = !cv.perfil; var raiz = $('.cv'); raiz.className = 'cv ' + (cv.perfil ? 'com-perfil ' : '') + 'm-' + cv.mobile; desenhaChat(); desenhaPerfil(); }
-      else if (t.dataset.cvaba) { cv.aba = t.dataset.cvaba; var tx = ($('#cvTexto') || {}).value || ''; desenhaChat(); $('#cvTexto').value = tx; $('#cvTexto').focus(); }
-      else if (t.dataset.cvrap !== undefined) { cv.rap = !cv.rap; var r = $('#cvRap'); r.hidden = !cv.rap; t.setAttribute('aria-expanded', cv.rap); }
-      else if (t.dataset.cvusa) { var l = lead(cv.sel), q = RAPIDAS[+t.dataset.cvusa]; $('#cvTexto').value = q[1].replace(/\{nome\}/g, primeiro(l.nome)); cv.rap = false; $('#cvRap').hidden = true; $('#cvTexto').focus(); }
-      else if (t.dataset.cvenviar !== undefined) enviar();
-      else if (t.dataset.cvetq) { alternaEtq(lead(cv.sel), t.dataset.cvetq); desenhaPerfil(); desenhaLista(); }
-      else if (t.dataset.cvvenda) { confirmarVenda(lead(t.dataset.cvvenda)); desenhaChat(); desenhaPerfil(); desenhaLista(); ctx.selos(); }
-      else if (t.dataset.cvsair) clienteSair(lead(t.dataset.cvsair));
-    } else if (m === 'funil') {
+    if (m === 'funil') {
       if (t.dataset.fnabre) { location.hash = '#conversas/' + t.dataset.fnabre; }
       else if (t.dataset.fnvenda) { confirmarVenda(lead(t.dataset.fnvenda)); desenhaKanban(); desenhaLogVendas(); }
     }
   });
   document.addEventListener('change', function (e) {
     if (!D) return; var id = e.target.id, m = ctx.modulo();
-    if (m === 'conversas') {
-      if (id === 'cvResp') { cv.resp = e.target.value; desenhaLista(); }
-      else if (id === 'cvEtq') { cv.etq = e.target.value; desenhaLista(); }
-      else if (id === 'cvEtapa') { cv.etapa = e.target.value; desenhaLista(); }
-      else if (e.target.dataset.cvetapa) { var l = lead(e.target.dataset.cvetapa); mudaEtapa(l, e.target.value, l.resp || 'Júlia'); desenhaChat(); desenhaPerfil(); desenhaLista(); }
-      else if (e.target.dataset.cvresp !== undefined && e.target.dataset.cvresp) { atribui(lead(e.target.dataset.cvresp), e.target.value); desenhaChat(); desenhaPerfil(); desenhaLista(); toast(e.target.value ? 'Conversa atribuída a ' + e.target.value + '.' : 'Atribuição removida.'); }
-    } else if (m === 'funil') {
+    if (m === 'funil') {
       if (id === 'fnResp') { fn.resp = e.target.value; desenhaKanban(); }
       else if (id === 'fnEtq') { fn.etq = e.target.value; desenhaKanban(); }
     }
   });
   document.addEventListener('input', function (e) {
     if (!D) return; var m = ctx.modulo();
-    if (m === 'conversas' && e.target.id === 'cvBusca') { cv.busca = e.target.value; desenhaLista(); }
-    else if (m === 'conversas' && e.target.id === 'cvTexto') {
-      var v = e.target.value;
-      if (v.charAt(0) === '/' && cv.aba === 'msg') { cv.rap = true; $('#cvRap').hidden = false; desenhaRapidas(v.split(' ')[0]); }
-      else if (cv.rap && v.charAt(0) !== '/') { cv.rap = false; $('#cvRap').hidden = true; }
-    } else if (m === 'funil' && e.target.id === 'fnBusca') { fn.busca = e.target.value; desenhaKanban(); }
+    if (m === 'funil' && e.target.id === 'fnBusca') { fn.busca = e.target.value; desenhaKanban(); }
   });
-  document.addEventListener('submit', function (e) {
-    if (!D) return;
-    if (e.target.dataset.cvnova === undefined) return;
-    e.preventDefault();
-    var inp = $('#cvNovaEtq'), nome = inp.value.trim().replace(/\s+/g, ' ');
-    if (!nome) { toast('Digite o nome da etiqueta.'); return; }
-    if (D.etiquetas.some(function (x) { return x.toLowerCase() === nome.toLowerCase(); })) { toast('Essa etiqueta já existe.'); return; }
-    D.etiquetas.push(nome); alternaEtq(lead(cv.sel), nome); desenhaPerfil(); desenhaLista(); toast('Etiqueta “' + nome + '” criada e aplicada.');
-  });
-  document.addEventListener('keydown', function (e) {
-    if (!D || e.target.id !== 'cvTexto') return;
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar(); }
-  });
-
   // arrastar cartões entre colunas do funil
   var arrastando = null;
   document.addEventListener('dragstart', function (e) { var l = e.target.closest && e.target.closest('.lead'); if (l && ctx && ctx.modulo() === 'funil') { arrastando = l.dataset.lead; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', arrastando); } catch (x) {} } });
@@ -383,7 +203,7 @@
   var CRM = window.CRM = {
     init: function (c) { ctx = c; carregar(); setInterval(function () { CRM.campanhas.tick(); }, 1000); },
     render: function (m, param, tela) {
-      if (m === 'conversas') conversas(param, tela);
+      if (m === 'conversas' || m === 'ia') CRM.conv.render(m, param, tela);
       else if (m === 'funil') funil(param, tela);
       else if (m === 'campanhas') CRM.campanhas.render(tela);
     },
@@ -395,7 +215,9 @@
     },
     i: {
       dados: function () { return D; }, salvar: salvar, esc: esc, toast: toast, ctx: function () { return ctx; }, catOf: catOf, digitos: digitos,
-      primeiro: primeiro, sistema: sistema, lead: lead, ETAPAS: ETAPAS, hora: hora, etqCls: etqCls, chipEtq: chipEtq, ETQ_BASE: ETQ_BASE
+      primeiro: primeiro, sistema: sistema, lead: lead, ETAPAS: ETAPAS, hora: hora, etqCls: etqCls, chipEtq: chipEtq, ETQ_BASE: ETQ_BASE,
+      ATENDENTES: ATENDENTES, RAPIDAS: RAPIDAS, RESPOSTAS: RESPOSTAS, atribui: atribui, mudaEtapa: mudaEtapa, confirmarVenda: confirmarVenda, alternaEtq: alternaEtq,
+      hist: hist, diaRotulo: diaRotulo, etapaRot: etapaRot, ultima: ultima, ordemUlt: ordemUlt, agora: agora, cliente: cliente, corAvatar: corAvatar, iniciais: iniciais
     }
   };
 })();

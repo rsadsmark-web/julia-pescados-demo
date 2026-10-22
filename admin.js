@@ -181,7 +181,7 @@
   }
 
   /* ---------- roteamento ---------- */
-  var MODULOS = { visao: visao, pedidos: pedidosTela, conversas: crmTela, funil: crmTela, campanhas: crmTela, clientes: clientes, nf: nf, estoque: estoque };
+  var MODULOS = { visao: visao, pedidos: pedidosTela, conversas: crmTela, ia: crmTela, funil: crmTela, campanhas: crmTela, clientes: clientes, nf: nf, estoque: estoque };
   function crmTela() { CRM.render(modulo, parametro, tela); }
   function ir() {
     var h = (location.hash || '#visao').slice(1).split('/'), param = h[1] || '';
