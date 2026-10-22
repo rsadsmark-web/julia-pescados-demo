@@ -9,11 +9,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow+Condensed:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="base.css?v=20261022e">
-<link rel="stylesheet" href="admin.css?v=20261022e">
-<link rel="stylesheet" href="crm.css?v=20261022e">
-<link rel="stylesheet" href="sobrio.css?v=20261022e">
-<link rel="stylesheet" href="conversas.css?v=20261022e">
+<link rel="stylesheet" href="base.css?v=20261022f">
+<link rel="stylesheet" href="admin.css?v=20261022f">
+<link rel="stylesheet" href="crm.css?v=20261022f">
+<link rel="stylesheet" href="sobrio.css?v=20261022f">
+<link rel="stylesheet" href="conversas.css?v=20261022f">
 </head>
 <body class="adm">
 <div class="app">
@@ -25,7 +25,6 @@
       <a href="#visao" data-m="visao"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg>Visão geral</a>
       <a href="#pedidos" data-m="pedidos"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.5h11v9h-11z"/><path d="M13.5 9.5h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.7"/><circle cx="17" cy="17.5" r="1.7"/></svg>Pedidos e delivery<span class="selo" id="seloPedidos"></span></a>
       <a href="#conversas" data-m="conversas"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8 8 0 0 1-11.8 7L3.5 20l1.6-4.6A8 8 0 1 1 21 11.5z"/></svg>Conversas<span class="selo" id="seloConversas"></span></a>
-      <a href="#ia" data-m="ia"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M19 16v4M17 18h4"/></svg>Atendimento IA<span class="selo opc">Opcional</span></a>
       <a href="#funil" data-m="funil"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5h18l-7 8.2v6l-4 2v-8z"/></svg>Funil de vendas</a>
       <a href="#campanhas" data-m="campanhas"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10v4l11 4.5v-13z"/><path d="M14.5 9.5a2.5 2.5 0 0 1 0 5"/><path d="M6 14.5l1.5 5h2.5l-1-4"/></svg>Campanhas</a>
       <a href="#clientes" data-m="clientes"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.7a3.5 3.5 0 0 1 0 6.6M18 14.4c2 .7 3.5 2.5 3.5 5.6"/></svg>Carteira de clientes</a>
@@ -44,10 +43,11 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="shared.js?v=20261022e"></script>
-<script src="crm.js?v=20261022e"></script>
-<script src="campanhas.js?v=20261022e"></script>
-<script src="conversas.js?v=20261022e"></script>
-<script src="admin.js?v=20261022e"></script>
+<script src="shared.js?v=20261022f"></script>
+<script src="crm.js?v=20261022f"></script>
+<script src="campanhas.js?v=20261022f"></script>
+<script src="ia-config.js?v=20261022f"></script>
+<script src="conversas.js?v=20261022f"></script>
+<script src="admin.js?v=20261022f"></script>
 </body>
 </html>

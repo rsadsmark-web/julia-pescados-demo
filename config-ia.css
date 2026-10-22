@@ -1,0 +1,18 @@
+/* Área de configuração da IA (RS Tech) — reaproveita os componentes do painel e só ajusta o que é próprio desta página */
+body.cfg-rs { background: var(--creme, #f4efe4); min-height: 100dvh; }
+.cfg-rs main { max-width: 1120px; margin: 0 auto; padding: 24px 20px 64px; }
+.cfg-rs .rs-topo { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
+.cfg-rs .rs-marca { display: flex; align-items: center; gap: 10px; }
+.cfg-rs .rs-selo { font: 700 12px/1 var(--corpo); letter-spacing: .06em; text-transform: uppercase; background: var(--marinho); color: #fff; padding: 6px 10px; border-radius: 6px; }
+.cfg-rs h1 { font-size: 22px; margin: 0; }
+.cfg-rs .rs-aviso { background: var(--aviso); border: 1px solid var(--aviso-borda); color: var(--aviso-texto); border-radius: 8px; padding: 10px 14px; font-size: 13.5px; margin-bottom: 16px; }
+.cfg-rs .rs-login { max-width: 420px; margin: 12vh auto 0; background: #fff; border: var(--borda); border-radius: 12px; padding: 28px; }
+.cfg-rs .rs-login h1 { margin-bottom: 6px; } .cfg-rs .rs-login p { color: var(--suave); font-size: 14px; margin: 0 0 16px; }
+.cfg-rs .rs-login .campo { display: flex; flex-direction: column; gap: 4px; margin-bottom: 14px; } .cfg-rs .rs-login input { width: 100%; }
+.cfg-rs .rs-erro { color: var(--perigo, #b3261e); font-size: 13.5px; min-height: 20px; margin: 0 0 8px; }
+.cfg-rs textarea#cfgPrompt { width: 100%; min-height: 440px; font: 13.5px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; resize: vertical; }
+.cfg-rs .rs-acoes { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+.cfg-rs .rs-estado { color: var(--suave); font-size: 13px; }
+.cfg-rs .xfaixa { display: flex; gap: 12px; flex-wrap: wrap; } .cfg-rs .xfaixa[hidden] { display: none; }
+.cfg-rs .rs-rodape { margin-top: 20px; font-size: 13px; color: var(--suave); }
+@media (max-width: 860px) { .cfg-rs main { padding: 16px 12px 48px; } .cfg-rs textarea#cfgPrompt { min-height: 320px; } }

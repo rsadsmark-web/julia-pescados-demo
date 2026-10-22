@@ -181,11 +181,11 @@
   }
 
   /* ---------- roteamento ---------- */
-  var MODULOS = { visao: visao, pedidos: pedidosTela, conversas: crmTela, ia: crmTela, funil: crmTela, campanhas: crmTela, clientes: clientes, nf: nf, estoque: estoque };
+  var MODULOS = { visao: visao, pedidos: pedidosTela, conversas: crmTela, funil: crmTela, campanhas: crmTela, clientes: clientes, nf: nf, estoque: estoque };
   function crmTela() { CRM.render(modulo, parametro, tela); }
   function ir() {
     var h = (location.hash || '#visao').slice(1).split('/'), param = h[1] || '';
-    h = h[0]; if (h === 'crm') h = 'funil'; if (!MODULOS[h]) h = 'visao';
+    h = h[0]; if (h === 'crm') h = 'funil'; if (h === 'ia') h = 'conversas'; if (!MODULOS[h]) h = 'visao';
     modulo = h; parametro = param; recarrega();
     if (mapa && h !== 'pedidos') { mapa.remove(); mapa = null; }
     document.querySelectorAll('#menu a').forEach(function (a) { a.classList.toggle('ativo', a.dataset.m === h); });

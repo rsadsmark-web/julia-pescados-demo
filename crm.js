@@ -203,7 +203,7 @@
   var CRM = window.CRM = {
     init: function (c) { ctx = c; carregar(); setInterval(function () { CRM.campanhas.tick(); }, 1000); },
     render: function (m, param, tela) {
-      if (m === 'conversas' || m === 'ia') CRM.conv.render(m, param, tela);
+      if (m === 'conversas') CRM.conv.render(m, param, tela);
       else if (m === 'funil') funil(param, tela);
       else if (m === 'campanhas') CRM.campanhas.render(tela);
     },

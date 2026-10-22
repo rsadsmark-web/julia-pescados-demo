@@ -1,4 +1,5 @@
-/* Conversas e Atendimento por IA da Julia Pescados — demonstração: tudo simulado no navegador, nenhuma IA é chamada e nada é enviado */
+/* Conversas e Atendimento por IA da Julia Pescados — demonstração: tudo simulado no navegador, nenhuma IA é chamada e nada é enviado.
+   O cliente só liga/desliga a IA e assume conversas; prompt e ajustes técnicos vêm de ia-config.js e só se editam em config-ia.html (área da RS Tech). */
 (function () {
   var I = window.CRM.i, D = null, ctx = null;
   var ATUAL = 'Júlia';
@@ -53,7 +54,6 @@
 
   /* ---------- configuração e dados próprios (ficam dentro dos dados do CRM, então "Restaurar dados" também zera) ---------- */
   var ASSUNTOS = [['preco', 'Preços e catálogo'], ['entrega', 'Entrega, taxas e prazos'], ['horario', 'Horário de funcionamento'], ['pagamento', 'Formas de pagamento'], ['pedido', 'Andamento do pedido'], ['orcamento', 'Orçamentos']];
-  var TONS = [['cordial', 'Cordial', 'Olá, Sabrina! O Kit Churrasco do Mar está R$ 84,90. Fico à disposição.'], ['objetivo', 'Objetivo', 'O Kit Churrasco do Mar está R$ 84,90.'], ['descontraido', 'Descontraído', 'Oi, Sabrina, tudo bem? O Kit Churrasco do Mar está R$ 84,90. Qualquer coisa é só chamar!']];
   var CORPO = {
     preco: 'Hoje temos camarão cinza a R$ 49,90/kg, camarão VG a R$ 64,90/kg, filé de tilápia a R$ 36,90/kg e o Kit Churrasco do Mar a R$ 84,90. Quer que eu monte o seu pedido?',
     entrega: 'Entregamos em Fortaleza e Caucaia. A taxa varia por bairro (de R$ 6,00 a R$ 22,00) e o prazo médio é de 60 a 90 minutos. Me diga o bairro e eu confirmo o valor.',
@@ -70,10 +70,8 @@
     ['Áudio do cliente', { k: 'audio', dur: 12, t: '' }]
   ];
 
-  function cfgPadrao() {
-    return { ativa: true, modo: 'sugerir', quando: 'sempre', de: '14:00', ate: '06:00', tom: 'cordial', assuntos: { preco: 1, entrega: 1, horario: 1, pagamento: 1, pedido: 1, orcamento: 0 },
-      humanoReclamacao: true, humanoGrande: true, limiteKg: 20, limiteValor: 1500 };
-  }
+  function cfgPadrao() { return { ativa: true }; }
+  function tec() { return window.JPIA.ler(); } // ajustes técnicos: definidos pela RS Tech, o cliente não altera
   function ensure() {
     D = I.dados(); ctx = I.ctx();
     if (D.conv) return;
@@ -111,15 +109,15 @@
     return { reclama: /reclam|atrasad|atraso|errad|pessim|horriv|devolu|estragad|cancel|procon|demorou|insatisf|nao chegou|cheiro|podre/.test(n), kg: kg, valor: valor,
       cortesia: !assunto && /^(ok|beleza|show|valeu|combinado|obrigad|certo|pode ser|perfeito|blz)/.test(n.trim()), assunto: assunto };
   }
-  function tom(corpo, nome) {
-    var t = D.conv.cfg.tom;
+  function tom(corpo, nome, t) {
+    t = t || tec().tom;
     if (t === 'objetivo') return corpo;
     if (t === 'descontraido') return 'Oi, ' + nome + ', tudo bem? ' + corpo + ' Qualquer coisa é só chamar!';
     return 'Olá, ' + nome + '! ' + corpo + ' Fico à disposição.';
   }
   function rotAssunto(a) { return (ASSUNTOS.filter(function (x) { return x[0] === a; })[0] || [0, a])[1]; }
-  function decidir(m, l) {
-    var cfg = D.conv.cfg, nome = primeiro(l ? l.nome : 'cliente');
+  function decidir(m, l, tomForcado) {
+    var cfg = tec(), nome = primeiro(l ? l.nome : 'cliente');
     if (m.k === 'audio') return { humano: true, motivo: 'o cliente enviou um áudio (a IA ainda não ouve áudios)' };
     if (m.k) return { silencio: true };
     var c = classificar(m.t);
@@ -129,10 +127,10 @@
     if (c.cortesia) return { silencio: true };
     if (!c.assunto) return { humano: true, motivo: 'assunto fora do que a IA pode responder' };
     if (!cfg.assuntos[c.assunto]) return { humano: true, motivo: 'o assunto “' + rotAssunto(c.assunto) + '” não está liberado para a IA' };
-    return { humano: false, assunto: c.assunto, texto: tom(CORPO[c.assunto], nome) };
+    return { humano: false, assunto: c.assunto, texto: tom(CORPO[c.assunto], nome, tomForcado) };
   }
   function dentroDaJanela() {
-    var cfg = D.conv.cfg, d = new Date(), min = d.getHours() * 60 + d.getMinutes();
+    var cfg = tec(), d = new Date(), min = d.getHours() * 60 + d.getMinutes();
     function m(h) { var p = h.split(':'); return (+p[0]) * 60 + (+p[1]); }
     if (cfg.quando === 'fora') return d.getDay() === 0 || min < 360 || min >= 840;
     if (cfg.quando === 'faixa') { var a = m(cfg.de), b = m(cfg.ate); return a <= b ? (min >= a && min < b) : (min >= a || min < b); }
@@ -182,7 +180,7 @@
   function aposCliente(l, m) {
     if (!efetivaIA(l) || l.optout) { if (X.sel === l.id) desenhaSug(); return; }
     var id = l.id;
-    if (D.conv.cfg.modo === 'auto') {
+    if (tec().modo === 'auto') {
       var d = decidir(m, l);
       if (d.silencio) return;
       digitandoIA[id] = true; atualizaMsgs(id, true); desenhaItem(id);
@@ -203,20 +201,20 @@
     salvar(); ctx.selos();
     toast('A IA passou a conversa de ' + l.nome + ' para atendimento humano: ' + motivo + '.');
   }
-  function gerarSugestao(l, m) {
+  function gerarSugestao(l, m, tomForcado) {
     var id = l.id; sug[id] = { estado: 'gerando', ts: m.ts };
     if (X.sel === id) desenhaSug();
     clearTimeout(timers['sug' + id]);
     timers['sug' + id] = setTimeout(function () {
       var u = ultimaMsg(l); if (!u || u.ts !== m.ts || !sug[id]) return;
-      var d = decidir(m, l);
+      var d = decidir(m, l, tomForcado);
       sug[id] = d.silencio ? { estado: 'nenhuma', ts: m.ts } : { estado: 'pronta', ts: m.ts, d: d };
       if (X.sel === id && ctx.modulo() === 'conversas') desenhaSug();
     }, 900);
   }
   function garanteSugestao(l) {
     var u = ultimaMsg(l);
-    if (D.conv.cfg.modo !== 'sugerir' || !efetivaIA(l) || !aguardando(l)) return;
+    if (tec().modo !== 'sugerir' || !efetivaIA(l) || !aguardando(l)) return;
     if (!sug[l.id] || sug[l.id].ts !== u.ts) gerarSugestao(l, u);
   }
 
@@ -362,9 +360,9 @@
   function desenhaSug() {
     var el = $('#xSug'), l = lead(X.sel); if (!el || !l) return;
     var cfg = D.conv.cfg, s = sug[l.id], mt = meta(l), h = '';
-    if (cfg.ativa && mt.ia !== 'humano' && !dentroDaJanela()) h = '<div class="xsug info">' + ic('brilho') + '<span>A IA está fora da janela de atendimento configurada. Esta conversa fica com a equipe.</span></div>';
+    if (cfg.ativa && mt.ia !== 'humano' && !dentroDaJanela()) h = '<div class="xsug info">' + ic('brilho') + '<span>A IA está fora do horário de atuação combinado. Esta conversa fica com a equipe.</span></div>';
     else if (mt.precisa) h = '<div class="xsug atencao">' + ic('alerta') + '<div><b>A IA passou esta conversa para a equipe</b><span>Motivo: ' + esc(mt.precisa) + '.</span></div>' + (l.resp === ATUAL ? '' : '<button class="btn pequeno" data-x-assumir>Assumir conversa</button>') + '</div>';
-    else if (efetivaIA(l) && cfg.modo === 'sugerir' && aguardando(l) && s) {
+    else if (efetivaIA(l) && tec().modo === 'sugerir' && aguardando(l) && s) {
       if (s.estado === 'gerando') h = '<div class="xsug gerando" aria-live="polite">' + ic('brilho') + '<span>A IA está preparando uma resposta</span><span class="xpontos"><i></i><i></i><i></i></span></div>';
       else if (s.estado === 'pronta' && s.d.humano) h = '<div class="xsug atencao">' + ic('alerta') + '<div><b>A IA recomenda atendimento humano</b><span>Motivo: ' + esc(s.d.motivo) + '. Nenhuma resposta foi sugerida.</span></div><button class="btn pequeno linha" data-x-descarta>Entendi</button></div>';
       else if (s.estado === 'pronta') h = '<div class="xsug pronta"><div class="xsug-topo"><span class="xia">' + ic('brilho') + 'Sugestão da IA</span><span class="xtag">' + esc(rotAssunto(s.d.assunto)) + '</span><button class="xbtn-ic peq" data-x-descarta aria-label="Descartar sugestão">' + ic('x') + '</button></div><p>' + esc(s.d.texto) + '</p>' +
@@ -469,8 +467,7 @@
   function cabecalho() {
     var cfg = D.conv.cfg;
     return '<div class="cab xcab-pg"><div><h1>Conversas</h1><p>Atendimento no estilo WhatsApp Web. Demonstração: envios simulados, nada sai do navegador.</p></div>' +
-      '<div class="xcab-dir"><span class="xglobal"><span class="xrotulo">Atendimento geral</span><span class="xseg" role="group" aria-label="Atendimento geral"><button data-x-geral="ia" aria-pressed="' + cfg.ativa + '">' + ic('brilho') + 'IA atende</button><button data-x-geral="humano" aria-pressed="' + !cfg.ativa + '">' + ic('usuario') + 'Humano atende</button></span></span>' +
-      '<a class="btn pequeno linha" href="#ia" title="Configurar o atendimento por IA">' + ic('engrenagem') + '<span>Configurar IA</span></a></div></div>';
+      '<div class="xcab-dir"><span class="xglobal"><span class="xrotulo">Atendimento geral</span><span class="xseg" role="group" aria-label="Atendimento geral"><button data-x-geral="ia" aria-pressed="' + cfg.ativa + '">' + ic('brilho') + 'IA atende</button><button data-x-geral="humano" aria-pressed="' + !cfg.ativa + '">' + ic('usuario') + 'Humano atende</button></span></span></div></div>';
   }
   function conversas(param, tela) {
     if (param && lead(param)) { X.sel = param; X.mobile = 'chat'; }
@@ -621,46 +618,6 @@
   }
   function fechaModal() { var m = $('#xModal'); if (m) { m.remove(); return true; } return false; }
 
-  /* ---------- tela de configuração da IA ---------- */
-  function telaIA(tela) {
-    var c = D.conv.cfg, ias = 0, aprov = 0, passag = 0;
-    D.leads.forEach(function (l) { l.msgs.forEach(function (m) { if (m.d === 'j' && m.ia === 1) ias++; if (m.d === 'j' && m.ia === 2) aprov++; if (m.d === 's' && m.ia) passag++; }); });
-    function sw(id, on, rot, desc) { return '<label class="xsw"><input type="checkbox" id="' + id + '"' + (on ? ' checked' : '') + '><span class="xsw-t" aria-hidden="true"><i></i></span><span class="xsw-x"><b>' + rot + '</b>' + (desc ? '<small>' + desc + '</small>' : '') + '</span></label>'; }
-    function radio(nome, val, atual, rot, desc) { return '<label class="xrad' + (val === atual ? ' on' : '') + '"><input type="radio" name="' + nome + '" value="' + val + '"' + (val === atual ? ' checked' : '') + '><span><b>' + rot + '</b><small>' + desc + '</small></span></label>'; }
-    function opt(v, rot) { return '<option value="' + v + '"' + (c.quando === v ? ' selected' : '') + '>' + rot + '</option>'; }
-    tela.innerHTML = '<div class="cab xcab-pg"><div><h1>Atendimento por IA <span class="xopc">Módulo opcional</span></h1><p>Sugestões e respostas automáticas para o atendimento no WhatsApp. Demonstração: tudo simulado, nenhuma IA real é chamada.</p></div><div class="xcab-dir"><a class="btn pequeno linha" href="#conversas">' + ic('conversa') + 'Ver nas conversas</a></div></div>' +
-      '<div class="xia-sobre">' + ic('brilho', 'grande') + '<div><h2>Um módulo opcional do plano</h2><p>O Atendimento por IA pode fazer parte do plano da Júlia Pescados ou ficar de fora, sem prejuízo do resto do painel. Quando ligado, a IA responde as dúvidas frequentes (preços, entrega, horário e pagamento), sugere respostas para a equipe aprovar com um clique e passa a conversa para uma pessoa quando o assunto é reclamação ou pedido grande. A equipe liga e desliga a IA quando quiser, no geral ou conversa a conversa.</p></div></div>' +
-      '<div class="xia-grade"><div class="xia-col">' +
-      '<section class="painel xcfg"><h2>Atendimento geral</h2>' + sw('iaAtiva', c.ativa, c.ativa ? 'IA atende' : 'Humano atende', 'Interruptor geral. Desligado, a equipe atende todas as conversas e nenhuma sugestão aparece.') +
-      '<fieldset class="xgrupo"' + (c.ativa ? '' : ' disabled') + '><legend>Como a IA atua</legend>' + radio('iaModo', 'sugerir', c.modo, 'Sugerir respostas', 'A IA escreve e o atendente aprova com um clique. Recomendado para começar.') + radio('iaModo', 'auto', c.modo, 'Responder sozinha', 'A IA responde na hora e passa para uma pessoa em reclamação ou pedido grande.') + '</fieldset></section>' +
-      '<section class="painel xcfg"><h2>Horário de atuação</h2><div class="campo"><label for="iaQuando">Quando a IA atende</label><select id="iaQuando">' + opt('sempre', 'O tempo todo') + opt('fora', 'Só fora do expediente (antes das 6h, depois das 14h e aos domingos)') + opt('faixa', 'Em uma faixa de horário') + '</select></div>' +
-      '<div class="xfaixa" id="iaFaixa"' + (c.quando === 'faixa' ? '' : ' hidden') + '><div class="campo"><label for="iaDe">Das</label><input type="time" id="iaDe" value="' + c.de + '"></div><div class="campo"><label for="iaAte">Até</label><input type="time" id="iaAte" value="' + c.ate + '"></div></div>' +
-      '<p class="xmut" id="iaJanela">' + (dentroDaJanela() ? 'Neste momento a IA está dentro da janela de atendimento.' : 'Neste momento a IA está fora da janela: a equipe atende.') + '</p></section>' +
-      '<section class="painel xcfg"><h2>Tom das respostas</h2><div class="xtons">' + TONS.map(function (t) { return radio('iaTom', t[0], c.tom, t[1], '“' + t[2] + '”'); }).join('') + '</div></section>' +
-      '<section class="painel xcfg"><h2>Assuntos permitidos <small>o que a IA pode responder</small></h2><div class="xassuntos">' + ASSUNTOS.map(function (a) { return sw('iaAs-' + a[0], !!c.assuntos[a[0]], a[1], ''); }).join('') + '</div><p class="xmut">Fora desta lista, a IA não responde e chama uma pessoa.</p></section>' +
-      '<section class="painel xcfg"><h2>Quando passar para uma pessoa</h2>' + sw('iaRecl', c.humanoReclamacao, 'Reclamação ou insatisfação', 'Atraso, produto errado, devolução ou cancelamento.') +
-      sw('iaGrande', c.humanoGrande, 'Pedido grande', 'Acima de qualquer um dos limites abaixo.') +
-      '<div class="xfaixa"><div class="campo"><label for="iaKg">A partir de (kg)</label><input type="number" id="iaKg" min="1" step="1" value="' + c.limiteKg + '"></div><div class="campo"><label for="iaVal">A partir de (R$)</label><input type="number" id="iaVal" min="1" step="50" value="' + c.limiteValor + '"></div></div>' +
-      '<p class="xmut">Áudios do cliente e assuntos fora da lista também passam para uma pessoa.</p></section></div>' +
-      '<div class="xia-col lado"><section class="painel xcfg"><h2>Testar a IA</h2><p class="xmut">Escreva como se fosse o cliente. Nada é enviado: é só uma prévia do que a IA faria com as regras ao lado.</p>' +
-      '<div class="campo"><label for="iaTeste">Mensagem do cliente</label><textarea id="iaTeste" rows="3" placeholder="Ex.: Quanto está o camarão cinza?"></textarea></div>' +
-      '<div class="xex">' + ['Quanto está o kit churrasco?', 'Entregam no Cambeba?', 'Preciso de 40 kg de camarão', 'Meu pedido veio errado'].map(function (t) { return '<button class="xchip" data-x-ex="' + esc(t) + '">' + esc(t) + '</button>'; }).join('') + '</div>' +
-      '<button class="btn" data-x-testa>' + ic('brilho') + 'Ver o que a IA faria</button><div class="xresultado" id="iaResultado" aria-live="polite"></div></section>' +
-      '<section class="painel xcfg"><h2>Uso nesta demonstração</h2><div class="xstats"><div><b>' + ias + '</b><small>respostas enviadas pela IA</small></div><div><b>' + aprov + '</b><small>sugestões aprovadas</small></div><div><b>' + passag + '</b><small>passagens para humano</small></div></div><p class="xmut">Números de exemplo, somados a partir das conversas.</p></section></div></div>';
-  }
-  function testaIA() {
-    var t = ($('#iaTeste') || {}).value || '', el = $('#iaResultado'); if (!el) return;
-    if (!t.trim()) { el.innerHTML = '<p class="xmut">Escreva uma mensagem para testar.</p>'; return; }
-    if (!D.conv.cfg.ativa) { el.innerHTML = '<div class="xsug atencao">' + ic('alerta') + '<div><b>A IA está desligada</b><span>Com “Humano atende” a equipe responde tudo.</span></div></div>'; return; }
-    el.innerHTML = '<div class="xsug gerando">' + ic('brilho') + '<span>Analisando</span><span class="xpontos"><i></i><i></i><i></i></span></div>';
-    setTimeout(function () {
-      var d = decidir({ t: t }, { nome: 'Sabrina' }), cfg = D.conv.cfg;
-      el.innerHTML = d.silencio ? '<div class="xsug info">' + ic('check') + '<span>Mensagem de cortesia: a IA não precisa responder.</span></div>' :
-        d.humano ? '<div class="xsug atencao">' + ic('alerta') + '<div><b>Passaria para uma pessoa</b><span>Motivo: ' + esc(d.motivo) + '.</span></div></div>' :
-        '<div class="xsug pronta"><div class="xsug-topo"><span class="xia">' + ic('brilho') + (cfg.modo === 'auto' ? 'A IA responderia' : 'A IA sugeriria') + '</span><span class="xtag">' + esc(rotAssunto(d.assunto)) + '</span></div><p>' + esc(d.texto) + '</p></div>';
-    }, 650);
-  }
-
   /* ---------- eventos ---------- */
   document.addEventListener('click', function (e) {
     if (!D) return;
@@ -671,10 +628,6 @@
     if (!t) return;
     var d = t.dataset;
     if (d.xAtalhos !== undefined) { modalAtalhos(); return; }
-    if (mod === 'ia') {
-      if (d.xEx !== undefined) { $('#iaTeste').value = d.xEx; testaIA(); } else if (d.xTesta !== undefined) testaIA();
-      return;
-    }
     if (mod !== 'conversas') return;
     var l = X.sel ? lead(X.sel) : null;
     if (d.xAbre) abre(d.xAbre);
@@ -700,7 +653,7 @@
     else if (d.xRetry) { var m = l.msgs[+d.xRetry]; if (m) { m.st = 'enviando'; salvar(); atualizaMsgs(l.id); entrega(l, m); } }
     else if (d.xAprova !== undefined) aprovaSugestao(false);
     else if (d.xEdita !== undefined) aprovaSugestao(true);
-    else if (d.xOutra !== undefined) { var u = ultimaMsg(l); if (u) { var tons = ['cordial', 'objetivo', 'descontraido'], atual = D.conv.cfg.tom; D.conv.cfg.tom = tons[(tons.indexOf(atual) + 1) % 3]; gerarSugestao(l, u); D.conv.cfg.tom = atual; } }
+    else if (d.xOutra !== undefined) { var u = ultimaMsg(l); if (u) { var tons = ['cordial', 'objetivo', 'descontraido']; gerarSugestao(l, u, tons[(tons.indexOf(tec().tom) + 1) % 3]); } }
     else if (d.xDescarta !== undefined) { sug[l.id] = { estado: 'nenhuma', ts: (ultimaMsg(l) || {}).ts }; desenhaSug(); }
     else if (d.xAssumir !== undefined) { I.atribui(l, ATUAL); salvar(); atualizaMsgs(l.id, true); desenhaCab(); desenhaSug(); desenhaLista(); desenhaPerfil(); toast('Você assumiu a conversa.'); }
     else if (d.xEtq) { I.alternaEtq(l, d.xEtq); desenhaPerfil(); desenhaLista(); }
@@ -708,24 +661,12 @@
   });
   document.addEventListener('toggle', function (e) { var s = e.target; if (s && s.dataset && s.dataset.xSec) X.abertos[s.dataset.xSec] = s.open; }, true);
   document.addEventListener('change', function (e) {
-    if (!D) return; var mod = ctx.modulo(), id = e.target.id || '', c = D.conv.cfg;
+    if (!D) return; var mod = ctx.modulo(), id = e.target.id || '';
     if (mod === 'conversas') {
       if (id === 'xFResp') { X.resp = e.target.value; desenhaLista(); }
       else if (id === 'xFEtq') { X.etq = e.target.value; desenhaLista(); }
       else if (id === 'xEtapa') { var l = lead(X.sel); I.mudaEtapa(l, e.target.value, l.resp || ATUAL); atualizaMsgs(l.id, true); desenhaPerfil(); desenhaLista(); }
       else if (id === 'xResp') { var l2 = lead(X.sel); I.atribui(l2, e.target.value); atualizaMsgs(l2.id, true); desenhaPerfil(); desenhaCab(); desenhaLista(); toast(e.target.value ? 'Conversa atribuída a ' + e.target.value + '.' : 'Atribuição removida.'); }
-    } else if (mod === 'ia') {
-      if (id === 'iaAtiva') { c.ativa = e.target.checked; e.target.closest('.xsw').querySelector('b').textContent = c.ativa ? 'IA atende' : 'Humano atende'; $('.xgrupo').disabled = !c.ativa; toast(c.ativa ? 'Atendimento por IA ligado no geral.' : 'Atendimento por IA desligado.'); }
-      else if (e.target.name === 'iaModo') { c.modo = e.target.value; $$('input[name=iaModo]').forEach(function (r) { r.closest('.xrad').classList.toggle('on', r.checked); }); toast(c.modo === 'auto' ? 'A IA agora responde sozinha, com passagem para humano.' : 'A IA agora sugere e o atendente aprova.'); }
-      else if (e.target.name === 'iaTom') { c.tom = e.target.value; $$('input[name=iaTom]').forEach(function (r) { r.closest('.xrad').classList.toggle('on', r.checked); }); toast('Tom ajustado.'); }
-      else if (id === 'iaQuando') { c.quando = e.target.value; $('#iaFaixa').hidden = c.quando !== 'faixa'; $('#iaJanela').textContent = dentroDaJanela() ? 'Neste momento a IA está dentro da janela de atendimento.' : 'Neste momento a IA está fora da janela: a equipe atende.'; }
-      else if ((id === 'iaDe' || id === 'iaAte') && e.target.value) c[id === 'iaDe' ? 'de' : 'ate'] = e.target.value;
-      else if (id.indexOf('iaAs-') === 0) c.assuntos[id.slice(5)] = e.target.checked ? 1 : 0;
-      else if (id === 'iaRecl') c.humanoReclamacao = e.target.checked;
-      else if (id === 'iaGrande') c.humanoGrande = e.target.checked;
-      else if (id === 'iaKg') c.limiteKg = Math.max(1, +e.target.value || 20);
-      else if (id === 'iaVal') c.limiteValor = Math.max(1, +e.target.value || 1500);
-      salvar();
     }
   });
   var tObs = null;
@@ -786,7 +727,7 @@
   window.CRM.conv = {
     render: function (m, param, tela) {
       ensure(); pararAudio(); fechaPop(); fechaModal();
-      if (m === 'ia') telaIA(tela); else conversas(param, tela);
+      conversas(param, tela);
     }
   };
 })();
