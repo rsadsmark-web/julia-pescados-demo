@@ -181,7 +181,9 @@
       (retirada ? '' : '<div id="mapaAcomp"></div>') + pix +
       '<div class="resumo">' + p.itens.map(function (i) { return '<div><span>' + i.qtd + ' ' + i.un + ' · ' + esc(i.nome) + '</span><span>' + JP.brl(i.preco * i.qtd) + '</span></div>'; }).join('') +
       '<div><span>' + (retirada ? 'Retirada' : 'Entrega — ' + esc(p.bairro)) + '</span><span>' + JP.brl(p.taxa) + '</span></div><div class="total"><span>Total · ' + esc(p.pagamento) + '</span><span>' + JP.brl(JP.totalPedido(p)) + '</span></div></div>' +
+      '<div id="avalAcomp"></div>' +
       '<p class="dica" style="text-align:center">Demonstração acelerada: o trajeto do motoboy é simulado numa rota de exemplo.</p></div>';
+    avalChave = ''; avalNota = 0;
     if (!retirada) montaMapa(p);
     atualizaAcomp();
   }
@@ -212,6 +214,41 @@
     $('#estadoTxt').textContent = txt[s.cod]; $('#estadoSub').textContent = sub;
     $('#simConf').hidden = !!p.confirmado;
     if (camadas.moto && camadas.pts) camadas.moto.setLatLng(JP.pontoNaRota(camadas.pts, s.prog));
+    if (!retirada && p.confirmado && s.cod === 'chegou') desenhaAval(p);
+  }
+
+  /* ---------- avaliação depois da entrega (pós-venda) ---------- */
+  var avalChave = '', avalNota = 0;
+  var ROT_NOTA = ['', 'Ruim', 'Regular', 'Bom', 'Muito bom', 'Excelente'];
+  function desenhaAval(p) {
+    var el = $('#avalAcomp'); if (!el) return;
+    PV.recarregar();
+    var pv = PV.ler(), feita = PV.doPedido(p.id), chave = p.id + (feita ? '|feita|' + feita.nota : pv.aval.ativa ? '|form' : '|off');
+    if (chave === avalChave) return;
+    avalChave = chave;
+    if (!feita && !pv.aval.ativa) { el.innerHTML = ''; return; }
+    if (feita) {
+      el.innerHTML = '<div class="aval feita"><h3>Obrigada pela sua avaliação!</h3><p class="aval-est" role="img" aria-label="Nota ' + feita.nota + ' de 5">' + new Array(feita.nota + 1).join('★') + '<i>' + new Array(6 - feita.nota).join('☆') + '</i></p>' +
+        (feita.nota <= 3 ? '<p class="dica">Sentimos muito. A Júlia vai falar com você pelo WhatsApp para resolver.</p>' : '<p class="dica">Gostou? Indique a Julia Pescados para amigos e família: é só passar o nosso perfil <b>@juliapescados</b>.</p>') + '</div>';
+      return;
+    }
+    el.innerHTML = '<div class="aval"><h3>Como foi o seu pedido?</h3><p class="dica">Dê uma nota de 1 a 5 e, se quiser, conte em uma frase como foi.</p>' +
+      '<div class="aval-notas" role="radiogroup" aria-label="Nota de 1 a 5">' + [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" role="radio" aria-checked="false" class="aval-estrela" data-estrela="' + n + '" aria-label="' + n + ' de 5 — ' + ROT_NOTA[n] + '">★</button>'; }).join('') + '</div>' +
+      '<p class="aval-rot" id="avalRot" aria-live="polite">&nbsp;</p>' +
+      '<label class="sr" for="avalTxt">Comentário sobre o pedido</label><textarea id="avalTxt" rows="3" maxlength="300" placeholder="Seu comentário (opcional)"></textarea>' +
+      '<label class="aval-ind"><input type="checkbox" id="avalInd"> Vou indicar a Julia Pescados para amigos e família</label>' +
+      '<button class="btn" id="enviarAval" disabled>Enviar avaliação</button></div>';
+    avalNota = 0;
+  }
+  function marcaNota(n) {
+    avalNota = n;
+    document.querySelectorAll('.aval-estrela').forEach(function (b) { var on = +b.dataset.estrela <= n; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(+b.dataset.estrela === n)); });
+    $('#avalRot').textContent = n + ' de 5 — ' + ROT_NOTA[n]; $('#enviarAval').disabled = false;
+  }
+  function enviaAval() {
+    var p = pedidoAtual(); if (!p || !avalNota) return;
+    PV.avaliar({ pedido: p.id, cliente: p.cliente, fone: p.fone, nota: avalNota, comentario: $('#avalTxt').value, indicou: $('#avalInd').checked, origem: 'Loja' });
+    avalChave = ''; desenhaAval(p);
   }
 
   /* ---------- eventos ---------- */
@@ -227,6 +264,8 @@
     else if (t.id === 'finalizar') finalizar();
     else if (t.id === 'abrirAcomp') { var ult = localStorage.getItem('jp_ultimo_pedido'); pedidoAcomp = ult; abreAcomp(false); }
     else if (t.id === 'fecharAcomp') fechaAcomp();
+    else if (t.dataset.estrela) marcaNota(+t.dataset.estrela);
+    else if (t.id === 'enviarAval') enviaAval();
     else if (t.id === 'simConf') { JP.confirmarPedido(pedidoAcomp); S = JP.estado(); desenhaAcomp(false); }
   });
   $('#veu').addEventListener('click', fechaGaveta);

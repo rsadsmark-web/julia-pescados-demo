@@ -1,0 +1,28 @@
+/* Pós-venda no painel: receitas e avaliações. Escopado em body.adm. */
+.adm .pv-topo { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start; margin-bottom: 18px; }
+.adm .pv-nota { color: var(--suave); font-size: 13.5px; margin-top: 8px; max-width: 62ch; }
+.adm .pv-mudo { color: var(--suave); }
+.adm .pv-ex { background: #e7f6e9; border: 1px solid #bfe0c5; border-radius: var(--raio); padding: 10px 14px; font-size: 14px; }
+.adm .pv-ex small { display: block; font-weight: 600; color: var(--ok); margin-bottom: 4px; }
+.adm .pv-chave { display: inline-flex; align-items: center; gap: 10px; border: 0; background: none; padding: 0; font: 600 15px var(--corpo); color: var(--tinta); cursor: pointer; }
+.adm .pv-chave i { position: relative; width: 42px; height: 24px; border-radius: 99px; background: #c9b9a4; transition: background .15s; flex: none; }
+.adm .pv-chave i::after { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .15s; }
+.adm .pv-chave[aria-checked=true] i { background: var(--ok); } .adm .pv-chave[aria-checked=true] i::after { transform: translateX(18px); }
+.adm .pv-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+.adm .pv-rec h3 { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 16px; margin-bottom: 10px; }
+.adm .pv-rec textarea, .adm .pv-caixa textarea, .adm #pvAvalTexto { width: 100%; border: var(--borda); border-radius: var(--raio); padding: 9px 11px; background: #fff; line-height: 1.45; resize: vertical; margin: 8px 0; font-size: 14px; }
+.adm .pv-duas { grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); }
+.adm .pv-av { border: var(--borda); border-radius: var(--raio); background: #fff; padding: 12px 14px; margin-bottom: 10px; }
+.adm .pv-av.alerta { border-color: var(--perigo); border-left-width: 5px; background: #fff6f4; }
+.adm .pv-av header { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.adm .pv-av header small { color: var(--suave); }
+.adm .pv-av p { margin: 8px 0; }
+.adm .pv-est { color: #c46a00; letter-spacing: 1px; font-size: 16px; } .adm .pv-est i { font-style: normal; opacity: .4; }
+.adm .pv-resp { background: var(--creme); border-radius: var(--raio); padding: 8px 12px; margin: 8px 0; font-size: 14px; }
+.adm .pv-resp small { display: block; font-weight: 600; color: var(--suave); }
+.adm .pv-barra { display: grid; grid-template-columns: 38px 1fr 28px; gap: 8px; align-items: center; margin: 6px 0; font-size: 14px; }
+.adm .pv-barra div { background: var(--creme); border-radius: 99px; height: 10px; overflow: hidden; } .adm .pv-barra i { display: block; height: 100%; background: var(--ok); }
+.adm .pv-barra i.n3 { background: #e9b949; } .adm .pv-barra i.n2, .adm .pv-barra i.n1 { background: var(--perigo); }
+.adm .pv-barra b { text-align: right; }
+.adm .pv-aguard { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--linha); }
+@media (max-width: 860px) { .adm .pv-topo, .adm .pv-duas { grid-template-columns: 1fr; } .adm .pv-grade { grid-template-columns: 1fr; } }

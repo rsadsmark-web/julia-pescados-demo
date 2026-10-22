@@ -728,6 +728,12 @@
     render: function (m, param, tela) {
       ensure(); pararAudio(); fechaPop(); fechaModal();
       conversas(param, tela);
+    },
+    garante: ensure,
+    // redesenha a lista e o chat aberto depois de mensagens inseridas por outro módulo (pós-venda)
+    atualizar: function () {
+      if (!D || ctx.modulo() !== 'conversas') return;
+      desenhaLista(); if (X.sel) { atualizaMsgs(X.sel, true); atualizaCab(X.sel); }
     }
   };
 })();

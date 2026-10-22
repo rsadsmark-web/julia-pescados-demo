@@ -35,6 +35,7 @@
     var baixo = S.produtos.filter(function (p) { return p.estoque <= p.min; }).length;
     $('#seloPedidos').textContent = pend || ''; $('#seloEstoque').textContent = baixo || '';
     var nl = window.CRM ? CRM.naoLidas() : 0; $('#seloConversas').textContent = nl || '';
+    var av = window.PVA ? PVA.pendentesBaixas() : 0; $('#seloAvaliacoes').textContent = av || '';
   }
 
   /* ---------- Visão geral ---------- */
@@ -181,8 +182,9 @@
   }
 
   /* ---------- roteamento ---------- */
-  var MODULOS = { visao: visao, pedidos: pedidosTela, conversas: crmTela, funil: crmTela, campanhas: crmTela, clientes: clientes, nf: nf, estoque: estoque };
+  var MODULOS = { visao: visao, pedidos: pedidosTela, conversas: crmTela, funil: crmTela, campanhas: crmTela, receitas: posVendaTela, avaliacoes: posVendaTela, clientes: clientes, nf: nf, estoque: estoque };
   function crmTela() { CRM.render(modulo, parametro, tela); }
+  function posVendaTela() { PVA.render(modulo, tela); }
   function ir() {
     var h = (location.hash || '#visao').slice(1).split('/'), param = h[1] || '';
     h = h[0]; if (h === 'crm') h = 'funil'; if (h === 'ia') h = 'conversas'; if (!MODULOS[h]) h = 'visao';
@@ -207,7 +209,7 @@
       var pr = S.produtos.filter(function (x) { return x.id === t.dataset.entrada; })[0]; pr.estoque = +(pr.estoque + q).toFixed(1); JP.salvar(); toast('Entrada de ' + q + ' ' + pr.un + ' em ' + pr.nome + '.'); estoque(); selos();
     }
     else if (t.id === 'emitirNf') emitirNf();
-    else if (t.id === 'resetar') { JP.resetar(); CRM.reset(); recarrega(); toast('Dados de exemplo restaurados.'); ir(); }
+    else if (t.id === 'resetar') { JP.resetar(); CRM.reset(); recarrega(); PVA.reset(); toast('Dados de exemplo restaurados.'); ir(); }
   });
   document.addEventListener('change', function (e) {
     if (e.target.dataset.moto !== undefined) {
@@ -238,6 +240,7 @@
     estado: function () { return S; }, salvarEstado: function () { JP.salvar(); }, esc: esc, toast: toast, brl: JP.brl, dataHora: JP.dataHora, ha: ha,
     totalPedido: JP.totalPedido, categoria: categoria, selos: selos, modulo: function () { return modulo; }
   });
+  PVA.init({ estado: function () { return S; }, esc: esc, toast: toast, ha: ha, dataHora: JP.dataHora, selos: selos, modulo: function () { return modulo; } });
   window.addEventListener('hashchange', ir);
   ir();
 })();

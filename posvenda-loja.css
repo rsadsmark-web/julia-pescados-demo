@@ -1,0 +1,15 @@
+/* Avaliação depois da entrega, no acompanhamento do pedido (loja) */
+.aval { border: 2px solid var(--marinho); border-radius: 10px; background: var(--ouro); padding: 16px 18px; display: flex; flex-direction: column; gap: 10px; }
+.aval h3 { font-size: 24px; color: var(--marinho); }
+.aval.feita { background: #d9efe0; text-align: center; align-items: center; }
+.aval-est { font-size: 28px; letter-spacing: 3px; color: #8a4a00; line-height: 1; } .aval-est i { font-style: normal; opacity: .35; }
+.aval-notas { display: flex; gap: 6px; }
+.aval-estrela { width: 48px; height: 48px; border: 2px solid var(--marinho); border-radius: 8px; background: var(--papel); color: #c9b9a4; font-size: 28px; line-height: 1; cursor: pointer; transition: background .12s, color .12s; }
+.aval-estrela.on { background: #fff; color: #c46a00; }
+.aval-estrela:hover { color: #c46a00; }
+.aval-estrela:focus-visible { outline: 3px solid var(--lata); outline-offset: 2px; }
+.aval-rot { font-weight: 600; color: var(--marinho); min-height: 1.4em; }
+.aval textarea { border: 2px solid var(--marinho); border-radius: 6px; padding: 9px 11px; background: var(--papel); width: 100%; resize: vertical; }
+.aval-ind { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+.aval-ind input { width: 18px; height: 18px; accent-color: var(--lata); }
+@media (max-width: 480px) { .aval-estrela { flex: 1; width: auto; } }

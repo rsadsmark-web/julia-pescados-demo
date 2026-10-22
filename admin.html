@@ -14,11 +14,12 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow+Condensed:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="base.css?v=20261022h">
-<link rel="stylesheet" href="admin.css?v=20261022h">
-<link rel="stylesheet" href="crm.css?v=20261022h">
-<link rel="stylesheet" href="sobrio.css?v=20261022h">
-<link rel="stylesheet" href="conversas.css?v=20261022h">
+<link rel="stylesheet" href="base.css?v=20261022i">
+<link rel="stylesheet" href="admin.css?v=20261022i">
+<link rel="stylesheet" href="crm.css?v=20261022i">
+<link rel="stylesheet" href="sobrio.css?v=20261022i">
+<link rel="stylesheet" href="conversas.css?v=20261022i">
+<link rel="stylesheet" href="posvenda.css?v=20261022i">
 </head>
 <body class="adm">
 <div class="app">
@@ -33,6 +34,8 @@
       <a href="#conversas" data-m="conversas"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8 8 0 0 1-11.8 7L3.5 20l1.6-4.6A8 8 0 1 1 21 11.5z"/></svg>Conversas<span class="selo" id="seloConversas"></span></a>
       <a href="#funil" data-m="funil"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4.5h18l-7 8.2v6l-4 2v-8z"/></svg>Funil de vendas</a>
       <a href="#campanhas" data-m="campanhas"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 10v4l11 4.5v-13z"/><path d="M14.5 9.5a2.5 2.5 0 0 1 0 5"/><path d="M6 14.5l1.5 5h2.5l-1-4"/></svg>Campanhas</a>
+      <a href="#receitas" data-m="receitas"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5M9 8h7M9 11.5h5"/></svg>Receitas</a>
+      <a href="#avaliacoes" data-m="avaliacoes"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5l2.6 5.4 5.9.8-4.3 4.1 1 5.9-5.2-2.8-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z"/></svg>Avaliações<span class="selo alerta" id="seloAvaliacoes"></span></a>
       <a href="#clientes" data-m="clientes"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.7a3.5 3.5 0 0 1 0 6.6M18 14.4c2 .7 3.5 2.5 3.5 5.6"/></svg>Carteira de clientes</a>
       <a href="#nf" data-m="nf"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2.5h8.5l4.5 4.5v14.5H6z"/><path d="M14 2.5V7h5M9 12h7M9 15.5h7M9 19h4"/></svg>Nota fiscal</a>
       <a href="#estoque" data-m="estoque"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8l9-5 9 5v8.5l-9 5-9-5z"/><path d="M3 8l9 5 9-5M12 13v8.5"/></svg>Estoque<span class="selo alerta" id="seloEstoque"></span></a>
@@ -49,11 +52,13 @@
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="shared.js?v=20261022h"></script>
-<script src="crm.js?v=20261022h"></script>
-<script src="campanhas.js?v=20261022h"></script>
-<script src="ia-config.js?v=20261022h"></script>
-<script src="conversas.js?v=20261022h"></script>
-<script src="admin.js?v=20261022h"></script>
+<script src="shared.js?v=20261022i"></script>
+<script src="crm.js?v=20261022i"></script>
+<script src="campanhas.js?v=20261022i"></script>
+<script src="ia-config.js?v=20261022i"></script>
+<script src="conversas.js?v=20261022i"></script>
+<script src="posvenda-dados.js?v=20261022i"></script>
+<script src="posvenda.js?v=20261022i"></script>
+<script src="admin.js?v=20261022i"></script>
 </body>
 </html>
