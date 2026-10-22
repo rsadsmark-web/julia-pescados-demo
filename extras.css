@@ -1,0 +1,28 @@
+/* Telas novas do painel: entregas do dia, recompra, lote fresco e atacado. Escopado em body.adm. */
+.adm .ex-corte { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 22px; align-items: start; margin-bottom: 18px; }
+.adm .ex-linha { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+.adm .ex-linha .campo { min-width: 150px; flex: 1; }
+.adm .ex-un { align-self: center; color: var(--suave); font-weight: 600; }
+.adm .ex-num { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--marinho); color: var(--papel); font: 700 15px var(--rotulo); }
+.adm .ex-pino { color: #fff; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font: 700 14px var(--rotulo); border: 3px solid var(--papel); box-shadow: 0 2px 6px rgba(0, 0, 0, .35); }
+.adm #mapaRota { height: 340px; border-radius: var(--raio); border: var(--borda); }
+.adm .painel h2 .btn { margin-left: auto; }
+.adm .painel h2 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.adm .ex-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 14px; }
+.adm .ex-esp h3 { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 17px; margin-bottom: 8px; }
+.adm .ex-cont { margin: 0 0 6px; font-size: 15px; } .adm .ex-cont b { font: 400 30px var(--titulo); color: var(--lata); margin-right: 4px; }
+.adm .ex-insc { list-style: none; padding: 0; margin: 0 0 12px; font-size: 14px; }
+.adm .ex-insc li { padding: 5px 0; border-bottom: 1px dotted var(--linha); }
+.adm .ex-insc small { display: block; color: var(--suave); }
+.adm .ex-qtds { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin: 12px 0; max-height: 330px; overflow: auto; padding-right: 4px; }
+.adm .ex-qtd { display: flex; justify-content: space-between; align-items: center; gap: 8px; border: var(--borda); border-radius: var(--raio); padding: 6px 10px; background: #fff; font-size: 14px; }
+.adm .ex-qtd small { display: block; color: var(--suave); }
+.adm .ex-qtd input { width: 64px; border: 2px solid var(--marinho); border-radius: 6px; padding: 5px 7px; background: var(--papel); }
+.adm tr.ex-sel td { background: #fff3dc; }
+.adm .pv-prev { margin: 0; white-space: normal; word-break: break-word; }
+.adm .pv-rec { border: var(--borda); border-radius: var(--raio); background: #fff; padding: 14px; }
+.adm .pv-rec .form-grade { grid-template-columns: 2fr 1fr 1fr; margin: 8px 0 4px; }
+.adm .pv-rec .form-grade .campo.largo { grid-column: auto; }
+.adm .pv-rec label { font-weight: 600; font-size: 14px; }
+.adm .pv-rec .campo label { font-size: 15px; }
+@media (max-width: 860px) { .adm .ex-corte { grid-template-columns: 1fr; } .adm .pv-rec .form-grade { grid-template-columns: 1fr 1fr; } .adm .pv-rec .form-grade .campo.largo { grid-column: 1 / -1; } }

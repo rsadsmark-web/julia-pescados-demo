@@ -3,7 +3,7 @@
 (function () {
   var ctx = null, I = null;
   var $ = function (s, r) { return (r || document).querySelector(s); };
-  var F = { filtro: 'todas', respondendo: null };
+  var F = { filtro: 'todas', respondendo: null, recProd: 'p1' };
   var ESTRELA = '★', VAZIA = '☆';
 
   function esc(t) { return ctx.esc(t); }
@@ -41,21 +41,17 @@
     if (window.CRM.conv.atualizar) CRM.conv.atualizar();
   }
   function contaIA(n) { var D = I.dados(); if (D.conv) D.conv.contIA.auto += n; }
-  function enviaReceitas(p, l, t0, passo) {
-    passo = passo || 20000;
-    var s = S(), vistos = {}, n = 0;
-    p.itens.forEach(function (i) {
-      var txt = PV.receita(i.id);
-      if (n >= 2 || !txt || vistos[i.id]) return;
-      vistos[i.id] = 1; n++;
-      msg(l, 'j', 'Olá, ' + primeiro(l.nome) + '! Uma receita rápida para o seu pedido (' + i.nome + '):\n\n' + txt, t0 + (n - 1) * passo, true);
-      s.envios.unshift({ pedido: p.id, cliente: p.cliente, produto: i.nome, quando: t0 + (n - 1) * passo, lead: l.id });
-    });
-    if (n) {
-      msg(l, 's', 'A IA enviou ' + (n > 1 ? n + ' receitas' : 'uma receita') + ' do pedido ' + p.id + ' (pós-venda).', t0 + n * passo, true);
-      contaIA(n); PV.salvar();
-    }
-    return n;
+  // Depois da entrega a IA manda uma só mensagem, com o link da página de receitas dos produtos do pedido.
+  function enviaReceitas(p, l, t0) {
+    var s = S(), prods = [], nomes = [];
+    p.itens.forEach(function (i) { if (prods.length < 3 && prods.indexOf(i.id) < 0 && PV.receitasDoProduto(i.id).length) { prods.push(i.id); nomes.push(i.nome); } });
+    if (!prods.length) return 0;
+    var link = PV.linkReceitas(prods, p.id), lista = nomes.join(', ').replace(/, ([^,]*)$/, ' e $1');
+    msg(l, 'j', PV.modeloReceitas(primeiro(l.nome), p.id, lista, link), t0, true);
+    msg(l, 's', 'A IA enviou o link de receitas do pedido ' + p.id + ' (pós-venda).', t0 + 1000, true);
+    s.envios.unshift({ pedido: p.id, cliente: p.cliente, produto: lista, quando: t0, lead: l.id, link: link });
+    contaIA(1); PV.salvar();
+    return 1;
   }
   function pedeAvaliacao(p, l, t) {
     msg(l, 'j', modeloAval(l.nome, p.id), t, true);
@@ -66,14 +62,14 @@
     var s = S(), l = achaLead(p.cliente, p.id, true);
     s.processados[p.id] = 1; PV.salvar();
     if (!l) return;
-    var n = s.receitas.ativa ? enviaReceitas(p, l, t0, imediato ? 1 : 20000) : 0;
+    var n = s.receitas.ativa ? enviaReceitas(p, l, t0) : 0;
     if (s.aval.ativa) {
-      var t = t0 + (n ? n * 20000 + 5000 : 0) + 60000;
+      var t = t0 + (n ? 5000 : 0) + 60000;
       if (imediato) setTimeout(function () { pedeAvaliacao(p, l, Date.now()); refrescaConversas(); atualizaTelas(); }, 4000);
       else pedeAvaliacao(p, l, t);
     }
     refrescaConversas();
-    if (imediato && n) ctx.toast('Pedido ' + p.id + ' entregue: a IA mandou ' + (n > 1 ? 'as receitas' : 'a receita') + ' para ' + p.cliente + ' nas Conversas.');
+    if (imediato && n) ctx.toast('Pedido ' + p.id + ' entregue: a IA mandou o link das receitas para ' + p.cliente + ' nas Conversas.');
   }
   // Cliente avaliou (na loja ou por WhatsApp): aparece na conversa e a IA agradece ou passa para a equipe.
   function sincroniza() {
@@ -115,7 +111,7 @@
       var p = pedidoObj(h[0]); if (!p) return;
       var l = achaLead(p.cliente, p.id); if (!l) return;
       var t0 = p.criado + 95 * 60000;
-      var n = enviaReceitas(p, l, t0), tp = t0 + n * 20000 + 5000 + 60000;
+      var n = enviaReceitas(p, l, t0), tp = t0 + (n ? 5000 : 0) + 60000;
       pedeAvaliacao(p, l, tp);
       var r = resposta[h[0]];
       if (r) PV.avaliar({ pedido: p.id, cliente: p.cliente, fone: p.fone, nota: r[0], comentario: r[1], indicou: r[2], origem: 'WhatsApp', quando: tp + 25 * 60000 });
@@ -146,21 +142,36 @@
     return '<button type="button" class="pv-chave" role="switch" aria-checked="' + ativa + '" id="' + id + '"><i aria-hidden="true"></i><span>' + rotulo + '</span></button>';
   }
   function receitas(tela) {
-    var s = S(), prods = ctx.estado().produtos;
-    tela.innerHTML = '<div class="cab"><div><h1>Receitas no WhatsApp</h1><p>Depois que o pedido é entregue, a IA do Atendimento manda ao cliente uma receita curta do que ele comprou.</p></div></div>' +
-      '<div class="painel pv-topo"><div>' + chaveToggle(s.receitas.ativa, s.receitas.ativa ? 'Envio de receitas ligado' : 'Envio de receitas desligado', 'pvRecAtiva') +
-      '<p class="pv-nota">A mensagem sai na conversa do cliente, logo depois da entrega, com a receita de até dois produtos do pedido. Quem desliga a IA nas Conversas também para este envio.</p></div>' +
-      '<div class="pv-ex"><small>Como o cliente recebe</small><p>Olá, Marcos! Uma receita rápida para o seu pedido (Camarão cinza inteiro):</p><p class="pv-mudo">+ o texto da receita, editável abaixo.</p></div></div>' +
-      '<div class="pv-grade" id="pvReceitas">' + prods.map(function (p) {
-        var ed = PV.editada(p.id);
-        return '<div class="painel pv-rec"><h3><span>' + esc(p.nome) + '</span>' + (ed ? '<span class="chip laranja">Editada</span>' : '<span class="chip cinza">Padrão</span>') + '</h3>' +
-          '<label class="sr" for="rec-' + p.id + '">Receita de ' + esc(p.nome) + '</label><textarea id="rec-' + p.id + '" data-rec="' + p.id + '" rows="8">' + esc(PV.receita(p.id)) + '</textarea>' +
-          '<div class="acoes"><button class="btn pequeno" data-rec-salvar="' + p.id + '">Salvar</button>' + (ed ? '<button class="btn pequeno claro" data-rec-padrao="' + p.id + '">Voltar ao texto padrão</button>' : '') + '</div></div>';
-      }).join('') + '</div>' +
-      '<div class="painel" style="margin-top:18px"><h2>Enviadas recentemente <small>' + s.envios.length + ' nesta demonstração</small></h2>' +
-      (s.envios.length ? '<div class="rolagem"><table><thead><tr><th>Quando</th><th>Cliente</th><th>Pedido</th><th>Receita</th><th></th></tr></thead><tbody>' +
+    var s = S(), prods = ctx.estado().produtos.filter(function (p) { return PV.receitasDoProduto(p.id).length; });
+    if (F.recProd !== 'todos' && !prods.some(function (p) { return p.id === F.recProd; })) F.recProd = 'todos';
+    var lista = PV.receitas().filter(function (r) { return F.recProd === 'todos' || r.prod === F.recProd; });
+    var nomeProd = function (id) { return (prods.filter(function (p) { return p.id === id; })[0] || {}).nome || id; };
+    var exemplo = PV.modeloReceitas('Marcos', 'JP-1045', 'Camarão cinza inteiro e Filé de tilápia', PV.linkReceitas(['p1', 'p5'], 'JP-1045'));
+    tela.innerHTML = '<div class="cab"><div><h1>Receitas</h1><p>Depois que o pedido é entregue, a IA manda ao cliente o link de uma página com várias receitas dos produtos que ele comprou.</p></div>' +
+      '<a class="btn pequeno claro" href="receitas.html" target="_blank" rel="noopener">Ver a página pública ↗</a></div>' +
+      '<div class="painel pv-topo"><div>' + chaveToggle(s.receitas.ativa, s.receitas.ativa ? 'Envio do link de receitas ligado' : 'Envio do link de receitas desligado', 'pvRecAtiva') +
+      '<p class="pv-nota">A mensagem sai na conversa do cliente, logo depois da entrega. Quem desliga a IA nas Conversas também para este envio.</p>' +
+      '<label class="sr" for="pvRecTexto">Mensagem enviada com o link</label><textarea id="pvRecTexto" rows="4">' + esc(s.receitas.texto) + '</textarea>' +
+      '<p class="pv-nota">Use {nome}, {pedido}, {produtos} e {link} no texto.</p>' +
+      '<div class="acoes"><button class="btn pequeno" id="pvRecTextoSalvar">Salvar mensagem</button><button class="btn pequeno claro" id="pvRecTextoPadrao">Voltar ao padrão</button></div></div>' +
+      '<div class="pv-ex"><small>Como o cliente recebe no WhatsApp</small><p class="pv-prev">' + esc(exemplo).replace(/\n/g, '<br>') + '</p></div></div>' +
+      '<div class="painel"><h2>Receitas da página <small>' + lista.length + ' de ' + PV.receitas().length + '</small></h2>' +
+      '<div class="filtros" id="pvRecFiltros"><button class="filtro' + (F.recProd === 'todos' ? ' ativo' : '') + '" data-rec-f="todos" aria-pressed="' + (F.recProd === 'todos') + '">Todos</button>' +
+      prods.map(function (p) { return '<button class="filtro' + (F.recProd === p.id ? ' ativo' : '') + '" data-rec-f="' + p.id + '" aria-pressed="' + (F.recProd === p.id) + '">' + esc(p.nome) + '<b>' + PV.receitasDoProduto(p.id).length + '</b></button>'; }).join('') + '</div>' +
+      '<div class="pv-grade" id="pvReceitas">' + lista.map(function (r) {
+        return '<div class="pv-rec" data-rec-card="' + r.id + '"><h3><span>' + esc(r.titulo) + '</span>' + (r.editada ? '<span class="chip laranja">Editada</span>' : '<span class="chip cinza">Padrão</span>') + '</h3>' +
+          '<small class="pv-mudo">' + esc(nomeProd(r.prod)) + '</small>' +
+          '<div class="form-grade"><div class="campo largo"><label for="rt-' + r.id + '">Título</label><input id="rt-' + r.id + '" value="' + esc(r.titulo) + '"></div>' +
+          '<div class="campo"><label for="rm-' + r.id + '">Tempo</label><input id="rm-' + r.id + '" value="' + esc(r.tempo) + '"></div>' +
+          '<div class="campo"><label for="rp-' + r.id + '">Serve</label><input id="rp-' + r.id + '" type="number" min="1" value="' + r.porcoes + '"></div></div>' +
+          '<label for="ri-' + r.id + '">Ingredientes <small class="pv-mudo">um por linha</small></label><textarea id="ri-' + r.id + '" rows="5">' + esc(r.ingr.join('\n')) + '</textarea>' +
+          '<label for="rs-' + r.id + '">Modo de preparo <small class="pv-mudo">um passo por linha</small></label><textarea id="rs-' + r.id + '" rows="5">' + esc(r.prep.join('\n')) + '</textarea>' +
+          '<div class="acoes"><button class="btn pequeno" data-rec-salvar="' + r.id + '">Salvar</button>' + (r.editada ? '<button class="btn pequeno claro" data-rec-padrao="' + r.id + '">Voltar ao texto padrão</button>' : '') + '</div></div>';
+      }).join('') + '</div></div>' +
+      '<div class="painel" style="margin-top:18px"><h2>Links enviados recentemente <small>' + s.envios.length + ' nesta demonstração</small></h2>' +
+      (s.envios.length ? '<div class="rolagem"><table><thead><tr><th>Quando</th><th>Cliente</th><th>Pedido</th><th>Produtos</th><th></th></tr></thead><tbody>' +
         s.envios.slice(0, 8).map(function (e) { return '<tr><td>' + ctx.dataHora(e.quando) + '</td><td>' + esc(e.cliente) + '</td><td>' + e.pedido + '</td><td>' + esc(e.produto) + '</td><td><a class="btn pequeno claro" href="#conversas/' + e.lead + '">Abrir conversa</a></td></tr>'; }).join('') + '</tbody></table></div>'
-        : '<p class="vazio">Nenhuma receita enviada ainda. Confirme um pedido de entrega na loja e espere a entrega para ver a mensagem nas Conversas.</p>') + '</div>';
+        : '<p class="vazio">Nenhum link enviado ainda. Confirme um pedido de entrega na loja e espere a entrega para ver a mensagem nas Conversas.</p>') + '</div>';
   }
 
   /* ---------- Avaliações ---------- */
@@ -247,9 +258,17 @@
     var m = ctx && ctx.modulo(); if (m !== 'receitas' && m !== 'avaliacoes') return;
     var t = e.target.closest('button'); if (!t) return;
     var s = S();
-    if (t.id === 'pvRecAtiva') { s.receitas.ativa = !s.receitas.ativa; PV.salvar(); receitas($('#tela')); ctx.toast(s.receitas.ativa ? 'Envio de receitas ligado.' : 'Envio de receitas desligado. Nenhuma receita sai até religar.'); }
-    else if (t.dataset.recSalvar) { var id = t.dataset.recSalvar, v = $('#rec-' + id).value.trim(); if (!v) { ctx.toast('A receita não pode ficar vazia.'); return; } s.receitas.textos[id] = v; PV.salvar(); var y = window.scrollY; receitas($('#tela')); window.scrollTo(0, y); ctx.toast('Receita salva. Os próximos envios usam este texto.'); }
-    else if (t.dataset.recPadrao) { delete s.receitas.textos[t.dataset.recPadrao]; PV.salvar(); var y2 = window.scrollY; receitas($('#tela')); window.scrollTo(0, y2); ctx.toast('Texto padrão restaurado.'); }
+    if (t.id === 'pvRecAtiva') { s.receitas.ativa = !s.receitas.ativa; PV.salvar(); receitas($('#tela')); ctx.toast(s.receitas.ativa ? 'Envio do link de receitas ligado.' : 'Envio do link de receitas desligado. Nenhuma mensagem sai até religar.'); }
+    else if (t.id === 'pvRecTextoSalvar') { var tx0 = $('#pvRecTexto').value.trim(); if (!tx0 || tx0.indexOf('{link}') < 0) { ctx.toast('A mensagem precisa ter o {link} da página de receitas.'); return; } s.receitas.texto = tx0; PV.salvar(); receitas($('#tela')); ctx.toast('Mensagem do link de receitas salva.'); }
+    else if (t.id === 'pvRecTextoPadrao') { s.receitas.texto = PV.MSG_RECEITAS; PV.salvar(); receitas($('#tela')); ctx.toast('Mensagem padrão restaurada.'); }
+    else if (t.dataset.recF) { F.recProd = t.dataset.recF; receitas($('#tela')); }
+    else if (t.dataset.recSalvar) {
+      var id = t.dataset.recSalvar, ln = function (k) { return $('#' + k + '-' + id).value.split('\n').map(function (x) { return x.trim(); }).filter(Boolean); };
+      var ed = { titulo: $('#rt-' + id).value.trim(), tempo: $('#rm-' + id).value.trim(), porcoes: Math.max(1, +$('#rp-' + id).value || 1), ingr: ln('ri'), prep: ln('rs') };
+      if (!ed.titulo || !ed.ingr.length || !ed.prep.length) { ctx.toast('A receita precisa de título, ingredientes e modo de preparo.'); return; }
+      s.receitas.edits[id] = ed; PV.salvar(); var y = window.scrollY; receitas($('#tela')); window.scrollTo(0, y); ctx.toast('Receita salva. A página pública já mostra o novo texto.');
+    }
+    else if (t.dataset.recPadrao) { delete s.receitas.edits[t.dataset.recPadrao]; PV.salvar(); var y2 = window.scrollY; receitas($('#tela')); window.scrollTo(0, y2); ctx.toast('Texto padrão restaurado.'); }
     else if (t.id === 'pvAvalAtiva') { s.aval.ativa = !s.aval.ativa; PV.salvar(); atualizaTelas(); ctx.toast(s.aval.ativa ? 'Pedido de avaliação ligado.' : 'Pedido de avaliação desligado, também na loja.'); }
     else if (t.id === 'pvAvalSalvar') { var tx = $('#pvAvalTexto').value.trim(); if (!tx) { ctx.toast('O texto não pode ficar vazio.'); return; } s.aval.texto = tx; PV.salvar(); ctx.toast('Texto do pedido de avaliação salvo.'); }
     else if (t.id === 'pvAvalPadrao') { s.aval.texto = PV.MSG_AVALIACAO; PV.salvar(); atualizaTelas(); ctx.toast('Texto padrão restaurado.'); }
@@ -275,6 +294,20 @@
       });
     },
     render: render, pendentesBaixas: pendentesBaixas,
+    // usado pelas novidades (recompra, lote fresco, saída para entrega): mensagem da IA na conversa do cliente
+    avisar: function (cli, texto, origem) {
+      var D = I.dados(), digs = String(cli.fone || '').replace(/\D/g, '');
+      var l = D.leads.filter(function (x) { return digs && String(x.fone).replace(/\D/g, '') === digs; })[0] || D.leads.filter(function (x) { return x.nome === cli.nome; })[0];
+      if (!l) {
+        var t = Date.now();
+        l = { id: 'l' + t, nome: cli.nome, fone: cli.fone, origem: origem || 'Cliente', etapa: 'vendido', valor: 0, itens: '', etq: [], resp: '', nao: 0, vendido: true, clienteId: cli.id || null, optout: false, ultimoDisparo: 0, bairro: cli.bairro || '',
+          msgs: [], hist: [{ ts: t, t: 'Contato criado — origem: ' + (origem || 'Cliente') }] };
+        D.leads.unshift(l);
+      }
+      if (l.optout) return null;
+      msg(l, 'j', texto, Date.now(), true); contaIA(1); refrescaConversas();
+      return l;
+    },
     reset: function () { PV.reset(); F.filtro = 'todas'; F.respondendo = null; PV.recarregar(); semear(); }
   };
 })();

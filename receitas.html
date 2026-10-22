@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Receitas — Julia Pescados</title>
+<meta name="description" content="Receitas com camarão, peixes e frutos do mar da Julia Pescados: do alho e óleo à moqueca cearense.">
+<meta name="theme-color" content="#5c1a12">
+<link rel="icon" type="image/png" sizes="32x32" href="img/marca/logo-julia-32.png">
+<link rel="apple-touch-icon" href="img/marca/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow+Condensed:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css?v=20261022j">
+<link rel="stylesheet" href="loja.css?v=20261022j">
+<link rel="stylesheet" href="receitas.css?v=20261022j">
+</head>
+<body>
+<div class="aviso-demo">Demonstração — receitas de exemplo da Julia Pescados. <a href="index.html">Voltar à loja</a></div>
+
+<header class="topo">
+  <a class="logo-marca" href="index.html" aria-label="Julia Pescados">
+    <img src="img/marca/logo-julia-96.png" srcset="img/marca/logo-julia-192.png 2x" width="56" height="56" alt="">
+    <span><b>Julia</b><small>PESCADOS</small></span>
+  </a>
+  <nav class="topo-nav" aria-label="Seções">
+    <a href="index.html#catalogo">Produtos</a>
+    <a href="index.html#entrega">Entrega</a>
+    <a href="receitas.html" aria-current="page">Receitas</a>
+  </nav>
+</header>
+
+<section class="rec-heroi">
+  <span class="chip laranja">Da peixaria para a sua mesa</span>
+  <h1>Receitas para <em>cada compra</em>.</h1>
+  <p id="recSub">Camarão, peixes e frutos do mar: escolha o produto e veja o passo a passo.</p>
+</section>
+
+<section class="rec-seu" id="recSeu" hidden aria-labelledby="recSeuT">
+  <div class="rec-seu-cab"><h2 id="recSeuT">Para o seu pedido</h2><p id="recSeuP"></p></div>
+  <div class="rec-grade" id="recSeuGrade"></div>
+</section>
+
+<main class="rec-miolo" id="receitas">
+  <div class="miolo-cab">
+    <div><h2>Todas as receitas</h2><p class="sub" id="recContagem"></p></div>
+    <div class="busca"><input id="recBusca" type="search" placeholder="Buscar receita" aria-label="Buscar receita"></div>
+  </div>
+  <div class="cats" id="recCats" role="group" aria-label="Filtrar por produto"></div>
+  <div class="rec-grade" id="recGrade"></div>
+</main>
+
+<footer class="rodape">
+  <a class="logo-marca branca" href="index.html" aria-label="Julia Pescados"><img src="img/marca/logo-julia-192.png" width="88" height="88" alt=""><span><b>Julia</b><small>PESCADOS</small></span></a>
+  <p>Distribuidora de pescados. Varejo e atacado. Delivery Fortaleza e Caucaia.</p>
+  <p><a href="https://www.instagram.com/juliapescados/" target="_blank" rel="noopener">@juliapescados</a></p>
+  <p class="nota claro">Demonstração criada pela RS Tech Marketing. Fotos ilustrativas de bancos livres.</p>
+</footer>
+
+<script src="shared.js?v=20261022j"></script>
+<script src="receitas-dados.js?v=20261022j"></script>
+<script src="posvenda-dados.js?v=20261022j"></script>
+<script src="receitas.js?v=20261022j"></script>
+</body>
+</html>

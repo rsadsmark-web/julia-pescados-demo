@@ -30,29 +30,40 @@
   var CATEGORIAS = ['Camarão', 'Peixes e filés', 'Frutos do mar', 'Kits'];
 
   var PRODUTOS = [
-    { id: 'p1', nome: 'Camarão cinza inteiro', cat: 'Camarão', un: 'kg', preco: 49.9, estoque: 42, min: 15, img: 'camarao-cru.jpg', desc: 'Camarão cinza fresco, calibre 40/50. Ideal para frigideira e moqueca.', ncm: '0306.17.00', dest: true },
+    { id: 'p1', fresco: true, nome: 'Camarão cinza inteiro', cat: 'Camarão', un: 'kg', preco: 49.9, estoque: 42, min: 15, img: 'camarao-cru.jpg', desc: 'Camarão cinza fresco, calibre 40/50. Ideal para frigideira e moqueca.', ncm: '0306.17.00', dest: true },
     { id: 'p2', nome: 'Camarão sem cabeça', cat: 'Camarão', un: 'kg', preco: 56.9, estoque: 36, min: 15, img: 'camarao-congelado.jpg', desc: 'Sem cabeça e com casca. Mais rendimento, menos trabalho.', ncm: '0306.17.00' },
     { id: 'p3', nome: 'Camarão descascado', cat: 'Camarão', un: 'kg', preco: 79.9, estoque: 18, min: 10, img: 'camarao-descascado.jpg', desc: 'Limpo e pronto para o preparo. Congelado em pacote de 1 kg.', ncm: '0306.17.00', dest: true },
-    { id: 'p4', nome: 'Camarão VG', cat: 'Camarão', un: 'kg', preco: 64.9, estoque: 9, min: 12, img: 'camarao-cru.jpg', desc: 'Camarão graúdo, perfeito para grelhar ou empanar.', ncm: '0306.17.00' },
-    { id: 'p5', nome: 'Filé de tilápia', cat: 'Peixes e filés', un: 'kg', preco: 36.9, estoque: 55, min: 20, img: 'file-tilapia.jpg', desc: 'Filé sem espinha, embalado a vácuo. Campeão de vendas.', ncm: '0304.62.00', dest: true },
-    { id: 'p6', nome: 'Tilápia inteira', cat: 'Peixes e filés', un: 'kg', preco: 24.9, estoque: 30, min: 12, img: 'peixes.jpg', desc: 'Inteira, escamada e eviscerada. Pronta para assar.', ncm: '0303.23.00' },
-    { id: 'p7', nome: 'Filé de salmão', cat: 'Peixes e filés', un: 'kg', preco: 89.9, estoque: 14, min: 8, img: 'salmao.jpg', desc: 'Filé de salmão em peça, congelado.', ncm: '0304.41.00' },
-    { id: 'p8', nome: 'Posta de serra', cat: 'Peixes e filés', un: 'kg', preco: 39.9, estoque: 7, min: 10, img: 'peixes.jpg', desc: 'Postas altas, ótimas para frito, assado ou caldeirada.', ncm: '0303.89.90' },
+    { id: 'p4', fresco: true, nome: 'Camarão VG', cat: 'Camarão', un: 'kg', preco: 64.9, estoque: 9, min: 12, img: 'camarao-cru.jpg', desc: 'Camarão graúdo, perfeito para grelhar ou empanar.', ncm: '0306.17.00' },
+    { id: 'p5', fresco: true, nome: 'Filé de tilápia', cat: 'Peixes e filés', un: 'kg', preco: 36.9, estoque: 55, min: 20, img: 'file-tilapia.jpg', desc: 'Filé sem espinha, embalado a vácuo. Campeão de vendas.', ncm: '0304.62.00', dest: true },
+    { id: 'p6', fresco: true, nome: 'Tilápia inteira', cat: 'Peixes e filés', un: 'kg', preco: 24.9, estoque: 30, min: 12, img: 'peixes.jpg', desc: 'Inteira, escamada e eviscerada. Pronta para assar.', ncm: '0303.23.00' },
+    { id: 'p7', fresco: true, nome: 'Filé de salmão', cat: 'Peixes e filés', un: 'kg', preco: 89.9, estoque: 14, min: 8, img: 'salmao.jpg', desc: 'Filé de salmão em peça, congelado.', ncm: '0304.41.00' },
+    { id: 'p8', fresco: true, nome: 'Posta de serra', cat: 'Peixes e filés', un: 'kg', preco: 39.9, estoque: 7, min: 10, img: 'peixes.jpg', desc: 'Postas altas, ótimas para frito, assado ou caldeirada.', ncm: '0303.89.90' },
     { id: 'p9', nome: 'Anéis de lula', cat: 'Frutos do mar', un: 'kg', preco: 42.9, estoque: 20, min: 8, img: 'lula.jpg', desc: 'Lula limpa em anéis, para fritar ou refogar.', ncm: '0307.43.00' },
     { id: 'p10', nome: 'Mix de frutos do mar', cat: 'Frutos do mar', un: 'kg', preco: 58.9, estoque: 16, min: 8, img: 'frutos-do-mar.jpg', desc: 'Camarão, lula e marisco para paella e risoto.', ncm: '0307.99.90' },
-    { id: 'p11', nome: 'Kit Churrasco do Mar', cat: 'Kits', un: 'kit', preco: 84.9, estoque: 25, min: 8, img: 'camarao-congelado.jpg', desc: '1 kg de camarão sem cabeça + 1 kg de filé de tilápia.', ncm: '0306.17.00', dest: true },
-    { id: 'p12', nome: 'Kit Família', cat: 'Kits', un: 'kit', preco: 119.9, estoque: 12, min: 6, img: 'frutos-do-mar.jpg', desc: '1 kg de camarão descascado + 1 kg de filé + 500 g de lula.', ncm: '0306.17.00' }
+    { id: 'p11', nome: 'Kit Churrasco de Camarão', cat: 'Kits', un: 'kit', preco: 84.9, estoque: 25, min: 8, img: 'camarao-congelado.jpg', desc: 'Camarão e tilápia prontos para a grelha: dá para 6 pessoas.', inclui: [['p2', 1], ['p5', 1]], ncm: '0306.17.00', dest: true },
+    { id: 'p12', nome: 'Kit Família', cat: 'Kits', un: 'kit', preco: 119.9, estoque: 12, min: 6, img: 'frutos-do-mar.jpg', desc: 'Moqueca, frito e arroz de uma vez: camarão, filé e lula.', inclui: [['p3', 1], ['p5', 1], ['p9', 0.5]], ncm: '0306.17.00' },
+    { id: 'p13', nome: 'Kit Moqueca', cat: 'Kits', un: 'kit', preco: 89.9, estoque: 20, min: 6, img: 'peixes.jpg', desc: 'Postas de serra, camarão e filé para uma moqueca cearense de verdade.', ncm: '0303.89.90', inclui: [['p8', 1], ['p3', 0.5], ['p5', 0.5]] },
+    { id: 'p14', nome: 'Kit Semana', cat: 'Kits', un: 'kit', preco: 169.9, estoque: 15, min: 5, img: 'frutos-do-mar.jpg', desc: 'Peixe, camarão e lula para cinco refeições diferentes durante a semana.', ncm: '0306.17.00', inclui: [['p5', 2], ['p2', 1], ['p8', 1], ['p9', 0.5]] }
   ];
 
   function agoraMs() { return Date.now(); }
   function dias(n) { return agoraMs() - n * 86400000; }
+
+  // Último pedido de cada cliente (base da recompra automática e do botão "repetir pedido").
+  var PRESETS = [[['p1', 2], ['p5', 1]], [['p3', 2], ['p9', 1]], [['p5', 2], ['p6', 1]], [['p11', 1]], [['p2', 2], ['p7', 1]]];
+  var ULTIMOS = {
+    'Restaurante Maré Cheia': [['p1', 12], ['p9', 4]], 'Cantina da Nona': [['p1', 8], ['p10', 3]], 'Bar do Zeca': [['p9', 20], ['p1', 15]],
+    'Tereza Cristina': [['p3', 2], ['p7', 1]], 'Beatriz Fontenele': [['p1', 3], ['p9', 1]], 'Joana Darc': [['p5', 2], ['p11', 1]]
+  };
+
+  var ENDERECOS = { 'Tereza Cristina': 'Rua das Flores, 120', 'Beatriz Fontenele': 'Rua Silva Paulet, 880, ap. 301', 'Joana Darc': 'Av. Frei Cirilo, 1500', 'Eduardo Pinheiro': 'Rua Desembargador Leite Albuquerque, 820' };
 
   function semente() {
     var nomes = [
       ['Marcos Vinícius', 'Aldeota', 18, 3420, 2], ['Restaurante Maré Cheia', 'Centro', 41, 9860, 3],
       ['Carla Mendonça', 'Meireles', 5, 1180, 4], ['Paulo Henrique', 'Cocó', 12, 2240, 6],
       ['Bar do Zeca', 'Varjota', 9, 4310, 1], ['Letícia Alves', 'Fátima', 2, 148, 1],
-      ['Joana Darc', 'Messejana', 3, 232, 20], ['Francisco Teixeira', 'Montese', 7, 980, 33],
+      ['Joana Darc', 'Messejana', 3, 232, 13], ['Francisco Teixeira', 'Montese', 7, 980, 33],
       ['Denise Marques', 'Papicu', 1, 96, 3], ['Rafael Costa', 'Parangaba', 4, 612, 51],
       ['Silvana Rocha', 'Edson Queiroz', 2, 190, 68], ['Eduardo Pinheiro', 'Aldeota', 15, 3050, 4],
       ['Cantina da Nona', 'Benfica', 22, 5420, 8], ['Tereza Cristina', 'Cambeba', 1, 119, 11],
@@ -60,7 +71,7 @@
       ['Ivan Gomes', 'Caucaia (Centro)', 2, 260, 72], ['Mônica Sales', 'Dionísio Torres', 8, 1520, 6]
     ];
     var clientes = nomes.map(function (n, i) {
-      return { id: 'c' + (i + 1), nome: n[0], fone: '(85) 9' + (8000 + i * 137) + '-' + (1000 + i * 211), bairro: n[1], pedidos: n[2], total: n[3], ultima: dias(n[4]) };
+      return { id: 'c' + (i + 1), nome: n[0], fone: '(85) 9' + (8000 + i * 137) + '-' + (1000 + i * 211), bairro: n[1], pedidos: n[2], total: n[3], ultima: dias(n[4]), itens: ULTIMOS[n[0]] || PRESETS[i % PRESETS.length], endereco: ENDERECOS[n[0]] || '' };
     });
 
     var motoboys = [
@@ -99,9 +110,26 @@
     };
   }
 
+  // Estados salvos antes das novidades ganham kits novos, marcação de lote fresco e último pedido dos clientes.
+  function migrar(e) {
+    var mudou = false;
+    PRODUTOS.forEach(function (novo) {
+      var atual = e.produtos.filter(function (x) { return x.id === novo.id; })[0];
+      if (!atual) { e.produtos.push(JSON.parse(JSON.stringify(novo))); mudou = true; return; }
+      if (novo.cat === 'Kits' || novo.fresco) {
+        ['nome', 'desc', 'inclui', 'fresco'].forEach(function (k) { if (novo[k] !== undefined && JSON.stringify(atual[k]) !== JSON.stringify(novo[k])) { atual[k] = novo[k]; mudou = true; } });
+      }
+    });
+    e.clientes.forEach(function (c, i) {
+      if (!c.itens) { c.itens = ULTIMOS[c.nome] || PRESETS[i % PRESETS.length]; mudou = true; }
+      if (c.endereco === undefined && ENDERECOS[c.nome]) { c.endereco = ENDERECOS[c.nome]; mudou = true; }
+    });
+    if (mudou) { try { localStorage.setItem(CHAVE, JSON.stringify(e)); } catch (x) {} }
+    return e;
+  }
   var estado = null;
   function carregar() {
-    try { var s = localStorage.getItem(CHAVE); if (s) { estado = JSON.parse(s); return estado; } } catch (e) {}
+    try { var s = localStorage.getItem(CHAVE); if (s) { estado = migrar(JSON.parse(s)); return estado; } } catch (e) {}
     estado = semente(); salvar(); return estado;
   }
   function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch (e) {} }
@@ -155,6 +183,11 @@
     if (p.fixo === 'entregue') return { cod: 'chegou', rotulo: 'Entregue', prog: 1 };
     if (!p.confirmado) return { cod: 'recebido', rotulo: 'Aguardando confirmação', prog: 0 };
     var agora = agoraMs();
+    if (p.saiuEm) { // o entregador marcou "saiu para entrega" no painel
+      var v = agora - p.saiuEm;
+      return v < T_VIAGEM ? { cod: 'saiu', rotulo: 'Saiu para entrega', prog: v / T_VIAGEM } : { cod: 'chegou', rotulo: 'Entregue', prog: 1 };
+    }
+    if (p.agendado) return { cod: 'recebido', rotulo: (p.tipo === 'retirada' ? 'Retirada ' : 'Entrega ') + p.agendado, prog: 0 }; // pedido feito depois do corte
     if (p.laco) { // pedidos de exemplo que ficam em rota o tempo todo
       return { cod: 'saiu', rotulo: 'Saiu para entrega', prog: ((agora - p.confirmadoEm) % p.laco) / p.laco };
     }
@@ -191,12 +224,17 @@
     salvar(); return p;
   }
 
+  // Quanto custaria comprar os itens do kit separados (para mostrar a economia).
+  function precoSeparado(k, produtos) {
+    return (k.inclui || []).reduce(function (t, c) { var p = produtos.filter(function (x) { return x.id === c[0]; })[0]; return t + (p ? p.preco * c[1] : 0); }, 0);
+  }
+
   window.JP = {
     WHATS: WHATS, BASE: BASE, BAIRROS: BAIRROS, CATEGORIAS: CATEGORIAS,
     estado: carregar, salvar: salvar, resetar: resetar,
     brl: brl, dataHora: dataHora, km: km, frete: frete, subtotal: subtotal, totalPedido: totalPedido,
     rota: rota, pontoNaRota: pontoNaRota, situacao: situacao,
-    confirmarPedido: confirmarPedido,
+    confirmarPedido: confirmarPedido, precoSeparado: precoSeparado,
     agora: agoraMs, T_PREP: T_PREP, T_ROTA: T_ROTA, T_VIAGEM: T_VIAGEM
   };
 })();

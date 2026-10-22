@@ -1,0 +1,37 @@
+/* Loja — novidades: corte das 14h, kits, lote fresco, recompra e atacado */
+.faixa-corte { background: #fbe6b0; color: #4d3300; border-bottom: 3px solid var(--marinho); padding: 9px clamp(16px, 4vw, 56px); text-align: center; font-weight: 600; }
+.aviso-corte { border: 2px solid #8a4a00; background: #fff1c9; color: #4d3300; border-radius: 8px; padding: 12px 14px; line-height: 1.45; }
+.aviso-corte b { display: block; font-family: var(--rotulo); font-size: 20px; letter-spacing: .04em; text-transform: uppercase; color: #6b2d00; }
+.corte-ok { margin: 0; }
+.aviso-repetir { border: 2px solid var(--ok); background: #d9efe0; color: #0f4a28; border-radius: 8px; padding: 10px 14px; margin-bottom: 4px; }
+.aviso-repetir.atacado { border-color: #86204a; background: #f6d6e3; color: #5c1433; }
+.acomp .aviso-corte { margin: 0; }
+
+.kit-inclui { list-style: none; margin: 0 0 8px; padding: 8px 12px; background: var(--creme); border-left: 4px solid var(--ouro); border-radius: 4px; font-size: 14px; line-height: 1.5; }
+.kit-inclui li::before { content: '✓ '; color: var(--ok); font-weight: 700; }
+.card-foto .chip.verde { background: #d9efe0; color: #14633a; border: 2px solid var(--marinho); left: auto; right: 10px; }
+.card .espera-btn { margin-top: 10px; border: 0; background: none; padding: 4px 0; color: var(--marinho); font: 600 14.5px var(--corpo); text-decoration: underline; text-underline-offset: 3px; text-align: left; cursor: pointer; }
+.card .espera-btn:hover { color: var(--lata); }
+.card .espera-btn.na-fila { color: var(--ok); text-decoration: none; }
+.card.destaque { animation: destaque 1.8s ease 2; }
+@keyframes destaque { 50% { box-shadow: 0 0 0 6px var(--ouro); } }
+.preco-velho { font-family: var(--corpo); font-size: 15px; color: var(--suave); font-weight: 500; }
+
+.modal-caixa.estreita { width: min(460px, 100%); }
+.ex-corpo { padding: 18px 22px 24px; display: flex; flex-direction: column; gap: 12px; }
+.ex-corpo p { margin: 0; }
+.ex-corpo .ok-topo { background: #d9efe0; border-radius: 8px; padding: 12px 14px; }
+
+.atacado-painel { background: var(--marinho); color: var(--papel); padding: clamp(22px, 3vw, 40px) clamp(16px, 4vw, 56px); border-bottom: 3px solid var(--ouro); }
+.atacado-cab { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; flex-wrap: wrap; max-width: 1380px; margin: 0 auto 14px; }
+.atacado-cab h2 { font-size: clamp(26px, 3vw, 38px); color: var(--ouro); margin: 6px 0 4px; }
+.atacado-cab p { margin: 0; opacity: .9; }
+.atacado-cab .link-btn { color: var(--papel); }
+.atacado-rec { max-width: 1380px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(240px, 1fr); gap: 22px; background: var(--papel); color: var(--tinta); border-radius: var(--raio); border: 3px solid var(--ouro); padding: 18px 22px; }
+.atacado-rec h3 { font-size: 22px; color: var(--lata); margin-bottom: 8px; } .atacado-rec h3 small { font: 600 16px var(--rotulo); color: var(--marinho); letter-spacing: .05em; text-transform: uppercase; margin-left: 6px; }
+.atacado-rec ul { list-style: none; margin: 0; padding: 0; }
+.atacado-rec li { display: flex; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px dotted var(--linha); }
+.atacado-tot { margin: 10px 0 4px; font-size: 18px; } .atacado-tot b { font-family: var(--titulo); color: var(--lata); font-weight: 400; font-size: 24px; }
+.atacado-acoes { display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+.btn.grande { padding: 16px 22px; font-size: 22px; }
+@media (max-width: 760px) { .atacado-rec { grid-template-columns: 1fr; } }

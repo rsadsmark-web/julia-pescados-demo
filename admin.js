@@ -36,6 +36,7 @@
     $('#seloPedidos').textContent = pend || ''; $('#seloEstoque').textContent = baixo || '';
     var nl = window.CRM ? CRM.naoLidas() : 0; $('#seloConversas').textContent = nl || '';
     var av = window.PVA ? PVA.pendentesBaixas() : 0; $('#seloAvaliacoes').textContent = av || '';
+    var es = window.EXP ? EXP.inscritosPendentes() : 0; $('#seloEspera').textContent = es || '';
   }
 
   /* ---------- Visão geral ---------- */
@@ -76,7 +77,7 @@
         S.motoboys.map(function (m) { return '<option value="' + m.id + '"' + (p.motoboy === m.id ? ' selected' : '') + '>' + m.nome + '</option>'; }).join('') + '</select>';
       var acao = !p.confirmado ? '<button class="btn pequeno" data-conf="' + p.id + '">Confirmar</button>'
         : '<button class="btn pequeno claro" data-venda="' + p.id + '"' + (p.vendaConfirmada ? ' disabled' : '') + '>' + (p.vendaConfirmada ? 'Venda registrada' : 'Confirmar venda') + '</button>';
-      return '<tr><td><b>' + p.id + '</b><small>' + JP.dataHora(p.criado) + '</small></td><td>' + esc(p.cliente) + '<small>' + esc(p.pagamento) + '</small></td><td>' + ent + '</td>' +
+      return '<tr><td><b>' + p.id + '</b>' + (p.atacadoId ? ' <span class="chip rosa">Atacado</span>' : '') + (p.recompra ? ' <span class="chip ok">Recompra</span>' : '') + (p.agendado ? ' <span class="chip alerta">' + esc(p.agendado) + '</span>' : '') + '<small>' + JP.dataHora(p.criado) + '</small></td><td>' + esc(p.cliente) + '<small>' + esc(p.pagamento) + '</small></td><td>' + ent + '</td>' +
         '<td class="num">' + JP.brl(JP.totalPedido(p)) + '</td><td>' + chipSit(p) + '</td><td>' + sel + '</td><td><div class="acoes">' + acao + '</div></td></tr>';
     }).join('');
   }
@@ -182,9 +183,10 @@
   }
 
   /* ---------- roteamento ---------- */
-  var MODULOS = { visao: visao, pedidos: pedidosTela, conversas: crmTela, funil: crmTela, campanhas: crmTela, receitas: posVendaTela, avaliacoes: posVendaTela, clientes: clientes, nf: nf, estoque: estoque };
+  var MODULOS = { visao: visao, pedidos: pedidosTela, conversas: crmTela, funil: crmTela, campanhas: crmTela, receitas: posVendaTela, avaliacoes: posVendaTela, entregas: extrasTela, recompra: extrasTela, espera: extrasTela, atacado: extrasTela, clientes: clientes, nf: nf, estoque: estoque };
   function crmTela() { CRM.render(modulo, parametro, tela); }
   function posVendaTela() { PVA.render(modulo, tela); }
+  function extrasTela() { EXP.render(modulo, tela); }
   function ir() {
     var h = (location.hash || '#visao').slice(1).split('/'), param = h[1] || '';
     h = h[0]; if (h === 'crm') h = 'funil'; if (h === 'ia') h = 'conversas'; if (!MODULOS[h]) h = 'visao';
@@ -209,7 +211,7 @@
       var pr = S.produtos.filter(function (x) { return x.id === t.dataset.entrada; })[0]; pr.estoque = +(pr.estoque + q).toFixed(1); JP.salvar(); toast('Entrada de ' + q + ' ' + pr.un + ' em ' + pr.nome + '.'); estoque(); selos();
     }
     else if (t.id === 'emitirNf') emitirNf();
-    else if (t.id === 'resetar') { JP.resetar(); CRM.reset(); recarrega(); PVA.reset(); toast('Dados de exemplo restaurados.'); ir(); }
+    else if (t.id === 'resetar') { JP.resetar(); CRM.reset(); recarrega(); PVA.reset(); EXP.reset(); toast('Dados de exemplo restaurados.'); ir(); }
   });
   document.addEventListener('change', function (e) {
     if (e.target.dataset.moto !== undefined) {
@@ -241,6 +243,7 @@
     totalPedido: JP.totalPedido, categoria: categoria, selos: selos, modulo: function () { return modulo; }
   });
   PVA.init({ estado: function () { return S; }, esc: esc, toast: toast, ha: ha, dataHora: JP.dataHora, selos: selos, modulo: function () { return modulo; } });
+  EXP.init({ estado: function () { return S; }, recarrega: recarrega, esc: esc, toast: toast, ha: ha, brl: JP.brl, dataHora: JP.dataHora, selos: selos, modulo: function () { return modulo; } });
   window.addEventListener('hashchange', ir);
   ir();
 })();

@@ -302,7 +302,7 @@
       var on = X.tocando && X.tocando.i === i && X.tocando.id === X.sel;
       return '<div class="xm-audio" data-x-ai="' + i + '" style="--p:' + (on ? X.tocando.p : 0) + '"><button class="xplay" data-x-play="' + i + '" aria-label="' + (on ? 'Pausar' : 'Ouvir') + ' áudio">' + ic(on ? 'pausa' : 'play') + '</button><span class="xonda" aria-hidden="true">' + onda(Math.round(m.ts % 9973), 30) + '</span><span class="xdur">' + mmss(m.dur) + '</span></div>';
     }
-    return esc(m.t).replace(/\n/g, '<br>');
+    return esc(m.t).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>').replace(/\n/g, '<br>');
   }
   function bolha(m, i, seq) {
     if (m.d === 's') return '<div class="xsis' + (m.ia ? ' ia' : '') + '">' + (m.ia ? ic('brilho') : '') + '<span>' + esc(m.t) + '</span></div>';

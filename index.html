@@ -14,12 +14,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow+Condensed:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="base.css?v=20261022i">
-<link rel="stylesheet" href="loja.css?v=20261022i">
-<link rel="stylesheet" href="posvenda-loja.css?v=20261022i">
+<link rel="stylesheet" href="base.css?v=20261022j">
+<link rel="stylesheet" href="loja.css?v=20261022j">
+<link rel="stylesheet" href="posvenda-loja.css?v=20261022j">
+<link rel="stylesheet" href="loja-extras.css?v=20261022j">
 </head>
 <body>
 <div class="aviso-demo">Demonstração — pedidos e pagamentos são simulados. <a href="admin.html">Abrir painel administrativo</a></div>
+<div class="faixa-corte" id="faixaCorte" role="status" hidden></div>
 
 <header class="topo">
   <a class="logo-marca" href="#" aria-label="Julia Pescados">
@@ -28,7 +30,9 @@
   </a>
   <nav class="topo-nav" aria-label="Seções">
     <a href="#catalogo">Produtos</a>
+    <a href="receitas.html">Receitas</a>
     <a href="#entrega">Entrega</a>
+    <button type="button" id="abrirAtacado" class="link-btn">Sou restaurante</button>
     <button type="button" id="abrirAcomp" class="link-btn">Meu pedido</button>
   </nav>
   <button class="carrinho-btn" id="abrirCarrinho" aria-label="Abrir carrinho">
@@ -63,6 +67,8 @@
   <div><svg class="fx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M4.9 6l14.2 12M19.1 6 4.9 18M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5"/></svg><p><b>Embalado a vácuo</b><span>Cadeia do frio mantida</span></p></div>
   <div><svg class="fx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg><p><b>Atacado</b><span>Preço especial para restaurantes</span></p></div>
 </section>
+
+<section id="atacadoPainel" class="atacado-painel" aria-label="Atacado para restaurantes" hidden></section>
 
 <main id="catalogo" class="miolo">
   <div class="miolo-cab">
@@ -104,9 +110,19 @@
   </div>
 </div>
 
+<!-- Lista de espera e atacado -->
+<div class="modal" id="modalEx" role="dialog" aria-modal="true" aria-labelledby="exTitulo" hidden>
+  <div class="modal-caixa estreita">
+    <div class="gaveta-cab"><h2 id="exTitulo"></h2><button class="fechar" id="fecharEx" aria-label="Fechar">×</button></div>
+    <div id="exConteudo"></div>
+  </div>
+</div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="shared.js?v=20261022i"></script>
-<script src="posvenda-dados.js?v=20261022i"></script>
-<script src="loja.js?v=20261022i"></script>
+<script src="shared.js?v=20261022j"></script>
+<script src="receitas-dados.js?v=20261022j"></script>
+<script src="posvenda-dados.js?v=20261022j"></script>
+<script src="extras-dados.js?v=20261022j"></script>
+<script src="loja.js?v=20261022j"></script>
 </body>
 </html>
