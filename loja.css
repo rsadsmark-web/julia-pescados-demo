@@ -56,7 +56,7 @@
 .miolo-cab .sub { margin: 10px 0 0; color: var(--suave); font-size: 17px; }
 .busca input { border: 0; border-bottom: 3px solid var(--marinho); background: transparent; border-radius: 0; padding: 10px 4px; width: 300px; max-width: 100%; font-size: 17px; font-weight: 500; transition: border-color .15s, width .3s var(--suave-ease); }
 .busca input::placeholder { color: var(--suave); font-family: var(--rotulo); font-size: 19px; letter-spacing: .05em; text-transform: uppercase; }
-.busca input:focus { outline: none; border-color: var(--lata); width: 340px; box-shadow: none; }
+.busca input:focus { outline: none; border-color: var(--lata); width: 340px; box-shadow: 0 0 0 3px var(--ouro); }
 .cats { display: flex; gap: 10px; overflow-x: auto; padding: 28px 2px 8px; scrollbar-width: none; }
 .cats::-webkit-scrollbar { display: none; }
 .cat { flex: none; border: 2px solid var(--marinho); background: var(--papel); border-radius: 6px; padding: 7px 20px; font-family: var(--rotulo); font-weight: 700; font-size: 20px; letter-spacing: .06em; text-transform: uppercase; color: var(--marinho); transition: background .15s, color .15s, transform .25s var(--suave-ease); }
