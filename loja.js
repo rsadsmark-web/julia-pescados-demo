@@ -192,7 +192,7 @@
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapa);
     var pts = JP.rota(b);
     camadas.pts = pts;
-    L.polyline(pts, { color: '#0d5c6b', weight: 5, opacity: .85 }).addTo(mapa);
+    L.polyline(pts, { color: '#14224f', weight: 5, opacity: .85 }).addTo(mapa);
     L.marker([JP.BASE.lat, JP.BASE.lng], { icon: L.divIcon({ className: '', html: '<div class="base-pin">Julia Pescados</div>', iconSize: [0, 0], iconAnchor: [50, 12] }) }).addTo(mapa);
     L.marker([b.lat, b.lng], { icon: L.divIcon({ className: '', html: '<div class="destino-pin"></div>', iconSize: [22, 22], iconAnchor: [11, 22] }) }).addTo(mapa);
     camadas.moto = L.marker(pts[0], { icon: L.divIcon({ className: '', html: '<div class="motoboy-pin">Moto</div>', iconSize: [34, 34], iconAnchor: [17, 17] }) }).addTo(mapa);
