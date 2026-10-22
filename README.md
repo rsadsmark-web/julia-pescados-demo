@@ -15,3 +15,5 @@ Todos os dados ficam no navegador (localStorage); pedidos, nota fiscal e rotas s
 
 Marca e número de WhatsApp vêm do perfil @juliapescados. Preços, bairros e taxas são de exemplo.
 Fotos: Wikimedia Commons (licenças livres), apenas ilustrativas.
+
+Teste do PDF: `npm i jspdf@2.5.1 --no-save && node tests/pedido-pdf.test.mjs . docs-pdf` (gera os PDFs de exemplo em docs-pdf).

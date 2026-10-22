@@ -5,7 +5,7 @@
   var tela = $('#tela');
   var modulo = 'visao', mapa = null, mapaCam = null, ticker = null;
   var filtroCli = 'todos', buscaCli = '', ordCli = 'total';
-  var nfSel = null, parametro = '';
+  var nfSel = null, parametro = '', abertos = {}, logoPdf = null;
   var CORES = { m1: '#9c2417', m2: '#0b4a5c', m3: '#e0861a' };
 
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -66,8 +66,19 @@
     tela.innerHTML = '<div class="cab"><div><h1>Pedidos e delivery</h1><p>Confirme pedidos, escolha o motoboy e acompanhe as rotas no mapa.</p></div></div>' +
       '<div class="mapa-linha"><div class="painel"><h2>Mapa dos motoboys <small>Fortaleza — rota simulada</small></h2><div id="mapaAdmin"></div></div>' +
       '<div class="painel"><h2>Rotas de entrega <small>equipe própria</small></h2><div class="rotas" id="rotas"></div></div></div>' +
-      '<div class="painel" style="margin-top:18px"><h2>Pedidos <small>os feitos pela loja aparecem aqui na hora</small></h2><div class="rolagem"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Entrega</th><th class="num">Total</th><th>Situação</th><th>Motoboy</th><th></th></tr></thead><tbody id="corpoPedidos"></tbody></table></div></div>';
+      '<div class="painel" style="margin-top:18px"><h2>Pedidos <small>os feitos pela loja aparecem aqui na hora · clique em “Ver itens” para abrir o pedido</small><button class="btn pequeno claro" id="pdfDia" type="button">Baixar pedidos do dia (PDF)</button></h2><div class="rolagem"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Entrega</th><th class="num">Total</th><th>Situação</th><th>Motoboy</th><th>Ações</th></tr></thead><tbody id="corpoPedidos"></tbody></table></div></div>';
     desenhaPedidos(); montaMapaAdmin(); atualizaMapaAdmin();
+  }
+  function detalhePedido(p) {
+    var ent = p.tipo === 'retirada';
+    return '<div class="det-pedido"><div class="det-itens"><table><thead><tr><th>Produto</th><th class="num">Quantidade</th><th class="num">Preço unitário</th><th class="num">Total</th></tr></thead><tbody>' +
+      p.itens.map(function (i) { return '<tr><td>' + esc(i.nome) + '</td><td class="num">' + String(i.qtd).replace('.', ',') + ' ' + esc(i.un || '') + '</td><td class="num">' + JP.brl(i.preco) + '</td><td class="num">' + JP.brl(i.preco * i.qtd) + '</td></tr>'; }).join('') +
+      '</tbody><tfoot><tr><td colspan="3">Subtotal</td><td class="num">' + JP.brl(JP.subtotal(p)) + '</td></tr><tr><td colspan="3">' + (ent ? 'Retirada' : 'Taxa de entrega' + (p.bairro ? ' (' + esc(p.bairro) + ')' : '')) + '</td><td class="num">' + JP.brl(p.taxa || 0) + '</td></tr><tr class="tot"><td colspan="3">Total do pedido</td><td class="num">' + JP.brl(JP.totalPedido(p)) + '</td></tr></tfoot></table></div>' +
+      '<dl class="det-dados"><div><dt>Cliente</dt><dd>' + esc(p.cliente) + '</dd></div><div><dt>WhatsApp</dt><dd>' + esc(p.fone) + '</dd></div>' +
+      '<div><dt>' + (ent ? 'Retirada' : 'Endereço de entrega') + '</dt><dd>' + (ent ? 'Retirada no local' : esc(p.endereco) + (p.bairro ? ' — ' + esc(p.bairro) : '')) + '</dd></div>' +
+      '<div><dt>Forma de pagamento</dt><dd>' + esc(p.pagamento) + '</dd></div>' +
+      '<div class="largo"><dt>Observações</dt><dd>' + (p.obs ? esc(p.obs) : '<i>Sem observações.</i>') + '</dd></div>' +
+      '<div class="largo"><button class="btn pequeno" type="button" data-pdf="' + p.id + '">Baixar pedido em PDF</button></div></dl></div>';
   }
   function desenhaPedidos() {
     $('#corpoPedidos').innerHTML = S.pedidos.map(function (p) {
@@ -78,7 +89,8 @@
       var acao = !p.confirmado ? '<button class="btn pequeno" data-conf="' + p.id + '">Confirmar</button>'
         : '<button class="btn pequeno claro" data-venda="' + p.id + '"' + (p.vendaConfirmada ? ' disabled' : '') + '>' + (p.vendaConfirmada ? 'Venda registrada' : 'Confirmar venda') + '</button>';
       return '<tr><td><b>' + p.id + '</b>' + (p.atacadoId ? ' <span class="chip rosa">Atacado</span>' : '') + (p.recompra ? ' <span class="chip ok">Recompra</span>' : '') + (p.agendado ? ' <span class="chip alerta">' + esc(p.agendado) + '</span>' : '') + '<small>' + JP.dataHora(p.criado) + '</small></td><td>' + esc(p.cliente) + '<small>' + esc(p.pagamento) + '</small></td><td>' + ent + '</td>' +
-        '<td class="num">' + JP.brl(JP.totalPedido(p)) + '</td><td>' + chipSit(p) + '</td><td>' + sel + '</td><td><div class="acoes">' + acao + '</div></td></tr>';
+        '<td class="num">' + JP.brl(JP.totalPedido(p)) + '</td><td>' + chipSit(p) + '</td><td>' + sel + '</td><td><div class="acoes"><button class="btn pequeno claro" type="button" data-itens="' + p.id + '" aria-expanded="' + !!abertos[p.id] + '">' + (abertos[p.id] ? 'Ocultar itens' : 'Ver itens (' + p.itens.length + ')') + '</button>' + acao + '</div></td></tr>' +
+        (abertos[p.id] ? '<tr class="linha-det"><td colspan="7">' + detalhePedido(p) + '</td></tr>' : '');
     }).join('');
   }
   function montaMapaAdmin() {
@@ -196,10 +208,38 @@
     MODULOS[h](); selos(); window.scrollTo(0, 0);
   }
 
+  /* ---------- PDF ---------- */
+  function carregaLogo() {
+    if (logoPdf) return Promise.resolve(logoPdf);
+    return new Promise(function (ok) {
+      var im = new Image(); im.onload = function () { var c = document.createElement('canvas'); c.width = im.naturalWidth; c.height = im.naturalHeight; c.getContext('2d').drawImage(im, 0, 0); logoPdf = c.toDataURL('image/png'); ok(logoPdf); };
+      im.onerror = function () { ok(null); }; im.src = 'img/marca/logo-julia-192.png';
+    });
+  }
+  function sitTexto(p) { var s = JP.situacao(p); return p.tipo === 'retirada' && s.cod === 'chegou' ? 'Pronto para retirada' : s.rotulo; }
+  function baixaPdf(qual, id) {
+    if (!window.jspdf) { toast('O gerador de PDF não carregou. Verifique a conexão e tente de novo.'); return; }
+    recarrega();
+    carregaLogo().then(function (logo) {
+      var doc, nome;
+      if (qual === 'pedido') { var p = pedido(id); if (!p) return; doc = JPPDF.pedido(window.jspdf, p, logo, sitTexto); nome = 'pedido-' + p.id + '-julia-pescados.pdf'; }
+      else {
+        var hoje = S.pedidos.filter(function (p) { return dias(p.criado) < 1; }), d = new Date(JP.agora());
+        if (!hoje.length) { toast('Não há pedidos de hoje para exportar.'); return; }
+        var txt = d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+        doc = JPPDF.lista(window.jspdf, hoje, logo, txt, sitTexto); nome = 'pedidos-do-dia-' + d.toISOString().slice(0, 10) + '-julia-pescados.pdf';
+      }
+      doc.save(nome); toast('PDF gerado: ' + nome);
+    });
+  }
+
   /* ---------- eventos ---------- */
   document.addEventListener('click', function (e) {
     var t = e.target.closest('button'); if (!t) return;
-    if (t.dataset.conf) { JP.confirmarPedido(t.dataset.conf); recarrega(); toast('Pedido ' + t.dataset.conf + ' confirmado. Estoque baixado e motoboy atribuído.'); desenhaPedidos(); atualizaMapaAdmin(); selos(); }
+    if (t.dataset.itens) { abertos[t.dataset.itens] = !abertos[t.dataset.itens]; desenhaPedidos(); }
+    else if (t.dataset.pdf) baixaPdf('pedido', t.dataset.pdf);
+    else if (t.id === 'pdfDia') baixaPdf('dia');
+    else if (t.dataset.conf) { JP.confirmarPedido(t.dataset.conf); recarrega(); toast('Pedido ' + t.dataset.conf + ' confirmado. Estoque baixado e motoboy atribuído.'); desenhaPedidos(); atualizaMapaAdmin(); selos(); }
     else if (t.dataset.venda) {
       var p = pedido(t.dataset.venda); p.vendaConfirmada = true; JP.salvar();
       recarrega(); toast('Venda de ' + JP.brl(JP.totalPedido(p)) + ' confirmada.'); desenhaPedidos();

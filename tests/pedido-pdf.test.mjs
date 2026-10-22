@@ -1,0 +1,14 @@
+import { createRequire } from 'module'; import fs from 'fs'; import assert from 'assert';
+const require = createRequire(import.meta.url);
+const J = require('jspdf'); const P = require(process.argv[2] + '/pedido-pdf.js');
+const logo = 'data:image/png;base64,' + fs.readFileSync(process.argv[2] + '/img/marca/logo-julia-192.png').toString('base64');
+const it = (n, un, preco, qtd) => ({ nome: n, un, preco, qtd });
+const p = { id: 'JP-1047', cliente: 'Eduardo Pinheiro', fone: '(85) 98211-3340', bairro: 'Aldeota', endereco: 'Rua Desembargador Leite Albuquerque, 820', tipo: 'entrega', pagamento: 'Pix', itens: [it('Camarão cinza', 'kg', 69.9, 3), it('Filé de salmão', 'kg', 89.9, 2.5)], taxa: 6, criado: Date.now(), confirmado: true, obs: 'Camarão bem limpo, sem casca.' };
+assert.equal(P.brl(1234.5), 'R$ 1.234,50');
+const d1 = P.pedido(J, p, logo, () => 'Em preparo'); assert.equal(d1.getNumberOfPages(), 1);
+const ret = { ...p, id: 'JP-1051', tipo: 'retirada', bairro: '', endereco: '', taxa: 0, confirmado: false, obs: '' };
+const lista = Array.from({ length: 12 }, (_, i) => ({ ...p, id: 'JP-' + (1040 + i) }));
+const d2 = P.lista(J, [p, ret, ...lista], logo, 'quinta-feira, 22 de outubro de 2026'); assert(d2.getNumberOfPages() >= 2);
+fs.writeFileSync(process.argv[3] + '/exemplo-pedido-JP-1047.pdf', Buffer.from(d1.output('arraybuffer')));
+fs.writeFileSync(process.argv[3] + '/exemplo-pedidos-do-dia.pdf', Buffer.from(d2.output('arraybuffer')));
+console.log('testes ok');

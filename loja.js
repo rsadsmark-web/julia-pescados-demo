@@ -5,7 +5,7 @@
   var carrinho = {};            // id -> quantidade
   var cat = 'Todos', termo = '';
   var tipo = 'entrega', pagamento = 'Pix';
-  var form = { nome: '', fone: '', bairro: '', endereco: '', troco: '' };
+  var form = { nome: '', fone: '', bairro: '', endereco: '', troco: '', obs: '' };
   var pedidoAcomp = localStorage.getItem('jp_ultimo_pedido') || null;
 
   var atacadoId = localStorage.getItem('jp_atacado') || '';   // restaurante identificado (atacado)
@@ -111,7 +111,8 @@
       return '<button class="opcao' + (p === pagamento ? ' ativa' : '') + '" data-pg="' + p + '">' + p + '</button>';
     }).join('') + '</div>' +
       (pagamento === 'Dinheiro' ? '<div class="campo"><label for="fTroco">Troco para quanto?</label><input id="fTroco" inputmode="decimal" value="' + esc(form.troco) + '" placeholder="Ex.: 200"></div>' : '') +
-      (pagamento === 'Pix' ? '<p class="dica">Você recebe a chave Pix no WhatsApp para pagar depois de confirmarmos o pedido.</p>' : '') + '</div>';
+      (pagamento === 'Pix' ? '<p class="dica">Você recebe a chave Pix no WhatsApp para pagar depois de confirmarmos o pedido.</p>' : '') + '</div>' +
+      '<div class="bloco"><h3>Observações</h3><div class="campo"><label for="fObs">Algum pedido especial? (opcional)</label><textarea id="fObs" rows="2" maxlength="200" placeholder="Ex.: camarão sem casca, ligar ao chegar">' + esc(form.obs) + '</textarea></div></div>';
 
     h += avisoCorteHtml();
     h += '<div class="resumo"><div><span>Subtotal</span><span>' + JP.brl(c.sub) + '</span></div>' +
@@ -157,6 +158,7 @@
     else l.push('Retirada no local');
     if (p.agendado) l.push('', '⏰ Pedido feito depois das ' + EX.horaCorte() + ': ' + (p.tipo === 'retirada' ? 'retirada ' : 'entrega ') + p.agendado + '.');
     if (p.atacadoId) l.push('', 'Pedido de atacado (restaurante), preço fixo da tabela.');
+    if (p.obs) l.push('', 'Observações: ' + p.obs);
     l.push('Total: ' + JP.brl(c.total), 'Pagamento: ' + p.pagamento + (p.pagamento === 'Dinheiro' && form.troco ? ' (troco para R$ ' + form.troco + ')' : ''), '', 'Nome: ' + p.cliente, 'WhatsApp: ' + p.fone);
     return l.join('\n');
   }
@@ -181,14 +183,14 @@
     var p = {
       cliente: form.nome.trim(), fone: form.fone.trim(), bairro: tipo === 'entrega' ? form.bairro : '', endereco: tipo === 'entrega' ? form.endereco.trim() : '',
       tipo: tipo, pagamento: pagamento, itens: c.its.map(function (i) { return { id: i.id, nome: i.nome, un: i.un, preco: i.preco, qtd: i.qtd }; }),
-      taxa: c.taxa, criado: JP.agora(), confirmado: false, baixa: false, motoboy: null, fixo: null, origemSite: true
+      taxa: c.taxa, criado: JP.agora(), confirmado: false, baixa: false, motoboy: null, fixo: null, origemSite: true, obs: form.obs.trim()
     };
     if (atac()) p.atacadoId = atac().id;
     if (repetindo) p.recompra = true;
     var id = registra(p);
     window.open('https://wa.me/' + JP.WHATS + '?text=' + encodeURIComponent(mensagem(p, c)), '_blank', 'noopener');
     repetindo = null;
-    carrinho = {}; salvaCarrinho(); atualizaContador();
+    carrinho = {}; form.obs = ''; salvaCarrinho(); atualizaContador();
     pedidoAcomp = id; localStorage.setItem('jp_ultimo_pedido', id);
     fechaGaveta(); abreAcomp(true);
   }
@@ -393,7 +395,7 @@
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { fechaGaveta(); fechaEx(); if (!$('#modalAcomp').hidden) fechaAcomp(); } });
   $('#busca').addEventListener('input', function (e) { termo = e.target.value.trim().toLowerCase(); desenhaGrade(); });
   $('#corpoCarrinho').addEventListener('input', function (e) {
-    var m = { fNome: 'nome', fFone: 'fone', fEnd: 'endereco', fTroco: 'troco' }[e.target.id];
+    var m = { fNome: 'nome', fFone: 'fone', fEnd: 'endereco', fTroco: 'troco', fObs: 'obs' }[e.target.id];
     if (m) { form[m] = e.target.value; salvaCarrinho(); }
   });
   $('#corpoCarrinho').addEventListener('change', function (e) {
