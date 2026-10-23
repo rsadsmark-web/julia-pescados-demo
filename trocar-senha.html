@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="pt-BR"><head><title>Trocar senha — Julia Pescados</title><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><link rel="icon" type="image/png" href="img/marca/logo-julia-32.png"><style>*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:#fdf1e6;color:#3d1410;font:16px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;padding:20px}main{width:100%;max-width:400px;background:#fff;border:1px solid #ecd5c2;border-radius:14px;padding:28px;box-shadow:0 8px 30px rgba(92,26,18,.08)}main.larga{max-width:760px}img.logo{display:block;margin:0 auto 12px;width:72px;height:72px}h1{font-size:20px;margin:0 0 4px;text-align:center}p.sub{margin:0 0 18px;text-align:center;color:#7a5a4f;font-size:14px}label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}input,select{width:100%;padding:11px 12px;border:1px solid #d8bfae;border-radius:8px;font:inherit;background:#fff}input:focus,select:focus{outline:3px solid #f0a35e;outline-offset:1px}button{margin-top:18px;width:100%;padding:12px;border:0;border-radius:8px;background:#5c1a12;color:#fff;font:600 16px inherit;cursor:pointer}button:hover{background:#7a2418}.erro{color:#a1180a;font-size:14px;margin-top:12px;min-height:20px}.ok{color:#1d7a43}table{width:100%;border-collapse:collapse;margin:14px 0;font-size:14px}th,td{text-align:left;padding:8px 6px;border-bottom:1px solid #f0e0d2}td button,.mini{margin:0;width:auto;padding:5px 10px;font-size:13px}a{color:#8a3a10}.linha{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:600px){.linha{grid-template-columns:1fr}}</style></head>
+<body><main>
+<img class="logo" src="img/marca/logo-julia-192.png" alt="Julia Pescados">
+<h1>Defina a sua senha</h1><p class="sub">A senha provisória precisa ser trocada antes de continuar.</p>
+<form id="f">
+<label for="a">Senha atual (provisória)</label><input id="a" type="password" autocomplete="current-password" required>
+<label for="n">Nova senha (mínimo 10 caracteres)</label><input id="n" type="password" autocomplete="new-password" minlength="10" required>
+<label for="c">Repita a nova senha</label><input id="c" type="password" autocomplete="new-password" minlength="10" required>
+<button type="submit">Salvar e entrar</button><div class="erro" id="e" role="alert"></div>
+</form></main>
+<script>
+document.getElementById('f').addEventListener('submit', function (ev) {
+  ev.preventDefault(); var e = document.getElementById('e'), n = document.getElementById('n').value;
+  if (n !== document.getElementById('c').value) { e.textContent = 'As senhas novas não são iguais.'; return; }
+  fetch('/api/trocar-senha', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ atual: document.getElementById('a').value, nova: n }) })
+    .then(function (r) { return r.json().then(function (j) { return [r.ok, j]; }); })
+    .then(function (x) { if (!x[0]) { e.textContent = x[1].erro || 'Erro ao trocar a senha.'; return; } location.href = '/admin.html'; });
+});
+</script></body></html>

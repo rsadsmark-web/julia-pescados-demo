@@ -99,6 +99,7 @@
   /* ---------- dados de exemplo ---------- */
   function semear() {
     var s = S(); if (s.semeado) return;
+    if (window.JP_VAZIO) { s.semeado = true; PV.salvar(); return; }
     var agora = Date.now(), dia = 86400000;
     // pedidos já entregues hoje: receita e pedido de nota já enviados nas Conversas
     var hoje = [['JP-1044'], ['JP-1045'], ['JP-1046']];

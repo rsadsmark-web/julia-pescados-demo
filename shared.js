@@ -104,6 +104,9 @@
       { id: 'l8', nome: 'Gustavo Nogueira', fone: '(85) 98177-2209', origem: 'Indicação', etapa: 'vendido', valor: 980, itens: 'Camarão sem cabeça 15 kg + posta de serra 3 kg', msgs: [['c', 'Entrega recebida, tudo certo.']], vendido: true }
     ];
 
+    if (window.JP_VAZIO) { // sistema real: sem clientes, pedidos nem números de exemplo; o catálogo e as categorias ficam, com estoque zerado
+      return { produtos: JSON.parse(JSON.stringify(PRODUTOS)).map(function (p) { p.estoque = 0; return p; }), clientes: [], motoboys: [], pedidos: [], leads: [], notas: [], baixas: [], seq: 1001 };
+    }
     return {
       produtos: PRODUTOS, clientes: clientes, motoboys: motoboys, pedidos: pedidos, leads: leads,
       notas: [], baixas: [], seq: 1052

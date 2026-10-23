@@ -89,6 +89,7 @@
   function semear(Dd) {
     Dd.cfg = { geral: false, teste: true, numTeste: '(85) 99999-0001', inicio: '09:00', fim: '19:00', minS: 25, maxS: 60, rodada: 2, limiteDia: 250, diaNumero: 9, lote: 100, simFalha: false, relogio: '' };
     I = I || window.CRM.i;
+    if (window.JP_VAZIO) { Dd.camps = []; return; }
     var h = 3600000, d = 86400000, agora = Date.now();
     function lead(n) { return Dd.leads.filter(function (l) { return l.nome === n; })[0]; }
     function camp(nome, msg, pub, status, ini) {

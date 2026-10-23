@@ -36,6 +36,7 @@
 
   /* ---------- dados de exemplo ---------- */
   function semente() {
+    if (window.JP_VAZIO) return [];
     var S = ctx.estado();
     var base = [
       { id: 'l1', nome: 'Hotel Terral Praia', fone: '(85) 98701-3321', origem: 'Indicação', etapa: 'novo', valor: 2400, itens: 'Camarão VG 30 kg/semana', etq: ['Atacado', 'Indicação'], resp: 'Júlia', nao: 1, msgs: [['c', 'Boa tarde! Vi vocês no Instagram. Vocês entregam camarão no atacado para hotel?', 190], ['j', 'Boa tarde! Entregamos sim, Fortaleza e Caucaia. Qual volume semanal?', 185], ['c', 'Em torno de 30 kg de camarão VG.', 22]] },
