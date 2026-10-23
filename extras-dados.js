@@ -21,6 +21,12 @@
   }
   function padrao() {
     var t = Date.now();
+    if (window.JP_VAZIO) return {
+      recompra: { ativa: true, auto: true, min: 10, max: 15, texto: TXT_RECOMPRA, enviados: {}, historico: [] },
+      espera: { texto: TXT_ESPERA, avisos: [], inscritos: [] },
+      atacado: { precos: {}, restaurantes: [], pedidosDe: {} },
+      entrega: { corte: 14, simulacao: 'real', avisoSaiu: true, textoSaiu: TXT_SAIU, textoAgendado: TXT_AGENDADO, processados: {} }
+    };
     return {
       recompra: { ativa: true, auto: true, min: 10, max: 15, texto: TXT_RECOMPRA, enviados: {}, historico: [
         { quando: t - 5 * DIA, clienteId: 'c12', cliente: 'Eduardo Pinheiro', dias: 11, status: 'repetiu', pedido: 'JP-1047' },
@@ -74,8 +80,8 @@
     return { amanha: amanha, texto: (amanha ? 'amanhã, ' : '') + diaDe(d) + ' (' + fmtData(d) + ')' };
   }
   // Depois do horário de corte (ou em domingo) o pedido é aceito, mas a entrega é no dia útil seguinte.
-  function aposCorte() { var hoje = new Date().getDay(); return hora() >= ler().entrega.corte || hoje === 0; }
-  function horaCorte() { return ler().entrega.corte + 'h'; }
+  function aposCorte() { var hoje = new Date().getDay(); return hora() >= (window.JP_CORTE || ler().entrega.corte) || hoje === 0; }
+  function horaCorte() { return (window.JP_CORTE || ler().entrega.corte) + 'h'; }   // JP_CORTE vem do servidor na página pública
 
   /* ---------- atacado ---------- */
   function restaurante(id) { return ler().atacado.restaurantes.filter(function (r) { return r.id === id; })[0]; }

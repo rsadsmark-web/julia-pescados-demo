@@ -251,7 +251,6 @@
       var pr = S.produtos.filter(function (x) { return x.id === t.dataset.entrada; })[0]; pr.estoque = +(pr.estoque + q).toFixed(1); JP.salvar(); toast('Entrada de ' + q + ' ' + pr.un + ' em ' + pr.nome + '.'); estoque(); selos();
     }
     else if (t.id === 'emitirNf') emitirNf();
-    else if (t.id === 'resetar') { JP.resetar(); CRM.reset(); recarrega(); PVA.reset(); EXP.reset(); toast('Dados de exemplo restaurados.'); ir(); }
   });
   document.addEventListener('change', function (e) {
     if (e.target.dataset.moto !== undefined) {

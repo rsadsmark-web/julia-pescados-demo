@@ -1,0 +1,101 @@
+# Júlia Pescados — estrutura portátil: o mesmo arquivo roda em qualquer máquina com Docker.
+#   cp .env.example .env  (preencher)  &&  docker compose up -d --build
+# Com proxy e certificado próprios (máquina sem outro proxy):  docker compose --profile proxy up -d --build
+name: julia-pescados
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=30", "-c", "work_mem=4MB", "-c", "effective_cache_size=192MB"]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    mem_limit: ${LIMITE_BANCO:-384m}
+    memswap_limit: ${LIMITE_BANCO:-384m}
+    cpus: 0.5
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+    networks: [interna]
+
+  app:
+    build: .
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      PORT: "3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${APP_PORTA:-8095}:3000"
+    mem_limit: ${LIMITE_APP:-256m}
+    memswap_limit: ${LIMITE_APP:-256m}
+    cpus: 0.5
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/saude"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks: [interna]
+
+  # Dump diário do Postgres (03h30 de Brasília), guarda 14 dias no volume "backups".
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        while true; do
+          sleep $$(( (86400 + 23400 - $$(date +%s) % 86400) % 86400 + 5 ))
+          f=/backups/julia-$$(date +%Y%m%d-%H%M).sql.gz
+          if pg_dump --no-owner | gzip > $$f.tmp; then mv $$f.tmp $$f; echo "backup ok: $$f"; else rm -f $$f.tmp; echo "backup FALHOU"; fi
+          find /backups -name 'julia-*.sql.gz' -mtime +14 -delete
+        done
+    volumes:
+      - backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+    mem_limit: 64m
+    memswap_limit: 64m
+    cpus: 0.2
+    networks: [interna]
+
+  caddy:
+    image: caddy:2-alpine
+    profiles: [proxy]
+    restart: unless-stopped
+    environment:
+      DOMINIO: ${DOMINIO}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on: [app]
+    mem_limit: 64m
+    memswap_limit: 64m
+    networks: [interna]
+
+volumes:
+  pgdata:
+  backups:
+  caddy_data:
+  caddy_config:
+
+networks:
+  interna:
