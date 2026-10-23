@@ -60,7 +60,7 @@ module.exports = function (app, pool) {
     const porId = new Map(catalogo.map((p) => [p.id, p]));
     const itens = (Array.isArray(b.itens) ? b.itens : []).slice(0, MAX_ITENS).map((i) => {
       const p = porId.get(txt(i.id, 20)), q = +i.qtd;
-      return p && q > 0 && q <= 500 ? { id: p.id, nome: p.nome, un: p.un, preco: +(i.preco > 0 && i.preco <= p.preco ? i.preco : p.preco), qtd: q } : null; // preço do cliente só vale se for menor (atacado); nunca maior que o do catálogo
+      return p && q > 0 && q <= 500 ? { id: p.id, nome: p.nome, un: p.un, preco: p.preco, qtd: q } : null; // o preço é sempre o do catálogo do servidor
     }).filter(Boolean);
     const fone = digitos(b.fone);
     if (!itens.length || fone.length < 10 || fone.length > 13 || !txt(b.cliente, 80)) return res.status(400).json({ erro: 'Pedido incompleto.' });

@@ -6,6 +6,7 @@ RUN cd servidor && npm ci --omit=dev
 COPY servidor servidor
 COPY *.html *.css *.js *.webmanifest site/
 COPY img site/img
+RUN mkdir -p /app/dinamico && chown node:node /app/dinamico
 USER node
 EXPOSE 3000
 CMD ["node", "servidor/server.js"]
