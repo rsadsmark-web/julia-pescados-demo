@@ -5,8 +5,8 @@ Julia Pescados é uma distribuidora de camarão e pescados (frescos e congelados
 Este repositório é uma demonstração clicável da RS Tech Marketing, sem back-end (dados no localStorage, pedidos, nota fiscal e rotas simulados). Aviso de demonstração obrigatório nas duas telas.
 
 ## Superfícies
-- Loja pública (index.html): Persuade. Cliente escolhe produtos, monta carrinho, entrega ou retirada, finaliza por WhatsApp, acompanha em mapa.
-- Painel administrativo (admin.html): Operate. Pedidos e delivery, conversas (estilo WhatsApp Web), funil kanban, campanhas de disparo simuladas com travas de segurança, carteira, nota fiscal, estoque.
+- Loja pública (index.html, endereço /): Persuade. Cliente escolhe produtos, monta carrinho, entrega ou retirada, finaliza por WhatsApp, acompanha em mapa.
+- Painel administrativo (admin.html, endereço /admin): Operate. Pedidos e delivery, conversas (estilo WhatsApp Web), funil kanban, campanhas de disparo simuladas com travas de segurança, carteira, nota fiscal, estoque.
 
 ## Verdade que não muda
 Catálogo, preços, bairros, fotos (img/), funções e fluxos. Nada de claims comerciais novos.

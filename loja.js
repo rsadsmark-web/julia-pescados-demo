@@ -428,6 +428,6 @@
     }
     if (mudou && history.replaceState) history.replaceState(null, '', location.pathname);
   })();
-  // Atalho para a demonstração: /index.html?acompanhar abre o último pedido
+  // Atalho para a demonstração: /?acompanhar abre o último pedido
   if (/acompanhar/.test(location.search) && pedidoAcomp) abreAcomp(false);
 })();

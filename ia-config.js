@@ -1,5 +1,5 @@
 /* Configuração do atendimento por IA da Julia Pescados — domínio da RS Tech, não do cliente.
-   O painel do cliente só LÊ esta configuração; quem edita é a área restrita (config-ia.html).
+   O painel do cliente só LÊ esta configuração; quem edita é a área restrita (/config-ia).
    Demonstração: fica no localStorage do navegador. Em produção vive no servidor, atrás de login de administrador. */
 (function () {
   var CHAVE = 'jp_rs_ia_v1';

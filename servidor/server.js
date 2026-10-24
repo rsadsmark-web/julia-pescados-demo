@@ -81,6 +81,16 @@ app.use((req, res, next) => {
   next();
 });
 
+/* ---------- endereços limpos: /admin em vez de /admin.html (o antigo redireciona com 301) ---------- */
+app.use((req, res, next) => {
+  if (req.method !== 'GET' && req.method !== 'HEAD') return next();
+  const m = /^(.*?)(?:\/index)?(?:\.html)?\/?$/.exec(req.path), alvo = (m && m[1]) || '/';
+  if (alvo !== req.path && !req.path.startsWith('/api/') && (/\.html$/.test(req.path) || /^\/[a-z-]+\/?$/.test(req.path) || req.path === '/index')) {
+    return res.redirect(301, alvo + req.url.slice(req.path.length));
+  }
+  next();
+});
+
 app.get('/saude', async (req, res) => {
   try { await pool.query('SELECT 1'); res.json({ ok: true }); } catch (e) { res.status(503).json({ ok: false }); }
 });
@@ -106,23 +116,23 @@ app.post('/api/login', limite({ janelaMs: 60000, max: 20, grupo: 'login:', mensa
 });
 app.get('/api/sair', async (req, res) => {
   const t = cookies(req)[COOKIE]; if (t) await pool.query('DELETE FROM sessoes WHERE token_hash = $1', [sha(t)]);
-  setaCookie(req, res, '', 0); res.redirect('/login.html');
+  setaCookie(req, res, '', 0); res.redirect('/login');
 });
 
 /* ---------- tudo abaixo exige login ---------- */
 app.use('/api', limite({ janelaMs: 60000, max: 600, grupo: 'painel:' })); // folga para o painel; barra abuso
-const LIVRES = new Set(['/login.html', '/login.js', '/img/marca/logo-julia-96.png', '/img/marca/logo-julia-192.png', '/img/marca/logo-julia-32.png', '/img/marca/apple-touch-icon.png', '/manifest.webmanifest']);
+const LIVRES = new Set(['/login', '/login.js', '/img/marca/logo-julia-96.png', '/img/marca/logo-julia-192.png', '/img/marca/logo-julia-32.png', '/img/marca/apple-touch-icon.png', '/manifest.webmanifest']);
 app.use(async (req, res, next) => {
   try {
     if (LIVRES.has(req.path)) return next();
     const u = await usuarioDaSessao(req);
     if (!u) {
       if (req.path.startsWith('/api/')) return res.status(401).json({ erro: 'Entre para continuar.' });
-      return res.redirect('/login.html?next=' + encodeURIComponent(req.originalUrl));
+      return res.redirect('/login?next=' + encodeURIComponent(req.originalUrl));
     }
     req.usuario = u;
-    if (u.senha_provisoria && !['/trocar-senha.html', '/api/trocar-senha', '/api/sair', '/trocar-senha.js'].includes(req.path) && !req.path.startsWith('/img/marca/')) {
-      return req.path.startsWith('/api/') ? res.status(403).json({ erro: 'Troque a senha provisória.' }) : res.redirect('/trocar-senha.html');
+    if (u.senha_provisoria && !['/trocar-senha', '/api/trocar-senha', '/api/sair', '/trocar-senha.js'].includes(req.path) && !req.path.startsWith('/img/marca/')) {
+      return req.path.startsWith('/api/') ? res.status(403).json({ erro: 'Troque a senha provisória.' }) : res.redirect('/trocar-senha');
     }
     if (req.method !== 'GET' && req.method !== 'HEAD' && req.headers['x-jp'] !== '1' && !req.is('json')) return res.status(403).json({ erro: 'Requisição recusada.' });
     next();
@@ -205,7 +215,7 @@ app.patch('/api/usuarios/:id', soAdmin, async (req, res) => {
 });
 
 /* ---------- arquivos do site ---------- */
-app.use(express.static(SITE, { dotfiles: 'ignore', index: 'index.html', setHeaders: (res, f) => { if (/\.(png|jpe?g|webp|svg|ico)$/i.test(f)) res.set('Cache-Control', 'private, max-age=86400'); } }));
+app.use(express.static(SITE, { dotfiles: 'ignore', index: 'index.html', extensions: ['html'], redirect: false, setHeaders: (res, f) => { if (/\.(png|jpe?g|webp|svg|ico)$/i.test(f)) res.set('Cache-Control', 'private, max-age=86400'); } }));
 app.use((err, req, res, next) => { console.error(err); res.status(500).json({ erro: 'Erro interno.' }); });
 
 module.exports = { pool, hashSenha, iniciaBanco };

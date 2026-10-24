@@ -1,4 +1,4 @@
-/* Receitas da página pública (receitas.html) e do painel. Cada produto tem mais de uma receita.
+/* Receitas da página pública (/receitas) e do painel. Cada produto tem mais de uma receita.
    O painel guarda só as edições (PV.receitaEditada); estes são os textos padrão. */
 (function () {
   var L = [

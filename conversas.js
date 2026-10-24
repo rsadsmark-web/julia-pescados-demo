@@ -1,5 +1,5 @@
 /* Conversas e Atendimento por IA da Julia Pescados — demonstração: tudo simulado no navegador, nenhuma IA é chamada e nada é enviado.
-   O cliente só liga/desliga a IA e assume conversas; prompt e ajustes técnicos vêm de ia-config.js e só se editam em config-ia.html (área da RS Tech). */
+   O cliente só liga/desliga a IA e assume conversas; prompt e ajustes técnicos vêm de ia-config.js e só se editam em /config-ia (área da RS Tech). */
 (function () {
   var I = window.CRM.i, D = null, ctx = null;
   var ATUAL = 'Júlia';

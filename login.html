@@ -16,7 +16,7 @@ document.getElementById('f').addEventListener('submit', function (ev) {
     .then(function (x) {
       if (!x[0]) { e.textContent = x[1].erro || 'Não foi possível entrar.'; return; }
       var n = new URLSearchParams(location.search).get('next');
-      location.href = x[1].trocar ? '/trocar-senha.html' : (n && n.charAt(0) === '/' && n.charAt(1) !== '/' ? n : '/admin.html');
+      location.href = x[1].trocar ? '/trocar-senha' : (n && n.charAt(0) === '/' && n.charAt(1) !== '/' ? n : '/admin');
     }).catch(function () { e.textContent = 'Sem conexão com o servidor.'; });
 });
 </script></body></html>

@@ -15,6 +15,6 @@ document.getElementById('f').addEventListener('submit', function (ev) {
   if (n !== document.getElementById('c').value) { e.textContent = 'As senhas novas não são iguais.'; return; }
   fetch('/api/trocar-senha', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ atual: document.getElementById('a').value, nova: n }) })
     .then(function (r) { return r.json().then(function (j) { return [r.ok, j]; }); })
-    .then(function (x) { if (!x[0]) { e.textContent = x[1].erro || 'Erro ao trocar a senha.'; return; } location.href = '/admin.html'; });
+    .then(function (x) { if (!x[0]) { e.textContent = x[1].erro || 'Erro ao trocar a senha.'; return; } location.href = '/admin'; });
 });
 </script></body></html>

@@ -14,7 +14,7 @@
     }
     d.innerHTML = t;
   }
-  function irParaLogin() { location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search + location.hash); }
+  function irParaLogin() { location.href = '/login?next=' + encodeURIComponent(location.pathname + location.search + location.hash); }
 
   var x = new XMLHttpRequest();
   x.open('GET', '/api/kv', false);

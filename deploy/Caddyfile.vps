@@ -21,7 +21,13 @@
 	}
 }
 
-julia.157-173-206-42.sslip.io {
+(servir) {
+	file_server {
+		precompressed br gzip
+	}
+}
+
+julia.rstechmarketing.com.br, julia.157-173-206-42.sslip.io {
 	encode zstd gzip
 
 	header {
@@ -31,6 +37,17 @@ julia.157-173-206-42.sslip.io {
 		Referrer-Policy strict-origin-when-cross-origin
 		-Server
 	}
+
+	# endereços limpos: o antigo com .html (e /index) redireciona com 301 para o limpo, mantendo a consulta (?x=1)
+	map {query} {qs} {
+		~.+ "?{query}"
+		default ""
+	}
+	@indice path /index.html /index
+	redir @indice /{qs} 301
+	@antiga path_regexp antiga ^/(.+)\.html$
+	redir @antiga /{re.antiga.1}{qs} 301
+
 	root * /opt/julia-pescados/publico
 
 	# catálogo público: arquivo escrito pelo Node quando o painel salva; curto para o estoque não ficar velho
@@ -53,7 +70,7 @@ julia.157-173-206-42.sslip.io {
 	handle {
 		# arquivo existe na pasta pública? serve do disco (já comprimido .br/.gz); senão é página do painel: Node, com login
 		@estatico file {
-			try_files {path} {path}/index.html
+			try_files {path} {path}.html {path}/index.html
 		}
 		handle @estatico {
 			# cada classe de arquivo tem o seu cache (handles não se somam: vale o primeiro que casar)
@@ -67,7 +84,7 @@ julia.157-173-206-42.sslip.io {
 				header Cache-Control "public, max-age=2592000, stale-while-revalidate=86400"
 				import servir
 			}
-			@paginas path / /index.html /receitas.html /login.html /manifest.webmanifest
+			@paginas path / /receitas /login /manifest.webmanifest
 			handle @paginas {
 				header Cache-Control "public, max-age=60, s-maxage=300, stale-while-revalidate=600, stale-if-error=86400"
 				import servir

@@ -139,7 +139,7 @@
   }
   function enviarRecompra(c) {
     var r = EX.ler().recompra, dias = diasDesde(c.ultima);
-    var url = link('index.html', { repetir: c.id, ref: 'recompra' });
+    var url = link('/', { repetir: c.id, ref: 'recompra' });
     var txt = r.texto.replace(/\{nome\}/g, primeiro(c.nome)).replace(/\{dias\}/g, dias).replace(/\{itens\}/g, itensTxt(c.itens)).replace(/\{link\}/g, url);
     var l = PVA.avisar(c, txt, 'Recompra automática');
     r.enviados[c.id] = c.ultima;
@@ -167,7 +167,7 @@
       '<p class="pv-nota">Quem passa do prazo sem comprar deixa de receber o aviso e segue para as campanhas de reativação.</p>' +
       '<label for="exRecTexto" style="display:block;margin-top:10px">Mensagem <small class="pv-mudo">use {nome}, {dias}, {itens} e {link}</small></label><textarea id="exRecTexto" rows="4">' + esc(r.texto) + '</textarea>' +
       '<div class="acoes"><button class="btn pequeno" id="exRecSalvar">Salvar regra</button><button class="btn pequeno claro" id="exRecPadrao">Voltar ao padrão</button></div></div>' +
-      '<div class="painel"><h2>O que o cliente recebe</h2><div class="pv-ex"><small>Conversa no WhatsApp</small><p class="pv-prev">' + esc(r.texto.replace(/\{nome\}/g, 'Tereza').replace(/\{dias\}/g, 11).replace(/\{itens\}/g, '2 kg de Camarão descascado e 1 kg de Filé de salmão').replace(/\{link\}/g, link('index.html', { repetir: 'c14' }))).replace(/\n/g, '<br>') + '</p></div>' +
+      '<div class="painel"><h2>O que o cliente recebe</h2><div class="pv-ex"><small>Conversa no WhatsApp</small><p class="pv-prev">' + esc(r.texto.replace(/\{nome\}/g, 'Tereza').replace(/\{dias\}/g, 11).replace(/\{itens\}/g, '2 kg de Camarão descascado e 1 kg de Filé de salmão').replace(/\{link\}/g, link('/', { repetir: 'c14' }))).replace(/\n/g, '<br>') + '</p></div>' +
       '<p class="pv-nota">O link abre a loja com o carrinho já montado com o último pedido: o cliente só confere o endereço e finaliza.</p>' +
       '<div class="acoes"><button class="btn pequeno" id="exRecRodar"' + (!r.ativa || !pend ? ' disabled' : '') + '>Enviar agora para ' + pend + ' cliente(s)</button></div></div></div>' +
       '<div class="painel" style="margin-top:18px"><h2>Clientes <small>por tempo desde o último pedido</small></h2><div class="rolagem"><table><thead><tr><th>Cliente</th><th>Último pedido</th><th>Itens</th><th>Situação</th><th>Aviso</th><th></th></tr></thead><tbody>' +
@@ -209,7 +209,7 @@
     var p = prod(id), e = EX.ler().espera, pend = EX.pendentes(id), inp = $('#exLote-' + id), q = inp ? parseFloat(inp.value) : 0;
     if (!p || !pend.length) return;
     if (q > 0) { p.estoque = +(p.estoque + q).toFixed(1); JP.salvar(); }
-    var url = link('index.html', { add: p.id, ref: 'lote' });
+    var url = link('/', { add: p.id, ref: 'lote' });
     pend.forEach(function (x) {
       var txt = e.texto.replace(/\{nome\}/g, primeiro(x.nome)).replace(/\{produto\}/g, p.nome).replace(/\{link\}/g, url);
       PVA.avisar({ nome: x.nome, fone: x.fone }, txt, 'Lista de espera — ' + p.nome);
@@ -233,7 +233,7 @@
       rs.map(function (r) {
         return '<tr' + (sel && r.id === sel.id ? ' class="ex-sel"' : '') + '><td><b>' + esc(r.nome) + '</b><small>' + esc(r.fone) + ' · código ' + esc(r.codigo) + '</small></td><td>' + esc(r.bairro) + '<small>' + esc(r.endereco) + '</small></td>' +
           '<td>' + (r.itens.length ? esc(itensTxt(r.itens.map(function (i) { return [i.id, i.qtd]; }))) : '<span class="pv-mudo">Sem pedido definido</span>') + '<small>' + esc(r.dias || '') + '</small></td><td class="num">' + ctx.brl(totalRecorrente(r)) + '</td>' +
-          '<td><div class="acoes"><button class="btn pequeno claro" data-ex-at-sel="' + r.id + '">Editar</button><a class="btn pequeno" href="' + link('index.html', { atacado: r.codigo }) + '" target="_blank" rel="noopener">Abrir loja ↗</a></div></td></tr>';
+          '<td><div class="acoes"><button class="btn pequeno claro" data-ex-at-sel="' + r.id + '">Editar</button><a class="btn pequeno" href="' + link('/', { atacado: r.codigo }) + '" target="_blank" rel="noopener">Abrir loja ↗</a></div></td></tr>';
       }).join('') + '</tbody></table></div></div>' +
       (sel ? '<div class="duas" style="margin-top:18px"><div class="painel"><h2>Pedido recorrente — ' + esc(sel.nome) + '</h2>' +
         '<div class="ex-linha"><div class="campo"><label for="exAtDias">Dias de entrega</label><input id="exAtDias" value="' + esc(sel.dias || '') + '" placeholder="Ex.: terça e sexta"></div></div>' +

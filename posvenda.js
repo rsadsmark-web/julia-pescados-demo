@@ -149,7 +149,7 @@
     var nomeProd = function (id) { return (prods.filter(function (p) { return p.id === id; })[0] || {}).nome || id; };
     var exemplo = PV.modeloReceitas('Marcos', 'JP-1045', 'Camarão cinza inteiro e Filé de tilápia', PV.linkReceitas(['p1', 'p5'], 'JP-1045'));
     tela.innerHTML = '<div class="cab"><div><h1>Receitas</h1><p>Depois que o pedido é entregue, a IA manda ao cliente o link de uma página com várias receitas dos produtos que ele comprou.</p></div>' +
-      '<a class="btn pequeno claro" href="receitas.html" target="_blank" rel="noopener">Ver a página pública ↗</a></div>' +
+      '<a class="btn pequeno claro" href="/receitas" target="_blank" rel="noopener">Ver a página pública ↗</a></div>' +
       '<div class="painel pv-topo"><div>' + chaveToggle(s.receitas.ativa, s.receitas.ativa ? 'Envio do link de receitas ligado' : 'Envio do link de receitas desligado', 'pvRecAtiva') +
       '<p class="pv-nota">A mensagem sai na conversa do cliente, logo depois da entrega. Quem desliga a IA nas Conversas também para este envio.</p>' +
       '<label class="sr" for="pvRecTexto">Mensagem enviada com o link</label><textarea id="pvRecTexto" rows="4">' + esc(s.receitas.texto) + '</textarea>' +

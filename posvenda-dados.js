@@ -44,7 +44,7 @@
   }
   // Endereço público da página de receitas, com os produtos do pedido em destaque.
   function linkReceitas(prods, pedido) {
-    var u = new URL('receitas.html', location.href);
+    var u = new URL('/receitas', location.href);
     if (prods && prods.length) u.searchParams.set('p', prods.join(','));
     if (pedido) u.searchParams.set('pedido', pedido);
     return u.href;

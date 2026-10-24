@@ -20,7 +20,7 @@
       '<h4>Ingredientes</h4><ul>' + r.ingr.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ul>' +
       '<h4>Modo de preparo</h4><ol>' + r.prep.map(function (i) { return '<li>' + esc(i) + '</li>'; }).join('') + '</ol>' +
       (r.dica ? '<p class="rec-dica"><b>Dica:</b> ' + esc(r.dica) + '</p>' : '') + '</details>' +
-      '<a class="btn pequeno claro" href="index.html?add=' + p.id + '">Comprar ' + esc(p.nome) + '</a></div></article>';
+      '<a class="btn pequeno claro" href="/?add=' + p.id + '">Comprar ' + esc(p.nome) + '</a></div></article>';
   }
 
   function desenha() {
