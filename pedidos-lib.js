@@ -38,7 +38,7 @@
     movs.forEach(function (m) {
       var pr = (S.produtos || []).filter(function (x) { return x.id === m[0]; })[0]; if (!pr) return;
       pr.estoque = Math.max(0, +(pr.estoque - sinal * m[1]).toFixed(3));
-      S.baixas.unshift({ quando: agora, pedido: p.id, produto: pr.nome, qtd: sinal * m[1], saldo: pr.estoque });
+      S.baixas.unshift({ quando: agora, pedido: p.id, produto: pr.nome, qtd: sinal * m[1], saldo: pr.estoque, tipo: sinal > 0 ? 'venda' : 'estorno' });
     });
   }
 

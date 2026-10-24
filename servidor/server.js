@@ -188,6 +188,7 @@ app.put('/api/kv/:chave', express.text({ type: '*/*', limit: '30mb' }), async (r
 /* ---------- usuários (só administrador) ---------- */
 const soAdmin = (req, res, next) => (req.usuario.papel === 'admin' ? next() : res.status(403).json({ erro: 'Só o administrador faz isso.' }));
 wa.rotasPainel(soAdmin);
+const nfe = require('./nf')(app, pool); nfe.rotas(soAdmin); // nota fiscal: rascunhos e configuração; emissão desligada por padrão
 app.get('/api/usuarios', soAdmin, async (req, res) => {
   res.json((await pool.query('SELECT id, usuario, nome, papel, ativo, senha_provisoria, criado FROM usuarios ORDER BY id')).rows);
 });
@@ -225,7 +226,7 @@ module.exports = { pool, hashSenha, iniciaBanco };
 if (require.main === module) {
   (async () => {
     for (let i = 0; i < 30; i++) { try { await iniciaBanco(); break; } catch (e) { console.log('aguardando o banco…', e.code || e.message); await new Promise((r) => setTimeout(r, 2000)); if (i === 29) process.exit(1); } }
-    await pub.iniciaTabelas(); await wa.iniciaTabelas(); wa.iniciaFila(); await pub.publica().catch((e) => console.error('publica', e.message));
+    await pub.iniciaTabelas(); await wa.iniciaTabelas(); await nfe.iniciaTabelas(); wa.iniciaFila(); await pub.publica().catch((e) => console.error('publica', e.message));
     app.listen(PORTA, () => console.log('Júlia Pescados no ar na porta ' + PORTA));
   })();
 }

@@ -36,6 +36,9 @@ services:
       UAZAPI_TOKEN: ${UAZAPI_TOKEN:-}
       UAZAPI_WEBHOOK_SECRET: ${UAZAPI_WEBHOOK_SECRET:-}
       WHATSAPP_LIBERADO: ${WHATSAPP_LIBERADO:-nao}
+      # Nota fiscal: sem provedor e sem liberação, o sistema só valida e guarda rascunhos (não emite).
+      FOCUS_TOKEN: ${FOCUS_TOKEN:-}
+      NF_EMISSAO_LIBERADA: ${NF_EMISSAO_LIBERADA:-nao}
       NODE_OPTIONS: --max-old-space-size=160   # heap abaixo do limite do contêiner: o Node recolhe memória antes de ser morto
     volumes:
       - ./dinamico:/app/dinamico   # catálogo público (estado-publico.json), servido pelo Caddy direto do disco

@@ -38,3 +38,7 @@ As telas respondem sem extensão: `/` (loja), `/receitas`, `/login`, `/trocar-se
 - Entrada: `POST /api/uazapi/webhook/<UAZAPI_WEBHOOK_SECRET>` grava a mensagem e ela vira conversa do CRM quando o painel abre; "SAIR" marca opt-out.
 - Mensagens do chat e as automações de pós-venda passam por `/api/whatsapp/enviar`; desligado, aparecem como "Não enviada" com o motivo.
 - Os caminhos `/send/text` e o formato do webhook seguem a uazapi v2 e precisam ser conferidos na primeira conexão real. A tela de campanhas ainda dispara em modo simulado (o envio em massa pela fila do servidor entra na ligação).
+
+## Estoque e nota fiscal (etapa 5)
+- Estoque (`estoque-lib.js`, `tests/estoque.test.mjs`): baixa ao confirmar o pedido, devolução ao cancelar, entrada com origem, contagem (ajuste com motivo), perda, mínimo editável por produto, alerta de baixo/esgotado, sugestão de compra pela média de venda dos últimos 14 dias e planilha CSV. Tudo fica no extrato do produto.
+- Nota fiscal (`nf-lib.js`, `servidor/nf.js`, `tests/nf.test.mjs`): valida emitente, CPF/CNPJ, NCM e endereço, monta o corpo da NF-e no formato do Focus NFe e guarda rascunhos. **Não emite**: precisa de `NF_EMISSAO_LIBERADA=sim`, `FOCUS_TOKEN`, provedor escolhido na tela e emitente completo. Os campos do corpo da nota devem ser conferidos na homologação do provedor.

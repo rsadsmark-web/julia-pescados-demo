@@ -37,7 +37,7 @@
   /* ---------- selos do menu ---------- */
   function selos() {
     var pend = S.pedidos.filter(function (p) { return JPD.statusDe(p) === 'novo'; }).length;
-    var baixo = S.produtos.filter(function (p) { return p.estoque <= p.min; }).length;
+    var al = JPE.alertas(S), baixo = al.baixos.length + al.esgotados.length;
     $('#seloPedidos').textContent = pend || ''; $('#seloEstoque').textContent = baixo || '';
     var nl = window.CRM ? CRM.naoLidas() : 0; $('#seloConversas').textContent = nl || '';
     var av = window.PVA ? PVA.pendentesBaixas() : 0; $('#seloAvaliacoes').textContent = av || '';
@@ -50,7 +50,7 @@
     var fat = hoje.reduce(function (s, p) { return s + JP.totalPedido(p); }, 0);
     var abertos = S.pedidos.filter(function (p) { return JPD.ativo(p) && JPD.statusDe(p) !== 'novo'; }).length;
     var pend = S.pedidos.filter(function (p) { return JPD.statusDe(p) === 'novo'; }).length;
-    var baixo = S.produtos.filter(function (p) { return p.estoque <= p.min; });
+    var al0 = JPE.alertas(S), baixo = al0.baixos.concat(al0.esgotados);
     tela.innerHTML = '<div class="cab"><div><h1>Bom dia, Júlia</h1><p>Resumo da operação de hoje.</p></div></div>' +
       '<div class="kpis">' +
       kpi('Pedidos hoje', hoje.length, JP.brl(fat) + ' faturados') +
@@ -211,24 +211,43 @@
   }
 
   /* ---------- Estoque ---------- */
-  function estoque() {
-    var baixos = S.produtos.filter(function (p) { return p.estoque <= p.min; });
-    tela.innerHTML = '<div class="cab"><div><h1>Estoque</h1><p>A baixa é automática quando o pedido é confirmado.</p></div></div>' +
-      (baixos.length ? '<div class="banner alerta"><b>Alerta de estoque baixo:</b> ' + baixos.map(function (p) { return esc(p.nome) + ' (' + p.estoque + ' ' + p.un + ')'; }).join(' · ') + '</div>' : '') +
-      '<div class="duas"><div class="painel"><h2>Produtos</h2><div class="rolagem"><table><thead><tr><th>Produto</th><th>Categoria</th><th>Nível</th><th class="num">Saldo</th><th class="num">Mínimo</th><th>Situação</th><th>Entrada</th></tr></thead><tbody>' +
-      S.produtos.map(function (p) {
-        var cr = p.estoque <= 0 ? 'critico' : p.estoque <= p.min ? 'baixo' : '', pct = Math.min(100, p.estoque / (p.min * 4) * 100);
-        var st = p.estoque <= 0 ? '<span class="chip perigo">Esgotado</span>' : p.estoque <= p.min ? '<span class="chip alerta">Baixo</span>' : '<span class="chip ok">Normal</span>';
-        return '<tr><td><b>' + esc(p.nome) + '</b></td><td>' + esc(p.cat) + '</td><td><div class="barra ' + cr + '"><i style="width:' + pct + '%"></i></div></td><td class="num"><b>' + p.estoque + '</b> ' + p.un + '</td><td class="num">' + p.min + '</td><td>' + st + '</td>' +
-          '<td><div class="acoes"><input class="peq" style="width:64px" type="number" min="1" step="1" placeholder="Qtd" id="ent-' + p.id + '" aria-label="Quantidade de entrada de ' + esc(p.nome) + '"><button class="btn pequeno claro" data-entrada="' + p.id + '">Repor</button></div></td></tr>';
-      }).join('') + '</tbody></table></div></div>' +
-      '<div class="painel"><h2>Baixas automáticas <small>geradas pelos pedidos confirmados</small></h2>' +
-      (S.baixas.length ? '<div class="rolagem"><table><thead><tr><th>Quando</th><th>Pedido</th><th>Produto</th><th class="num">Saiu</th><th class="num">Saldo</th></tr></thead><tbody>' + S.baixas.slice(0, 14).map(function (b) { return '<tr><td>' + JP.dataHora(b.quando) + '</td><td>' + b.pedido + '</td><td>' + esc(b.produto) + '</td><td class="num">−' + b.qtd + '</td><td class="num">' + b.saldo + '</td></tr>'; }).join('') + '</tbody></table></div>'
-        : '<p class="vazio">Nenhuma baixa ainda.<br>Confirme um pedido em “Pedidos e delivery” e veja o saldo cair aqui.</p>') + '</div></div>';
+  var filtroEst = 'todos', buscaEst = '', extratoAberto = {};
+  var TIPO_MOV = { venda: ['Venda', 'cinza'], estorno: ['Devolução', 'ok'], entrada: ['Entrada', 'ok'], ajuste: ['Ajuste', 'laranja'], perda: ['Perda', 'alerta'] };
+  function qtdMov(b) { var q = Math.abs(b.qtd), sinal = (b.tipo === 'entrada' || b.tipo === 'estorno' || (b.tipo === 'ajuste' && b.qtd > 0)) ? '+' : '−'; if (b.tipo === 'estorno' && b.qtd > 0) sinal = '−'; if (!b.tipo) sinal = b.qtd < 0 ? '+' : '−'; return sinal + String(+q.toFixed(3)).replace('.', ','); }
+  function linhaMov(b, comProduto) {
+    var t = TIPO_MOV[b.tipo || 'venda'];
+    return '<tr><td>' + JP.dataHora(b.quando) + '</td>' + (comProduto ? '<td>' + esc(b.produto) + '</td>' : '') + '<td><span class="chip ' + t[1] + '">' + t[0] + '</span></td><td class="num">' + qtdMov(b) + '</td><td class="num">' + String(+(+b.saldo).toFixed(3)).replace('.', ',') + '</td><td>' + esc(b.pedido || b.motivo || '') + (b.por ? '<small>' + esc(b.por) + '</small>' : '') + '</td></tr>';
   }
+  function estoque() {
+    var al = JPE.alertas(S), baixos = al.baixos.concat(al.esgotados);
+    var lista = S.produtos.filter(function (p) {
+      var c = JPE.situacao(p).cod;
+      if (filtroEst === 'baixos' && c === 'normal') return false; if (filtroEst === 'esgotados' && c !== 'esgotado') return false;
+      return !buscaEst || JPL.semAcento(p.nome + ' ' + p.cat).indexOf(JPL.semAcento(buscaEst)) >= 0;
+    });
+    var sug = JPE.sugestoes(S, { agora: JP.agora() });
+    tela.innerHTML = '<div class="cab"><div><h1>Estoque</h1><p>A baixa é automática quando o pedido é confirmado e volta se ele for cancelado. Entradas, ajustes de contagem e perdas ficam registrados.</p></div><div><button class="btn pequeno claro" type="button" id="estCsv">Baixar planilha (CSV)</button></div></div>' +
+      (baixos.length ? '<div class="banner alerta"><div><b>' + baixos.length + ' produto(s) pedem atenção:</b> ' + baixos.slice(0, 12).map(function (p) { return esc(p.nome) + ' (' + String(p.estoque).replace('.', ',') + ' ' + esc(p.un) + ')'; }).join(' · ') + (baixos.length > 12 ? ' …' : '') + '</div></div>' : '') +
+      (sug.length ? '<div class="painel"><h2>Sugestão de compra <small>cobre 7 dias de venda, pela média dos últimos 14 dias, e nunca fica abaixo do mínimo</small></h2><div class="rolagem"><table><thead><tr><th>Produto</th><th class="num">Saldo</th><th class="num">Mínimo</th><th class="num">Vende por dia</th><th class="num">Comprar</th><th>Motivo</th></tr></thead><tbody>' + sug.slice(0, 15).map(function (x) { return '<tr><td><b>' + esc(x.nome) + '</b></td><td class="num">' + String(x.saldo).replace('.', ',') + ' ' + esc(x.un) + '</td><td class="num">' + x.min + '</td><td class="num">' + String(x.mediaDia).replace('.', ',') + '</td><td class="num"><b>' + String(x.comprar).replace('.', ',') + '</b></td><td>' + esc(x.motivo) + '</td></tr>'; }).join('') + '</tbody></table></div></div>' : '') +
+      '<div class="painel" style="margin-top:18px"><h2>Produtos <small>' + lista.length + ' de ' + S.produtos.length + '</small></h2><div class="filtros">' +
+      [['todos', 'Todos'], ['baixos', 'Abaixo do mínimo'], ['esgotados', 'Esgotados']].map(function (f) { return '<button type="button" class="filtro' + (filtroEst === f[0] ? ' ativo' : '') + '" data-fest="' + f[0] + '">' + f[1] + '</button>'; }).join('') +
+      '<input class="peq" type="search" id="buscaEst" placeholder="Buscar produto" value="' + esc(buscaEst) + '" aria-label="Buscar produto no estoque" style="margin-left:auto;min-width:200px"></div>' +
+      '<div class="rolagem"><table><thead><tr><th>Produto</th><th>Nível</th><th class="num">Saldo</th><th class="num">Mínimo</th><th>Situação</th><th>Movimentar</th></tr></thead><tbody>' +
+      lista.map(function (p) {
+        var sit = JPE.situacao(p), cr = sit.cod === 'esgotado' ? 'critico' : sit.cod === 'baixo' ? 'baixo' : '', pct = Math.min(100, p.estoque / (Math.max(p.min, 1) * 4) * 100);
+        var st = '<span class="chip ' + { esgotado: 'perigo', baixo: 'alerta', normal: 'ok' }[sit.cod] + '">' + sit.rotulo + '</span>';
+        return '<tr><td><b>' + esc(p.nome) + '</b><small>' + esc(p.cat) + '</small></td><td><div class="barra ' + cr + '"><i style="width:' + pct + '%"></i></div></td><td class="num"><b>' + String(p.estoque).replace('.', ',') + '</b> ' + esc(p.un) + '</td>' +
+          '<td class="num"><input class="peq" style="width:64px" type="number" min="0" step="any" value="' + p.min + '" data-min="' + p.id + '" aria-label="Mínimo de ' + esc(p.nome) + '"></td><td>' + st + '</td>' +
+          '<td><div class="acoes"><input class="peq" style="width:64px" type="number" min="0" step="any" placeholder="Qtd" id="ent-' + p.id + '" aria-label="Quantidade de entrada de ' + esc(p.nome) + '"><button class="btn pequeno claro" data-entrada="' + p.id + '">Repor</button><button class="btn pequeno claro" data-ajuste="' + p.id + '">Contar</button><button class="btn pequeno claro" data-perda="' + p.id + '">Perda</button><button class="btn pequeno claro" data-extrato="' + p.id + '">' + (extratoAberto[p.id] ? 'Ocultar' : 'Extrato') + '</button></div></td></tr>' +
+          (extratoAberto[p.id] ? '<tr class="linha-det"><td colspan="6">' + (function () { var e = JPE.extrato(S, p.id, 15); return e.length ? '<table><thead><tr><th>Quando</th><th>Tipo</th><th class="num">Qtd</th><th class="num">Saldo</th><th>Origem</th></tr></thead><tbody>' + e.map(function (b) { return linhaMov(b, false); }).join('') + '</tbody></table>' : '<p class="vazio">Sem movimentação registrada.</p>'; })() + '</td></tr>' : '');
+      }).join('') + '</tbody></table></div></div>' +
+      '<div class="painel" style="margin-top:18px"><h2>Últimas movimentações <small>vendas, devoluções, entradas, contagens e perdas</small></h2>' +
+      (S.baixas.length ? '<div class="rolagem"><table><thead><tr><th>Quando</th><th>Produto</th><th>Tipo</th><th class="num">Qtd</th><th class="num">Saldo</th><th>Origem</th></tr></thead><tbody>' + S.baixas.slice(0, 25).map(function (b) { return linhaMov(b, true); }).join('') + '</tbody></table></div>' : '<p class="vazio">Nenhuma movimentação ainda.</p>') + '</div>';
+  }
+  function movimenta(fn, ok) { var r = fn(); if (!r.ok) { toast(r.erro); return; } JP.salvar(); toast(ok(r)); estoque(); selos(); }
 
   /* ---------- roteamento ---------- */
-  var MODULOS = { visao: visao, pedidos: pedidosTela, whatsapp: function () { WAA.render(tela); }, conversas: crmTela, funil: crmTela, campanhas: crmTela, receitas: posVendaTela, avaliacoes: posVendaTela, entregas: extrasTela, recompra: extrasTela, espera: extrasTela, atacado: extrasTela, clientes: clientes, nf: nf, estoque: estoque, loja: lojaTela };
+  var MODULOS = { visao: visao, pedidos: pedidosTela, whatsapp: function () { WAA.render(tela); }, conversas: crmTela, funil: crmTela, campanhas: crmTela, receitas: posVendaTela, avaliacoes: posVendaTela, entregas: extrasTela, recompra: extrasTela, espera: extrasTela, atacado: extrasTela, clientes: clientes, nf: function () { if (window.JP_VAZIO) NFA.render(tela); else nf(); }, estoque: estoque, loja: lojaTela };
   function lojaTela() { LJA.render(tela); }
   function crmTela() { CRM.render(modulo, parametro, tela); }
   function posVendaTela() { PVA.render(modulo, tela); }
@@ -303,15 +322,33 @@
     }
     else if (t.dataset.fcli) { filtroCli = t.dataset.fcli; desenhaClientes(); }
     else if (t.dataset.entrada) {
-      var inp = $('#ent-' + t.dataset.entrada), q = parseFloat(inp.value);
-      if (!(q > 0)) { toast('Informe a quantidade que entrou.'); return; }
-      var pr = S.produtos.filter(function (x) { return x.id === t.dataset.entrada; })[0]; pr.estoque = +(pr.estoque + q).toFixed(1); JP.salvar(); toast('Entrada de ' + q + ' ' + pr.un + ' em ' + pr.nome + '.'); estoque(); selos();
+      var inp = $('#ent-' + t.dataset.entrada), pr = S.produtos.filter(function (x) { return x.id === t.dataset.entrada; })[0], q = parseFloat(String(inp.value).replace(',', '.'));
+      var mo = (window.prompt('Entrada de ' + (q || '?') + ' ' + pr.un + ' em ' + pr.nome + '.\nOrigem (opcional, ex.: compra do fornecedor):', 'Compra') || '');
+      movimenta(function () { return JPE.entrada(S, pr.id, q, { agora: JP.agora(), por: (window.JP_USUARIO || {}).usuario, motivo: mo }); }, function (r) { return 'Entrada registrada. Saldo de ' + pr.nome + ': ' + r.saldo + ' ' + pr.un + '.'; });
+    }
+    else if (t.dataset.ajuste) {
+      var pa = S.produtos.filter(function (x) { return x.id === t.dataset.ajuste; })[0], cont = window.prompt('Contagem física de ' + pa.nome + ' (' + pa.un + ').\nSaldo no sistema: ' + pa.estoque + '. Quanto há de verdade?'); if (cont === null) return;
+      var ma = window.prompt('Motivo do ajuste (obrigatório):', 'Contagem do freezer'); if (ma === null) return;
+      movimenta(function () { return JPE.ajuste(S, pa.id, parseFloat(String(cont).replace(',', '.')), { agora: JP.agora(), por: (window.JP_USUARIO || {}).usuario, motivo: ma }); }, function (r) { return 'Saldo ajustado (' + (r.diferenca > 0 ? '+' : '') + r.diferenca + ').'; });
+    }
+    else if (t.dataset.perda) {
+      var pp2 = S.produtos.filter(function (x) { return x.id === t.dataset.perda; })[0], qp = window.prompt('Quanto de ' + pp2.nome + ' (' + pp2.un + ') foi perdido?'); if (qp === null) return;
+      var mp = window.prompt('Motivo da perda (obrigatório):', 'Descongelou'); if (mp === null) return;
+      movimenta(function () { return JPE.perda(S, pp2.id, parseFloat(String(qp).replace(',', '.')), { agora: JP.agora(), por: (window.JP_USUARIO || {}).usuario, motivo: mp }); }, function () { return 'Perda registrada.'; });
+    }
+    else if (t.dataset.extrato) { extratoAberto[t.dataset.extrato] = !extratoAberto[t.dataset.extrato]; estoque(); }
+    else if (t.dataset.fest) { filtroEst = t.dataset.fest; estoque(); }
+    else if (t.id === 'estCsv') {
+      var blob = new Blob(['\ufeff' + JPE.csv(S)], { type: 'text/csv;charset=utf-8' }), a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'estoque-' + new Date(JP.agora()).toISOString().slice(0, 10) + '.csv'; a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
     }
     else if (t.id === 'emitirNf') emitirNf();
   });
   document.addEventListener('change', function (e) {
     if (e.target.dataset.moto !== undefined) {
       var p = pedido(e.target.dataset.moto), ra = JPD.atribui(S, p, e.target.value); if (!ra.ok) { toast(ra.erro); desenhaPedidos(); return; } JP.salvar(); toast(p.motoboy ? 'Entregador ' + motoboy(p.motoboy).nome + ' atribuído ao ' + p.id + '.' : 'Entregador removido do ' + p.id + '.'); atualizaMapaAdmin();
+    } else if (e.target.dataset.min !== undefined) {
+      var rm = JPE.defineMinimo(S, e.target.dataset.min, e.target.value); if (!rm.ok) { toast(rm.erro); estoque(); return; } JP.salvar(); toast('Mínimo salvo.'); estoque(); selos();
     } else if (e.target.id === 'nfPedido') { nfSel = e.target.value; nf(); }
   });
   document.addEventListener('submit', function (e) {
@@ -320,7 +357,7 @@
     S.motoboys.push({ id: 'm' + Date.now().toString(36), nome: nome.slice(0, 40), fone: f.fone.value.trim().slice(0, 20), moto: f.moto.value.trim().slice(0, 30), ativo: true });
     JP.salvar(); toast('Entregador ' + nome + ' cadastrado.'); f.reset(); atualizaMapaAdmin(); desenhaPedidos();
   });
-  document.addEventListener('input', function (e) { if (e.target.id === 'buscaCli') { buscaCli = e.target.value; var pos = e.target.selectionStart; desenhaClientes(); var b = $('#buscaCli'); b.focus(); b.setSelectionRange(pos, pos); } });
+  document.addEventListener('input', function (e) { if (e.target.id === 'buscaEst') { buscaEst = e.target.value; var ps = e.target.selectionStart; estoque(); var be = $('#buscaEst'); be.focus(); be.setSelectionRange(ps, ps); return; } if (e.target.id === 'buscaCli') { buscaCli = e.target.value; var pos = e.target.selectionStart; desenhaClientes(); var b = $('#buscaCli'); b.focus(); b.setSelectionRange(pos, pos); } });
 
   // pedidos feitos na loja (outra aba) chegam aqui sozinhos
   window.addEventListener('storage', function (e) {
@@ -347,6 +384,7 @@
   PVA.init({ estado: function () { return S; }, esc: esc, toast: toast, ha: ha, dataHora: JP.dataHora, selos: selos, modulo: function () { return modulo; } });
   EXP.init({ estado: function () { return S; }, recarrega: recarrega, esc: esc, toast: toast, ha: ha, brl: JP.brl, dataHora: JP.dataHora, selos: selos, modulo: function () { return modulo; } });
   WAA.init({ esc: esc, toast: toast });
+  NFA.init({ esc: esc, toast: toast, estado: function () { return S; } });
   LJA.init({ estado: function () { return S; }, esc: esc, toast: toast });
   window.addEventListener('hashchange', ir);
   ir();
