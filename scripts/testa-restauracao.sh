@@ -12,8 +12,8 @@ DROP DATABASE IF EXISTS $tmp;
 SQL
   exit 1; }
 conta() { echo "SELECT 'usuarios', count(*) FROM usuarios UNION ALL SELECT 'kv', count(*) FROM kv UNION ALL SELECT 'entradas', count(*) FROM entradas UNION ALL SELECT 'produtos', coalesce(jsonb_array_length((SELECT valor::jsonb->'produtos' FROM kv WHERE chave='jp_demo_v1')),0) UNION ALL SELECT 'pedidos', coalesce(jsonb_array_length((SELECT valor::jsonb->'pedidos' FROM kv WHERE chave='jp_demo_v1')),0);" | psql_ "$1" 2>&1; }
-echo "CREATE DATABASE $tmp;" | psql_ postgres >/dev/null 2>&1 || falha "nao consegui criar o banco temporario"
-gunzip -c "$arq" | psql_ "$tmp" >/dev/null 2>&1 || falha "o dump nao restaurou"
+echo "CREATE DATABASE $tmp;" | psql_ postgres >/dev/null 2>&1 || falha "nÃ£o consegui criar o banco temporÃ¡rio"
+gunzip -c "$arq" | psql_ "$tmp" >/dev/null 2>&1 || falha "o dump nÃ£o restaurou"
 # contagens: o backup é do passado, então o banco real pode ter ido além; o restaurado nunca pode ter mais nem estar vazio
 if [ "$MODO" = local ]; then real_db="$JULIA_PGDB"; else real_db=$(cd "$DIR_PROJ" && docker compose exec -T db sh -c 'echo $POSTGRES_DB'); fi
 rest=$(conta "$tmp"); real=$(conta "$real_db")
