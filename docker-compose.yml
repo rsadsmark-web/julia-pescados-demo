@@ -31,6 +31,11 @@ services:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       PORT: "3000"
       DINAMICO_DIR: /app/dinamico
+      # WhatsApp (uazapi): tudo vazio = desligado. Só envia com os quatro preenchidos e a chave geral ligada no painel.
+      UAZAPI_URL: ${UAZAPI_URL:-}
+      UAZAPI_TOKEN: ${UAZAPI_TOKEN:-}
+      UAZAPI_WEBHOOK_SECRET: ${UAZAPI_WEBHOOK_SECRET:-}
+      WHATSAPP_LIBERADO: ${WHATSAPP_LIBERADO:-nao}
       NODE_OPTIONS: --max-old-space-size=160   # heap abaixo do limite do contêiner: o Node recolhe memória antes de ser morto
     volumes:
       - ./dinamico:/app/dinamico   # catálogo público (estado-publico.json), servido pelo Caddy direto do disco

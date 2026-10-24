@@ -297,6 +297,14 @@
     render: render, pendentesBaixas: pendentesBaixas,
     // usado pelas novidades (recompra, lote fresco, saída para entrega): mensagem da IA na conversa do cliente
     avisar: function (cli, texto, origem) {
+      function enviaPeloServidor(l, m, tipo) {
+        m.st = 'enviando';
+        fetch('/api/whatsapp/enviar', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-jp': '1' }, body: JSON.stringify({ fone: l.fone, texto: m.t, tipo: tipo, lead: l.id }) })
+          .then(function (r) { return r.json().catch(function () { return {}; }); })
+          .then(function (j) { if (j.ok) { m.st = 'enviada'; delete m.erro; } else { m.st = 'falhou'; m.erro = j.motivo || j.erro || 'o servidor recusou o envio.'; } })
+          .catch(function () { m.st = 'falhou'; m.erro = 'sem conexão com o servidor.'; })
+          .then(function () { I.salvar(); refrescaConversas(); });
+      }
       var D = I.dados(), digs = String(cli.fone || '').replace(/\D/g, '');
       var l = D.leads.filter(function (x) { return digs && String(x.fone).replace(/\D/g, '') === digs; })[0] || D.leads.filter(function (x) { return x.nome === cli.nome; })[0];
       if (!l) {
@@ -306,7 +314,9 @@
         D.leads.unshift(l);
       }
       if (l.optout) return null;
-      msg(l, 'j', texto, Date.now(), true); contaIA(1); refrescaConversas();
+      var m = msg(l, 'j', texto, Date.now(), true); contaIA(1);
+      if (window.JP_VAZIO) enviaPeloServidor(l, m, /recompra|lote|avalia|indica/i.test(origem || '') ? 'campanha' : 'resposta'); // sistema real: nada de "enviada" de mentira
+      refrescaConversas();
       return l;
     },
     reset: function () { PV.reset(); F.filtro = 'todas'; F.respondendo = null; PV.recarregar(); semear(); }

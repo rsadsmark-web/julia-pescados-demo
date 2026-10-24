@@ -150,9 +150,22 @@
     if (!l.resp && opcoes.ia !== 1) { l.resp = ATUAL; I.sistema(l, 'Conversa atribuída a ' + ATUAL + ' ao responder.'); }
     if (opcoes.ia !== 1) meta(l).precisa = '';
     insere(l, m); meta(l).status = 'aberta'; l.nao = 0; delete sug[l.id]; salvar();
-    entrega(l, m);
-    if (opcoes.ia !== 1) simulaCliente(l);
+    if (window.JP_VAZIO) enviaReal(l, m); // sistema real: nada de entrega nem resposta de mentira
+    else { entrega(l, m); if (opcoes.ia !== 1) simulaCliente(l); }
     return m;
+  }
+  // Manda pelo servidor (uazapi). Se o WhatsApp estiver desligado ou travado, a mensagem fica como "não enviada" com o motivo.
+  function enviaReal(l, m) {
+    var id = l.id;
+    function falha(motivo) { m.st = 'falhou'; m.erro = motivo; salvar(); atualizaMsgs(id); desenhaItem(id); toast('Não enviada: ' + motivo); }
+    if (m.k) { setTimeout(function () { falha('o envio de anexos e áudios ainda não está disponível.'); }, 0); return; }
+    fetch('/api/whatsapp/enviar', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-jp': '1' }, body: JSON.stringify({ fone: l.fone, texto: m.t, lead: l.id }) })
+      .then(function (r) { return r.json().catch(function () { return {}; }); })
+      .then(function (j) {
+        if (j.ok) { m.st = 'enviada'; delete m.erro; salvar(); atualizaMsgs(id); desenhaItem(id); }
+        else falha(j.motivo || j.erro || 'o servidor recusou o envio.');
+      })
+      .catch(function () { falha('sem conexão com o servidor.'); });
   }
   function entrega(l, m) {
     var id = l.id;
@@ -310,7 +323,7 @@
     var eu = m.d === 'j';
     return '<div class="xm ' + (eu ? 'j' : 'c') + (seq ? ' seq' : '') + (m.st === 'falhou' ? ' falhou' : '') + '" data-i="' + i + '">' + (m.camp ? '<small class="xm-camp">Campanha: ' + esc(m.camp) + '</small>' : '') + corpoMsg(m, i) +
       '<span class="xm-rod">' + (m.ia ? '<em class="xia" title="' + (m.ia === 2 ? 'Resposta escrita pela IA e aprovada por ' + ATUAL : 'Resposta enviada pela IA') + '">' + ic('brilho') + (m.ia === 2 ? 'IA · aprovada' : 'IA') + '</em>' : '') + '<time>' + hora(m.ts) + '</time>' + (eu ? tick(m) : '') + '</span>' +
-      (m.st === 'falhou' ? '<button class="xm-retry" data-x-retry="' + i + '">' + ic('alerta') + 'Não enviada. Tentar de novo</button>' : '') + '</div>';
+      (m.st === 'falhou' ? '<button class="xm-retry" data-x-retry="' + i + '" title="' + esc(m.erro || '') + '">' + ic('alerta') + 'Não enviada' + (m.erro ? ': ' + esc(String(m.erro).replace(/\.$/, '')) : '') + '. Tentar de novo</button>' : '') + '</div>';
   }
   function esqueletoChat() {
     return '<div class="xmsgs-sk" aria-hidden="true"><i class="sk c" style="width:52%"></i><i class="sk c" style="width:34%"></i><i class="sk j" style="width:44%"></i><i class="sk c" style="width:60%"></i><i class="sk j" style="width:30%"></i></div>';
@@ -379,7 +392,7 @@
       return;
     }
     el.innerHTML = '<div class="xabas" role="tablist"><button role="tab" aria-selected="' + !nota + '" class="' + (nota ? '' : 'ativo') + '" data-x-aba="msg">Mensagem</button><button role="tab" aria-selected="' + nota + '" class="' + (nota ? 'ativo nota' : '') + '" data-x-aba="nota">Nota interna</button>' +
-      '<span class="xabas-dir"><span class="xpopbox"><button class="btn pequeno linha" data-x-pop="sim" aria-haspopup="true" title="Só na demonstração: faz o cliente escrever">' + ic('usuario') + '<span>Simular cliente</span></button><div class="xpop direita" id="xPopSim"' + (X.pop === 'sim' ? '' : ' hidden') + '></div></span></span></div>' +
+      (window.JP_VAZIO ? '</div>' : '<span class="xabas-dir"><span class="xpopbox"><button class="btn pequeno linha" data-x-pop="sim" aria-haspopup="true" title="Só na demonstração: faz o cliente escrever">' + ic('usuario') + '<span>Simular cliente</span></button><div class="xpop direita" id="xPopSim"' + (X.pop === 'sim' ? '' : ' hidden') + '></div></span></span></div>') +
       '<div class="xrap" id="xRap" role="listbox" aria-label="Respostas rápidas" hidden></div>' +
       '<div class="xlinha' + (nota ? ' nota' : '') + '"><span class="xpopbox"><button class="xbtn-ic" data-x-pop="anexo" aria-label="Anexar" aria-haspopup="true" title="Anexar"' + (nota ? ' disabled' : '') + '>' + ic('clipe') + '</button><div class="xpop" id="xPopAnexo"' + (X.pop === 'anexo' ? '' : ' hidden') + '></div></span>' +
       '<button class="xbtn-ic" data-x-rapb aria-label="Respostas rápidas" title="Respostas rápidas (Alt+R)"' + (nota ? ' disabled' : '') + '>' + ic('raio') + '</button>' +
@@ -466,7 +479,7 @@
   /* ---------- telas ---------- */
   function cabecalho() {
     var cfg = D.conv.cfg;
-    return '<div class="cab xcab-pg"><div><h1>Conversas</h1><p>Atendimento no estilo WhatsApp Web. Demonstração: envios simulados, nada sai do navegador.</p></div>' +
+    return '<div class="cab xcab-pg"><div><h1>Conversas</h1><p>Atendimento no estilo WhatsApp Web. ' + (window.JP_VAZIO ? 'As mensagens saem pelo WhatsApp (uazapi) quando a integração estiver ligada; enquanto estiver desligada, ficam como não enviadas.' : 'Demonstração: envios simulados, nada sai do navegador.') + '</p></div>' +
       '<div class="xcab-dir"><span class="xglobal"><span class="xrotulo">Atendimento geral</span><span class="xseg" role="group" aria-label="Atendimento geral"><button data-x-geral="ia" aria-pressed="' + cfg.ativa + '">' + ic('brilho') + 'IA atende</button><button data-x-geral="humano" aria-pressed="' + !cfg.ativa + '">' + ic('usuario') + 'Humano atende</button></span></span></div></div>';
   }
   function conversas(param, tela) {
@@ -650,7 +663,7 @@
     else if (d.xSim !== undefined) { fechaPop(); recebe(l, SIMULAR[+d.xSim][1]); }
     else if (d.xGrav) gravacao(d.xGrav);
     else if (d.xPlay) tocar(+d.xPlay);
-    else if (d.xRetry) { var m = l.msgs[+d.xRetry]; if (m) { m.st = 'enviando'; salvar(); atualizaMsgs(l.id); entrega(l, m); } }
+    else if (d.xRetry) { var m = l.msgs[+d.xRetry]; if (m) { m.st = 'enviando'; salvar(); atualizaMsgs(l.id); if (window.JP_VAZIO) enviaReal(l, m); else entrega(l, m); } }
     else if (d.xAprova !== undefined) aprovaSugestao(false);
     else if (d.xEdita !== undefined) aprovaSugestao(true);
     else if (d.xOutra !== undefined) { var u = ultimaMsg(l); if (u) { var tons = ['cordial', 'objetivo', 'descontraido']; gerarSugestao(l, u, tons[(tons.indexOf(tec().tom) + 1) % 3]); } }

@@ -30,3 +30,11 @@ As telas respondem sem extensão: `/` (loja), `/receitas`, `/login`, `/trocar-se
 
 ## Pedidos e delivery (etapa 3)
 `pedidos-lib.js` (testado em `tests/pedidos.test.mjs`) concentra as regras: fluxo novo → confirmado → separando → pronto → saiu (entrega) ou entregue (retirada), cancelamento com motivo (devolve o estoque), entregador (menos ocupado primeiro), pagamento com referência do comprovante e comanda de 80 mm. O frete é a taxa do bairro mais R$ 1,50 por km acima de 8 km (editável em Loja online → Frete e mínimo). Estoque baixa ao confirmar. Cada mudança fica no histórico do pedido.
+
+## WhatsApp pela uazapi (etapa 4) — pronto e DESLIGADO
+`servidor/whatsapp-lib.js` (travas, número, opt-out, leitura do webhook; testes em `tests/whatsapp.test.mjs`) e `servidor/whatsapp.js` (fila de saída, webhook, entrada no CRM). Tela "WhatsApp" no painel: estado, travas e últimas mensagens.
+- Nada sai sem: `WHATSAPP_LIBERADO=sim` + `UAZAPI_URL` + `UAZAPI_TOKEN` no `.env` **e** chave geral ligada no painel. Em modo teste (padrão), só os números de teste recebem.
+- Campanhas: horário, limite diário com aquecimento, intervalo aleatório, opt-out e pausa após 3 falhas valem no servidor.
+- Entrada: `POST /api/uazapi/webhook/<UAZAPI_WEBHOOK_SECRET>` grava a mensagem e ela vira conversa do CRM quando o painel abre; "SAIR" marca opt-out.
+- Mensagens do chat e as automações de pós-venda passam por `/api/whatsapp/enviar`; desligado, aparecem como "Não enviada" com o motivo.
+- Os caminhos `/send/text` e o formato do webhook seguem a uazapi v2 e precisam ser conferidos na primeira conexão real. A tela de campanhas ainda dispara em modo simulado (o envio em massa pela fila do servidor entra na ligação).

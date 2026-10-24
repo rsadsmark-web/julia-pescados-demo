@@ -96,6 +96,7 @@ app.get('/saude', async (req, res) => {
 });
 
 /* ---------- rotas públicas: pedido e lista de espera da loja (com limite por IP) ---------- */
+const wa = require('./whatsapp')(app, pool); // WhatsApp (uazapi): desligado por padrão; o webhook tem corpo próprio, por isso vem antes
 app.use('/api', express.json({ limit: '20kb' }));
 const pub = require('./publico')(app, pool);
 
@@ -158,9 +159,10 @@ app.post('/api/trocar-senha', async (req, res) => {
 
 /* ---------- estado do sistema (chave/valor) ---------- */
 const CHAVES = new Set(['jp_demo_v1', 'jp_crm_v1', 'jp_ex_v1', 'jp_pv_v1', 'jp_rs_ia_v1', 'jp_loja_v1']);
-app.get('/api/entradas/pendentes', async (req, res) => res.json({ n: await pub.pendentes() }));
+app.get('/api/entradas/pendentes', async (req, res) => res.json({ n: (await pub.pendentes()) + (await wa.pendentesEntrada()) }));
 app.get('/api/kv', async (req, res) => {
-  try { await pub.absorve(); } catch (e) { console.error('absorve', e.message); } // pedidos e inscrições feitos na loja entram no estado antes de o painel carregar
+  try { await pub.absorve(); } catch (e) { console.error('absorve', e.message); }
+  try { await wa.absorveEntrada(); } catch (e) { console.error('absorve whatsapp', e.message); } // pedidos e inscrições feitos na loja entram no estado antes de o painel carregar
   const r = await pool.query('SELECT chave, valor, versao FROM kv');
   const o = {}; r.rows.forEach((x) => { o[x.chave] = { valor: x.valor, versao: x.versao }; });
   res.json(o);
@@ -185,6 +187,7 @@ app.put('/api/kv/:chave', express.text({ type: '*/*', limit: '30mb' }), async (r
 
 /* ---------- usuários (só administrador) ---------- */
 const soAdmin = (req, res, next) => (req.usuario.papel === 'admin' ? next() : res.status(403).json({ erro: 'Só o administrador faz isso.' }));
+wa.rotasPainel(soAdmin);
 app.get('/api/usuarios', soAdmin, async (req, res) => {
   res.json((await pool.query('SELECT id, usuario, nome, papel, ativo, senha_provisoria, criado FROM usuarios ORDER BY id')).rows);
 });
@@ -222,7 +225,7 @@ module.exports = { pool, hashSenha, iniciaBanco };
 if (require.main === module) {
   (async () => {
     for (let i = 0; i < 30; i++) { try { await iniciaBanco(); break; } catch (e) { console.log('aguardando o banco…', e.code || e.message); await new Promise((r) => setTimeout(r, 2000)); if (i === 29) process.exit(1); } }
-    await pub.iniciaTabelas(); await pub.publica().catch((e) => console.error('publica', e.message));
+    await pub.iniciaTabelas(); await wa.iniciaTabelas(); wa.iniciaFila(); await pub.publica().catch((e) => console.error('publica', e.message));
     app.listen(PORTA, () => console.log('Júlia Pescados no ar na porta ' + PORTA));
   })();
 }

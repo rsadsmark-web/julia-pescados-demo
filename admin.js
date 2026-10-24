@@ -228,7 +228,7 @@
   }
 
   /* ---------- roteamento ---------- */
-  var MODULOS = { visao: visao, pedidos: pedidosTela, conversas: crmTela, funil: crmTela, campanhas: crmTela, receitas: posVendaTela, avaliacoes: posVendaTela, entregas: extrasTela, recompra: extrasTela, espera: extrasTela, atacado: extrasTela, clientes: clientes, nf: nf, estoque: estoque, loja: lojaTela };
+  var MODULOS = { visao: visao, pedidos: pedidosTela, whatsapp: function () { WAA.render(tela); }, conversas: crmTela, funil: crmTela, campanhas: crmTela, receitas: posVendaTela, avaliacoes: posVendaTela, entregas: extrasTela, recompra: extrasTela, espera: extrasTela, atacado: extrasTela, clientes: clientes, nf: nf, estoque: estoque, loja: lojaTela };
   function lojaTela() { LJA.render(tela); }
   function crmTela() { CRM.render(modulo, parametro, tela); }
   function posVendaTela() { PVA.render(modulo, tela); }
@@ -346,6 +346,7 @@
   });
   PVA.init({ estado: function () { return S; }, esc: esc, toast: toast, ha: ha, dataHora: JP.dataHora, selos: selos, modulo: function () { return modulo; } });
   EXP.init({ estado: function () { return S; }, recarrega: recarrega, esc: esc, toast: toast, ha: ha, brl: JP.brl, dataHora: JP.dataHora, selos: selos, modulo: function () { return modulo; } });
+  WAA.init({ esc: esc, toast: toast });
   LJA.init({ estado: function () { return S; }, esc: esc, toast: toast });
   window.addEventListener('hashchange', ir);
   ir();
