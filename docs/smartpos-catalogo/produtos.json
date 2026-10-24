@@ -1,0 +1,542 @@
+[
+ {
+  "codigo": "1002",
+  "nome": "Filé De Camarão M 51/60 - IQF (Kg)",
+  "categoria": "Camarões",
+  "preco": 55.5,
+  "unidade_pelo_nome": "kg",
+  "estoque": 57.0,
+  "foto": "fotos/1002-21864866.jpg",
+  "atualizado": "2026-10-23T16:42:14.163Z"
+ },
+ {
+  "codigo": "2003",
+  "nome": "Filé De Pargo C/ Pele (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 52.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 3.0,
+  "foto": "fotos/2003-21876870.jpg",
+  "atualizado": "2026-10-23T17:14:22.885Z"
+ },
+ {
+  "codigo": "136",
+  "nome": "Alho Roxo Descascado (Kg)",
+  "categoria": "Temperos E Alhos",
+  "preco": 38.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 8.0,
+  "foto": "fotos/136-33750684.jpg",
+  "atualizado": "2026-10-23T12:35:57.619Z"
+ },
+ {
+  "codigo": "131",
+  "nome": "Arraia Desfiada Pré Cozida (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 36.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 10.0,
+  "foto": "fotos/131-33632950.jpg",
+  "atualizado": "2026-10-23T15:14:08.652Z"
+ },
+ {
+  "codigo": "195",
+  "nome": "Bisteca Suína Temperada (Kg)",
+  "categoria": "Produtos Regionais",
+  "preco": 33.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 5.0,
+  "foto": "fotos/195-40718136.jpg",
+  "atualizado": "2026-09-18T13:03:36.267Z"
+ },
+ {
+  "codigo": "125",
+  "nome": "Bolinha De Camarão - Fritura (Bandeja C/",
+  "categoria": "Petiscos - Farinha Pan",
+  "preco": 20.0,
+  "unidade_pelo_nome": "bandeja",
+  "estoque": 5.0,
+  "foto": "fotos/125-33632892.jpg",
+  "atualizado": "2026-09-28T01:34:47.804Z"
+ },
+ {
+  "codigo": "244",
+  "nome": "Bolinha de Camarão - Fritura (Bandeja c/ 24 Und)",
+  "categoria": "Petiscos - Fritura",
+  "preco": 27.0,
+  "unidade_pelo_nome": "bandeja",
+  "estoque": 5.0,
+  "foto": "fotos/244-46534828.jpg",
+  "atualizado": "2026-10-08T12:59:50.328Z"
+ },
+ {
+  "codigo": "127",
+  "nome": "Bolinha De Caranguejo - Fritura (Bandeja",
+  "categoria": "Petiscos - Farinha Pan",
+  "preco": 22.0,
+  "unidade_pelo_nome": "bandeja",
+  "estoque": 4.0,
+  "foto": "fotos/127-33632914.jpg",
+  "atualizado": "2026-09-28T01:34:18.117Z"
+ },
+ {
+  "codigo": "245",
+  "nome": "Bolinha de Carne do Sol - Fritura (Bandeja C/24 Und)",
+  "categoria": "Petiscos - Fritura",
+  "preco": 27.0,
+  "unidade_pelo_nome": "bandeja",
+  "estoque": 9.0,
+  "foto": "fotos/245-46534832.jpg",
+  "atualizado": "2026-10-06T12:03:38.184Z"
+ },
+ {
+  "codigo": "243",
+  "nome": "Bolinha De Peixe - Fritura (Bandeja C/ 2",
+  "categoria": "Petiscos - Fritura",
+  "preco": 25.0,
+  "unidade_pelo_nome": "bandeja",
+  "estoque": 7.0,
+  "foto": "fotos/243-46530271.jpg",
+  "atualizado": "2026-10-08T19:48:06.913Z"
+ },
+ {
+  "codigo": "126",
+  "nome": "Bolinha De Peixe - Fritura (Bandeja C/12",
+  "categoria": "Petiscos - Farinha Pan",
+  "preco": 19.0,
+  "unidade_pelo_nome": "bandeja",
+  "estoque": 8.0,
+  "foto": "fotos/126-33632903.jpg",
+  "atualizado": "2026-10-23T15:13:20.490Z"
+ },
+ {
+  "codigo": "242",
+  "nome": "Bolinha De Queijo - 24 Und",
+  "categoria": "Petiscos - Fritura",
+  "preco": 25.0,
+  "unidade_pelo_nome": "unidades",
+  "estoque": 8.0,
+  "foto": "fotos/242-46530249.jpg",
+  "atualizado": "2026-10-08T17:39:51.005Z"
+ },
+ {
+  "codigo": "165",
+  "nome": "Buchada Fechada De Carneiro Temperada (K",
+  "categoria": "Produtos Regionais",
+  "preco": 51.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 0.0,
+  "foto": "fotos/165-36356038.jpg",
+  "atualizado": "2026-09-28T01:37:00.672Z"
+ },
+ {
+  "codigo": "124",
+  "nome": "Camarão Empanado C/ CreamCheese - Fritur",
+  "categoria": "Petiscos - Farinha Pan",
+  "preco": 27.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 22.0,
+  "foto": "fotos/124-33619652.jpg",
+  "atualizado": "2026-10-23T15:14:08.410Z"
+ },
+ {
+  "codigo": "128",
+  "nome": "Camarão Empanado Tradicional - Fritura (",
+  "categoria": "Petiscos - Farinha Pan",
+  "preco": 24.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 13.0,
+  "foto": "fotos/128-33632921.jpg",
+  "atualizado": "2026-10-23T17:08:08.384Z"
+ },
+ {
+  "codigo": "218",
+  "nome": "Camarão Sem Cabeça (Kg) IQF",
+  "categoria": "Camarões",
+  "preco": 51.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": -6.0,
+  "foto": "fotos/218-44014169.jpg",
+  "atualizado": "2026-10-23T15:14:08.550Z"
+ },
+ {
+  "codigo": "132",
+  "nome": "Carne De Caranguejo (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 84.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 5.0,
+  "foto": "fotos/132-33632954.jpg",
+  "atualizado": "2026-10-14T11:24:22.867Z"
+ },
+ {
+  "codigo": "167",
+  "nome": "Carne Do Sol Cozida E Desfiada (500g)",
+  "categoria": "Produtos Regionais",
+  "preco": 44.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 11.0,
+  "foto": "fotos/167-36405437.jpg",
+  "atualizado": "2026-10-23T17:09:57.250Z"
+ },
+ {
+  "codigo": "194",
+  "nome": "Carneiro Temperado (Kg)",
+  "categoria": "Produtos Regionais",
+  "preco": 46.5,
+  "unidade_pelo_nome": "kg",
+  "estoque": 0.0,
+  "foto": "fotos/194-40718118.jpg",
+  "atualizado": "2026-10-09T10:45:59.845Z"
+ },
+ {
+  "codigo": "241",
+  "nome": "Coxinha De Frango - 24 Und",
+  "categoria": "Petiscos - Fritura",
+  "preco": 25.0,
+  "unidade_pelo_nome": "unidades",
+  "estoque": 8.0,
+  "foto": "fotos/241-46530233.jpg",
+  "atualizado": "2026-09-28T21:42:45.093Z"
+ },
+ {
+  "codigo": "2005",
+  "nome": "Filé De Abadejo (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 41.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": -30.0,
+  "foto": "fotos/2005-21877118.jpg",
+  "atualizado": "2026-10-21T17:50:27.382Z"
+ },
+ {
+  "codigo": "250",
+  "nome": "Filé de Arabaiana",
+  "categoria": "Peixes & Mariscos",
+  "preco": 41.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 4.0,
+  "foto": "fotos/250-46749773.jpg",
+  "atualizado": "2026-10-23T17:14:09.468Z"
+ },
+ {
+  "codigo": "2000",
+  "nome": "Filé De Atum (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 36.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 7.0,
+  "foto": "fotos/2000-21876782.jpg",
+  "atualizado": "2026-10-23T17:10:39.745Z"
+ },
+ {
+  "codigo": "163",
+  "nome": "Filé De Bacalhau Saithé Dessalgado (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 75.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 3.0,
+  "foto": "fotos/163-36274252.jpg",
+  "atualizado": "2026-10-10T11:33:39.629Z"
+ },
+ {
+  "codigo": "232",
+  "nome": "Filé De Camarão Big XGG Télson 16/20",
+  "categoria": "Camarões",
+  "preco": 85.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 0.0,
+  "foto": "fotos/232-45657693.jpg",
+  "atualizado": "2026-10-16T17:29:43.398Z"
+ },
+ {
+  "codigo": "174",
+  "nome": "Filé De Camarão Evisc. XG 26/30 Télson",
+  "categoria": "Camarões",
+  "preco": 78.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 4.0,
+  "foto": "fotos/174-36689720.jpg",
+  "atualizado": "2026-10-16T11:53:46.435Z"
+ },
+ {
+  "codigo": "252",
+  "nome": "Filé de Camarão Eviscerado XXG 16/20",
+  "categoria": "Camarões",
+  "preco": 88.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 30.0,
+  "foto": "fotos/252-47032832.jpg",
+  "atualizado": "2026-10-22T18:33:58.315Z"
+ },
+ {
+  "codigo": "1010",
+  "nome": "Filé De Camarão G1 41/50 - IQF (kg)",
+  "categoria": "Camarões",
+  "preco": 62.5,
+  "unidade_pelo_nome": "kg",
+  "estoque": 28.0,
+  "foto": "fotos/1010-23082849.jpg",
+  "atualizado": "2026-10-23T15:13:20.247Z"
+ },
+ {
+  "codigo": "135",
+  "nome": "Filé De Camarão G2 36/40 - IQF - Eviscer",
+  "categoria": "Camarões",
+  "preco": 67.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 38.0,
+  "foto": "fotos/135-33750675.jpg",
+  "atualizado": "2026-10-23T19:59:48.215Z"
+ },
+ {
+  "codigo": "140",
+  "nome": "Filé De Camarão GG - 31/35 IQF - Eviscer",
+  "categoria": "Camarões",
+  "preco": 72.5,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 1.0,
+  "foto": "fotos/140-34018334.jpg",
+  "atualizado": "2026-10-22T10:44:36.048Z"
+ },
+ {
+  "codigo": "145",
+  "nome": "Filé De Camarão XG - 26/30 Evisverado -",
+  "categoria": "Camarões",
+  "preco": 77.5,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 9.0,
+  "foto": "fotos/145-34189285.jpg",
+  "atualizado": "2026-10-23T12:05:11.436Z"
+ },
+ {
+  "codigo": "147",
+  "nome": "Filé De Camarão XGG - 21/25 Eviscerado -",
+  "categoria": "Camarões",
+  "preco": 84.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 2.0,
+  "foto": "fotos/147-34189351.jpg",
+  "atualizado": "2026-10-14T11:25:03.606Z"
+ },
+ {
+  "codigo": "219",
+  "nome": "Filé De Panga S/Gordura (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 43.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 1.0,
+  "foto": "fotos/219-44464784.jpg",
+  "atualizado": "2026-10-23T13:49:33.224Z"
+ },
+ {
+  "codigo": "130",
+  "nome": "Filé De Pescada Amarela (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 57.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 5.0,
+  "foto": "fotos/130-33632943.jpg",
+  "atualizado": "2026-10-22T14:22:04.937Z"
+ },
+ {
+  "codigo": "2004",
+  "nome": "Filé De Pescada Branca (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 42.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 5.0,
+  "foto": "fotos/2004-21877080.jpg",
+  "atualizado": "2026-10-23T19:59:48.329Z"
+ },
+ {
+  "codigo": "2008",
+  "nome": "Filé De Salmão (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 94.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 1.0,
+  "foto": "fotos/2008-21877171.jpg",
+  "atualizado": "2026-10-19T13:23:40.270Z"
+ },
+ {
+  "codigo": "2006",
+  "nome": "Filé De Sirigado (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 53.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 8.0,
+  "foto": "fotos/2006-21877139.jpg",
+  "atualizado": "2026-10-23T17:13:56.778Z"
+ },
+ {
+  "codigo": "115",
+  "nome": "Filé de Tilápia (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 49.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 5.0,
+  "foto": "fotos/115-33531121.jpg",
+  "atualizado": "2026-10-23T17:07:54.715Z"
+ },
+ {
+  "codigo": "168",
+  "nome": "Frango Cozido Temperado E Desfiado (500g",
+  "categoria": "Produtos Regionais",
+  "preco": 30.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 7.0,
+  "foto": "fotos/168-36405458.jpg",
+  "atualizado": "2026-10-15T11:23:22.864Z"
+ },
+ {
+  "codigo": "116",
+  "nome": "Galinha Caipira Neutra - (Unidade ~ 1.20",
+  "categoria": "Produtos Regionais",
+  "preco": 32.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 4.0,
+  "foto": "fotos/116-33531184.jpg",
+  "atualizado": "2026-10-22T12:31:34.418Z"
+ },
+ {
+  "codigo": "187",
+  "nome": "Isca De Peixe (12 Unid.)",
+  "categoria": "Petiscos - Farinha Pan",
+  "preco": 31.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 10.0,
+  "foto": "fotos/187-38787012.jpg",
+  "atualizado": "2026-10-22T14:52:06.981Z"
+ },
+ {
+  "codigo": "117",
+  "nome": "Panelada Temperada (Kg)",
+  "categoria": "Produtos Regionais",
+  "preco": 31.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": -5.0,
+  "foto": "fotos/117-33531224.jpg",
+  "atualizado": "2026-10-23T12:35:57.502Z"
+ },
+ {
+  "codigo": "247",
+  "nome": "Pastel Carne do Sol C/ Queijo - (12 und)",
+  "categoria": "Petiscos - Fritura",
+  "preco": 26.5,
+  "unidade_pelo_nome": "unidades",
+  "estoque": 9.0,
+  "foto": "fotos/247-46534854.jpg",
+  "atualizado": "2026-09-28T21:42:45.235Z"
+ },
+ {
+  "codigo": "248",
+  "nome": "Pastel de Frango-Fritura (Bdj c/ 12 und)",
+  "categoria": "Petiscos - Fritura",
+  "preco": 24.5,
+  "unidade_pelo_nome": "unidades",
+  "estoque": 9.0,
+  "foto": "fotos/248-46534860.jpg",
+  "atualizado": "2026-09-28T21:42:45.329Z"
+ },
+ {
+  "codigo": "246",
+  "nome": "Pastel de Queijo - Fritura (Bdj c/ 12)",
+  "categoria": "Petiscos - Fritura",
+  "preco": 24.5,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 4.0,
+  "foto": "fotos/246-46534844.jpg",
+  "atualizado": "2026-10-10T12:55:55.192Z"
+ },
+ {
+  "codigo": "133",
+  "nome": "Polvo Inteiro (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 55.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 0.0,
+  "foto": "fotos/133-33632960.jpg",
+  "atualizado": "2026-10-08T14:30:18.884Z"
+ },
+ {
+  "codigo": "3003",
+  "nome": "Posta De Cavala (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 42.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 0.0,
+  "foto": "fotos/3003-21877391.jpg",
+  "atualizado": "2026-10-13T14:18:55.774Z"
+ },
+ {
+  "codigo": "0101010",
+  "nome": "Posta De Serra (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 38.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 1.0,
+  "foto": "fotos/0101010-24169825.jpg",
+  "atualizado": "2026-10-13T14:18:41.550Z"
+ },
+ {
+  "codigo": "118",
+  "nome": "Posta de Tilápia S/ Cabeça (Kg)",
+  "categoria": "Peixes & Mariscos",
+  "preco": 35.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 13.0,
+  "foto": "fotos/118-33532021.jpg",
+  "atualizado": "2026-10-23T16:44:58.974Z"
+ },
+ {
+  "codigo": "199",
+  "nome": "Sarrabulho Suíno Temperado (Kg)",
+  "categoria": "Produtos Regionais",
+  "preco": 23.0,
+  "unidade_pelo_nome": "kg",
+  "estoque": 1.0,
+  "foto": "fotos/199-43086385.jpg",
+  "atualizado": "2026-08-03T16:41:13.283Z"
+ },
+ {
+  "codigo": "119",
+  "nome": "Tempero Extra Julia Pescados",
+  "categoria": "Temperos E Alhos",
+  "preco": 3.5,
+  "unidade_pelo_nome": "não informada",
+  "estoque": -6.0,
+  "foto": "fotos/119-33532053.jpg",
+  "atualizado": "2026-08-21T15:01:29.391Z"
+ },
+ {
+  "codigo": "134",
+  "nome": "Tempero Pronto JP (200grs)",
+  "categoria": "Temperos E Alhos",
+  "preco": 19.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 3.0,
+  "foto": "fotos/134-33633099.jpg",
+  "atualizado": "2026-10-09T18:55:11.233Z"
+ },
+ {
+  "codigo": "120",
+  "nome": "Tilápia Inteira Tratada e Desossada (Peç",
+  "categoria": "Peixes & Mariscos",
+  "preco": 39.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 14.0,
+  "foto": "fotos/120-33532105.jpg",
+  "atualizado": "2026-10-23T16:44:38.329Z"
+ },
+ {
+  "codigo": "221",
+  "nome": "Tripa De Porco Temperada (700grs)",
+  "categoria": "Produtos Regionais",
+  "preco": 32.0,
+  "unidade_pelo_nome": "não informada",
+  "estoque": 0.0,
+  "foto": "fotos/221-44923575.jpg",
+  "atualizado": "2026-10-10T14:13:03.255Z"
+ }
+]
