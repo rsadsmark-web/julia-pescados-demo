@@ -30,6 +30,13 @@ for (const f of arquivos) {
 }
 cpSync(join(raiz, 'img'), join(saida, 'img'), { recursive: true });
 
+// formulário de pendências da Júlia: página única, sem dados internos; as respostas ficam só no aparelho dela
+mkdirSync(join(saida, 'formulario-julia'), { recursive: true });
+const formulario = readFileSync(join(raiz, 'docs', 'formulario-julia', 'formulario-julia.html'), 'utf8')
+  .replace('<title>', '<meta name="robots" content="noindex,nofollow">\n<title>');
+writeFileSync(join(saida, 'formulario-julia', 'index.html'), formulario);
+cpSync(join(raiz, 'docs', 'formulario-julia', 'formulario-julia.pdf'), join(saida, 'formulario-julia', 'formulario-julia.pdf'));
+
 // compressão prévia dos arquivos de texto
 const COMPRIMIR = new Set(['.html', '.css', '.js', '.json', '.svg', '.webmanifest']);
 let total = 0, comprimido = 0;
