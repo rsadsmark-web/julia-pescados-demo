@@ -50,3 +50,11 @@ As telas respondem sem extensão: `/` (loja), `/receitas`, `/login`, `/trocar-se
 - **Restaurar de verdade**: `scripts/restaurar.sh arquivo.sql.gz` (apaga os dados atuais; peça confirmação ao responsável).
 - **Auditoria**: login (ok e falha), sair, troca de senha, usuários, configuração do WhatsApp e da nota fiscal ficam em `auditoria` (tela Usuários, só administrador). Senhas e tokens nunca são gravados.
 - Para ligar o Drive: criar a conta/pasta da Júlia, rodar `rclone config` na VPS criando o remoto `gdrive-julia` (nunca reaproveitar o Drive de outro cliente) e conferir com `rclone lsd gdrive-julia:`.
+
+## IA de atendimento (etapa 7) — pronta e DESLIGADA
+`servidor/ia-lib.js` (base do catálogo, prompt, leitura da resposta e travas; `tests/ia.test.mjs`) e `servidor/ia.js` (chamada ao modelo, registro e rotas). Roda no servidor quando chega mensagem pelo webhook da uazapi.
+- Base: catálogo com preço vigente e estoque, horário, mínimo, frete por bairro, combos e pagamento. Só isso pode ser afirmado.
+- Passa direto para uma pessoa, sem gastar IA: reclamação, cancelamento/reembolso, pedido para falar com gente, pedido grande, áudio e imagem. Cortesia ("ok, obrigado") não recebe resposta.
+- Barra a resposta (e avisa o cliente que a equipe assume) quando traz preço fora da tabela, promessa de prazo, link de fora da loja ou pedido de dado sensível. Limites por conversa e por hora.
+- Modos: "Só sugerir" (guarda no registro, não envia) e "Responder sozinha" (envia pela fila do WhatsApp, que tem as próprias travas e o modo teste).
+- Ligar exige: `ANTHROPIC_API_KEY` no servidor, IA ligada na tela WhatsApp e WhatsApp liberado. A tela tem "Testar sem enviar nada" e o registro das últimas decisões.

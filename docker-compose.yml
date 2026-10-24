@@ -38,6 +38,8 @@ services:
       WHATSAPP_LIBERADO: ${WHATSAPP_LIBERADO:-nao}
       # Nota fiscal: sem provedor e sem liberação, o sistema só valida e guarda rascunhos (não emite).
       FOCUS_TOKEN: ${FOCUS_TOKEN:-}
+      # IA de atendimento: sem a chave não existe resposta automática (a IA também nasce desligada no painel).
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       NF_EMISSAO_LIBERADA: ${NF_EMISSAO_LIBERADA:-nao}
       NODE_OPTIONS: --max-old-space-size=160   # heap abaixo do limite do contêiner: o Node recolhe memória antes de ser morto
     volumes:

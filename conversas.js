@@ -136,7 +136,8 @@
     if (cfg.quando === 'faixa') { var a = m(cfg.de), b = m(cfg.ate); return a <= b ? (min >= a && min < b) : (min >= a || min < b); }
     return true;
   }
-  function efetivaIA(l) { return D.conv.cfg.ativa && meta(l).ia !== 'humano' && dentroDaJanela(); }
+  // sistema real: a IA roda no servidor (tela WhatsApp); o motor de palavras-chave abaixo é só da demonstração
+  function efetivaIA(l) { return !window.JP_VAZIO && D.conv.cfg.ativa && meta(l).ia !== 'humano' && dentroDaJanela(); }
   function ultimaMsg(l) { return l.msgs.filter(function (m) { return m.d === 'c' || m.d === 'j'; }).slice(-1)[0]; }
   function aguardando(l) { var u = ultimaMsg(l); return !!u && u.d === 'c' && meta(l).status !== 'resolvida' && !l.optout; }
   function aberta(id) { return X.sel === id && ctx.modulo() === 'conversas' && (!mobile() || X.mobile === 'chat'); }
@@ -480,7 +481,7 @@
   function cabecalho() {
     var cfg = D.conv.cfg;
     return '<div class="cab xcab-pg"><div><h1>Conversas</h1><p>Atendimento no estilo WhatsApp Web. ' + (window.JP_VAZIO ? 'As mensagens saem pelo WhatsApp (uazapi) quando a integração estiver ligada; enquanto estiver desligada, ficam como não enviadas.' : 'Demonstração: envios simulados, nada sai do navegador.') + '</p></div>' +
-      '<div class="xcab-dir"><span class="xglobal"><span class="xrotulo">Atendimento geral</span><span class="xseg" role="group" aria-label="Atendimento geral"><button data-x-geral="ia" aria-pressed="' + cfg.ativa + '">' + ic('brilho') + 'IA atende</button><button data-x-geral="humano" aria-pressed="' + !cfg.ativa + '">' + ic('usuario') + 'Humano atende</button></span></span></div></div>';
+      (window.JP_VAZIO ? '<div class="xcab-dir"><a class="btn pequeno linha" href="#whatsapp">IA e WhatsApp: ajustes na tela WhatsApp</a></div></div>' : '<div class="xcab-dir"><span class="xglobal"><span class="xrotulo">Atendimento geral</span><span class="xseg" role="group" aria-label="Atendimento geral"><button data-x-geral="ia" aria-pressed="' + cfg.ativa + '">' + ic('brilho') + 'IA atende</button><button data-x-geral="humano" aria-pressed="' + !cfg.ativa + '">' + ic('usuario') + 'Humano atende</button></span></span></div></div>');
   }
   function conversas(param, tela) {
     if (param && lead(param)) { X.sel = param; X.mobile = 'chat'; }

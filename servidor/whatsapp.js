@@ -86,6 +86,7 @@ module.exports = function (app, pool, ganchos) {
     if (ev && ev.tipo === 'mensagem') {
       await pool.query('INSERT INTO wa_entrada (ext_id, fone, texto, nome, de_mim, quando) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (ext_id) DO NOTHING', [ev.extId || null, ev.fone, ev.texto, ev.nome || null, ev.deMim, ev.quando]);
       if (!ev.deMim && W.ehOptout(ev.texto)) await pool.query('INSERT INTO wa_optout (fone, motivo) VALUES ($1,$2) ON CONFLICT DO NOTHING', [ev.fone, 'respondeu: ' + ev.texto.slice(0, 40)]);
+      else if (!ev.deMim && app.locals.iaAtende) app.locals.iaAtende({ fone: ev.fone, texto: ev.texto, nome: ev.nome }); // atendimento por IA (desligado por padrão)
     } else if (ev && ev.tipo === 'status') {
       await pool.query("UPDATE wa_saida SET estado = $2 WHERE ext_id = ANY($1) AND estado IN ('enviada','entregue')", [ev.ids, ev.estado]);
     }
