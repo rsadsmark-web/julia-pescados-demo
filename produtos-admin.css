@@ -1,0 +1,105 @@
+/* Painel — Produtos e Categorias (celular primeiro; telas grandes ganham colunas) */
+.adm .pra-resumo { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+.adm .pra-resumo > div { background: var(--papel); border: 2px solid var(--marinho); border-radius: 10px; padding: 10px 14px; display: flex; align-items: baseline; gap: 8px; }
+.adm .pra-resumo b { font-family: var(--rotulo); font-size: 30px; line-height: 1; color: var(--marinho); }
+.adm .pra-resumo span { color: var(--suave); font-size: 14px; }
+.adm .pra-resumo .alerta b { color: var(--lata); }
+.adm .pra-painel { padding: 14px; overflow: visible; }
+.adm .pra-filtros { display: grid; gap: 10px; margin-bottom: 12px; }
+.adm .pra-filtros label, .adm .campo label { display: block; font-family: var(--rotulo); font-size: 15px; letter-spacing: .06em; text-transform: uppercase; color: var(--suave); margin-bottom: 3px; }
+.adm .pra-filtros input, .adm .pra-filtros select, .adm .pra-form input:not([type=checkbox]), .adm .pra-form select, .adm .pra-form textarea, .adm .pra-nova input { width: 100%; min-height: 44px; border: 2px solid var(--marinho); border-radius: 8px; padding: 8px 11px; background: var(--papel); font: inherit; }
+.adm .pra-form textarea { min-height: 70px; }
+.adm #praSit { margin-bottom: 12px; }
+.adm .pra-lote { position: sticky; top: 64px; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; background: var(--marinho); color: var(--papel); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; box-shadow: 0 4px 14px rgba(11, 74, 92, .3); }
+.adm .pra-lote[hidden] { display: none; }
+.adm .pra-lote .btn.claro { background: var(--papel); }
+.adm .pra-lote .btn.linha { color: var(--papel); border-color: var(--papel); }
+.adm .pra-cabecalho { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; color: var(--suave); padding: 4px 2px 10px; border-bottom: 2px dotted var(--linha); }
+.adm .pra-todos { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; min-height: 32px; }
+.adm .pra-todos input, .adm .prd-sel input { width: 20px; height: 20px; accent-color: var(--marinho); }
+.adm .pra-lista { display: grid; }
+
+.adm .prd { display: grid; grid-template-columns: 28px 64px minmax(0, 1fr); grid-template-areas: "sel foto nome" "preco preco estoque" "onoff onoff acoes"; gap: 8px 12px; padding: 14px 4px; border-bottom: 2px dotted var(--linha); align-items: center; }
+.adm .prd.marcado { background: var(--marinho-claro); border-radius: 8px; }
+.adm .prd.off .prd-foto img, .adm .prd.off .prd-nome b { opacity: .55; }
+.adm .prd-sel { grid-area: sel; display: grid; place-items: center; cursor: pointer; min-height: 44px; }
+.adm .prd-foto { grid-area: foto; position: relative; width: 64px; height: 64px; padding: 0; border: 2px solid var(--marinho); border-radius: 10px; overflow: hidden; background: var(--kraft); cursor: pointer; }
+.adm .prd-foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.adm .prd-foto span { position: absolute; inset: auto 0 0 0; background: rgba(11, 74, 92, .85); color: var(--papel); font-family: var(--rotulo); font-size: 13px; letter-spacing: .06em; text-transform: uppercase; padding: 1px 0; opacity: 0; transition: opacity .15s; }
+.adm .prd-foto:hover span, .adm .prd-foto:focus-visible span { opacity: 1; }
+.adm .prd-nome { grid-area: nome; min-width: 0; }
+.adm .prd-nome b { display: block; font-size: 16.5px; line-height: 1.25; overflow-wrap: anywhere; }
+.adm .prd-nome small { display: block; color: var(--suave); font-size: 13.5px; }
+.adm .prd-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.adm .prd-chips:empty { display: none; }
+.adm .prd-campo { display: block; }
+.adm .prd-preco { grid-area: preco; } .adm .prd-estoque { grid-area: estoque; }
+.adm .prd-campo span { display: block; font-family: var(--rotulo); font-size: 14px; letter-spacing: .06em; text-transform: uppercase; color: var(--suave); }
+.adm .prd-campo input { width: 100%; min-height: 44px; border: 2px solid var(--marinho); border-radius: 8px; padding: 6px 10px; text-align: right; font-weight: 600; background: var(--papel); }
+.adm .prd-onoff { grid-area: onoff; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; min-height: 44px; font-weight: 600; font-size: 15px; position: relative; }
+.adm .prd-onoff input { position: absolute; opacity: 0; width: 46px; height: 28px; margin: 0; cursor: pointer; }
+.adm .trilho { width: 46px; height: 28px; border-radius: 99px; background: #b9b2a6; position: relative; flex: none; transition: background .15s; }
+.adm .trilho::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .15s; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); }
+.adm .prd-onoff input:checked + .trilho { background: var(--ok); } .adm .prd-onoff input:checked + .trilho::after { transform: translateX(18px); }
+.adm .prd-onoff input:focus-visible + .trilho { outline: 3px solid var(--ouro); outline-offset: 2px; box-shadow: 0 0 0 5px var(--marinho); }
+.adm .prd-acoes { grid-area: acoes; display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+.adm .prd-acoes .btn, .adm .cat-ordem .btn { min-height: 40px; }
+
+.adm .pra-nova { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+.adm .pra-nova .campo { flex: 1 1 220px; }
+.adm .pra-cats { list-style: none; margin: 14px 0 0; padding: 0; display: grid; }
+.adm .cat { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "ordem nome onoff" "acoes acoes acoes"; gap: 8px 12px; align-items: center; padding: 14px 4px; border-bottom: 2px dotted var(--linha); }
+.adm .cat.off .cat-nome b { opacity: .55; }
+.adm .cat-ordem { grid-area: ordem; display: grid; gap: 4px; } .adm .cat-nome { grid-area: nome; min-width: 0; } .adm .cat .prd-onoff { grid-area: onoff; } .adm .cat .prd-acoes { grid-area: acoes; justify-content: flex-start; }
+.adm .cat-nome b { font-size: 18px; overflow-wrap: anywhere; } .adm .cat-nome small { display: block; color: var(--suave); font-size: 14px; }
+.adm .cat-ordem .btn { padding: 4px 10px; }
+.adm .cat-ordem .btn[disabled] { opacity: .3; }
+
+.adm .btn.perigo { background: var(--perigo); color: #fff; border-color: var(--perigo); } .adm .btn.perigo:hover { background: #8c1d17; }
+.pra-erro { color: var(--perigo); font-weight: 600; margin: 8px 0 0; } .pra-erro[hidden] { display: none; }
+.pra-dlg { border: 3px solid var(--marinho); border-radius: 14px; padding: 0; width: min(560px, calc(100vw - 20px)); max-height: calc(100dvh - 20px); background: var(--papel); color: var(--tinta); }
+.pra-dlg::backdrop { background: rgba(15, 51, 64, .6); }
+.pra-form { padding: 18px 18px 14px; display: grid; gap: 12px; overflow-y: auto; max-height: calc(100dvh - 26px); }
+.pra-form h2 { font-size: 24px; } .pra-form p { margin: 0; }
+.pra-form .campo label { display: block; font-family: var(--rotulo); font-size: 15px; letter-spacing: .06em; text-transform: uppercase; color: var(--suave); margin-bottom: 3px; }
+.pra-form .campo small { display: block; color: var(--suave); font-size: 13px; margin-top: 2px; }
+.pra-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; } .pra-grade .largo { grid-column: 1 / -1; }
+.pra-marcas { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+.pra-fotobox { display: flex; gap: 14px; align-items: center; } .pra-fotobox img { width: 96px; height: 96px; object-fit: cover; border-radius: 10px; border: 2px solid var(--marinho); background: var(--kraft); }
+.pra-fotobox small { display: block; color: var(--suave); font-size: 13px; margin-top: 4px; }
+.pra-mais summary { cursor: pointer; font-weight: 600; min-height: 36px; display: flex; align-items: center; } .pra-mais .pra-grade { margin-top: 8px; }
+.pra-botoes { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; position: sticky; bottom: 0; background: var(--papel); padding-top: 8px; }
+.pra-escolha { border: 2px solid var(--linha); border-radius: 8px; padding: 8px 12px; max-height: 220px; overflow-y: auto; display: grid; gap: 4px; } .pra-escolha legend { font-family: var(--rotulo); letter-spacing: .06em; text-transform: uppercase; font-size: 15px; color: var(--suave); padding: 0 4px; }
+.pra-escolha .lja-chk { min-height: 36px; white-space: normal; }
+.pra-previa { color: var(--suave); font-size: 14px; min-height: 1.4em; }
+
+/* menu agrupado */
+.adm .menu-grupo { margin: 14px 10px 4px; font-family: var(--rotulo); font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: var(--ouro); opacity: .9; }
+.adm .menu-botao { display: none; }
+.adm #menu a { font-size: 18px; padding: 8px 10px; }
+.adm .lateral { overflow-y: auto; gap: 16px; scrollbar-width: thin; }
+
+@media (min-width: 700px) {
+  .adm .pra-resumo { grid-template-columns: repeat(4, 1fr); }
+  .adm .pra-filtros { grid-template-columns: 2fr 1fr; }
+  .adm .prd { grid-template-columns: 28px 64px minmax(160px, 1fr) 110px 130px 110px auto; grid-template-areas: "sel foto nome preco estoque onoff acoes"; padding: 12px 6px; }
+  .adm .prd-campo span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .adm .cat { grid-template-columns: auto minmax(0, 1fr) 110px auto; grid-template-areas: "ordem nome onoff acoes"; }
+  .adm .cat .prd-acoes { justify-content: flex-end; }
+}
+@media (min-width: 700px) and (max-width: 1180px) {
+  .adm .prd { grid-template-columns: 28px 64px minmax(0, 1fr) 100px 110px; grid-template-areas: "sel foto nome preco estoque" ". . onoff acoes acoes"; }
+  .adm .prd-acoes { justify-content: flex-start; }
+}
+@media (max-width: 860px) {
+  .adm .lateral { flex-wrap: wrap; align-items: center; justify-content: space-between; overflow: visible; max-height: none; gap: 0; padding: 8px 12px; }
+  .adm .lateral .logo-marca { flex: none; }
+  .adm .menu-botao { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 14px; border: 2px solid var(--ouro); border-radius: 8px; background: transparent; color: var(--ouro); font-family: var(--rotulo); font-weight: 700; font-size: 19px; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; max-width: 62vw; }
+  .adm .menu-botao span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .adm #menu { display: none; flex-basis: 100%; flex-direction: column; max-height: calc(100dvh - 76px); overflow-y: auto; padding: 8px 0 14px; }
+  .adm.menu-aberto #menu { display: flex; }
+  .adm #menu a { padding: 12px 12px; font-size: 20px; min-height: 46px; } .adm #menu a .ic { display: block; }
+  .adm.menu-aberto .lateral-rodape { display: flex; flex-basis: 100%; flex-direction: row; gap: 8px; padding-bottom: 8px; }
+  .adm .lateral-rodape a { font-size: 15px; flex: 1; padding: 8px 6px; }
+  .adm .pra-lote { top: 60px; }
+}

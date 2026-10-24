@@ -1,9 +1,8 @@
 /* Painel da Júlia — "Loja online": o que a loja pública mostra e cobra.
-   Produtos (preço, promoção, estoque, destaque, fração, descrição, dica), combos, frete por bairro, pedido mínimo,
-   horário de funcionamento e textos. Cada mudança é gravada na hora e a loja pública atualiza em até um minuto. */
+   Combos, frete por bairro, pedido mínimo, horário de funcionamento e textos. Produtos e categorias ficam em produtos-admin.js.
+   Cada mudança é gravada na hora e a loja pública atualiza em até um minuto. */
 (function () {
-  var ctx = null, aba = 'produtos';
-  var F = { termo: '', cat: '', abertos: {} };
+  var ctx = null, aba = 'combos', parte = 'combos';
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var CHAVE = 'jp_loja_v1';
@@ -15,66 +14,27 @@
   function cfgLer() { var s = null; try { s = JSON.parse(localStorage.getItem(CHAVE) || 'null'); } catch (e) {} return JPL.mescla(s); }
   var cfg = null;
   function cfgSalvar(msg) { localStorage.setItem(CHAVE, JSON.stringify(cfg)); ctx.toast(msg || 'Salvo. A loja atualiza em até um minuto.'); }
-  function salvaProdutos(msg) { JP.salvar(); ctx.toast(msg || 'Salvo. A loja atualiza em até um minuto.'); }
   function prod(id) { return S().produtos.filter(function (p) { return p.id === id; })[0]; }
   function numero(v) { var n = parseFloat(String(v).replace(',', '.')); return isNaN(n) ? null : n; }
 
-  var ABAS = [['produtos', 'Produtos'], ['combos', 'Combos'], ['entrega', 'Frete e mínimo'], ['horario', 'Horário'], ['textos', 'Textos e contato']];
+  // Cada item do menu abre uma parte: combos, frete e pedido mínimo, ou dados da loja (horário e textos).
+  var PARTES = {
+    combos: { titulo: 'Combos', texto: 'Kits de produtos com preço fechado, que aparecem em destaque na loja.', abas: [['combos', 'Combos']] },
+    frete: { titulo: 'Frete e pedido mínimo', texto: 'Quanto o cliente paga de entrega em cada bairro, o acréscimo por quilômetro e o valor mínimo do pedido.', abas: [['entrega', 'Frete e mínimo']] },
+    loja: { titulo: 'Dados da loja', texto: 'Horário de funcionamento, textos do site e contato. Cada mudança vale na hora, sem botão de publicar.', abas: [['horario', 'Horário'], ['textos', 'Textos e contato']] }
+  };
 
-  function render(tela) {
-    cfg = cfgLer();
-    tela.innerHTML = '<div class="cab"><div><h1>Loja online</h1><p>Tudo o que o cliente vê no site: preços, estoque, destaques, combos, frete, pedido mínimo e horário. Cada mudança vale na hora, sem precisar de botão de publicar.</p></div><a class="btn pequeno claro" href="/" target="_blank" rel="noopener">Ver a loja ↗</a></div>' +
-      '<div class="filtros" role="tablist" aria-label="Partes da loja">' + ABAS.map(function (a) { return '<button type="button" class="filtro' + (aba === a[0] ? ' ativo' : '') + '" role="tab" aria-selected="' + (aba === a[0]) + '" data-lja-aba="' + a[0] + '">' + a[1] + '</button>'; }).join('') + '</div>' +
+  function render(tela, qual) {
+    cfg = cfgLer(); parte = PARTES[qual] ? qual : 'loja';
+    var P = PARTES[parte]; if (!P.abas.some(function (a) { return a[0] === aba; })) aba = P.abas[0][0];
+    tela.innerHTML = '<div class="cab"><div><h1>' + P.titulo + '</h1><p>' + P.texto + '</p></div><a class="btn pequeno claro" href="/" target="_blank" rel="noopener">Ver a loja ↗</a></div>' +
+      (P.abas.length > 1 ? '<div class="filtros" role="tablist" aria-label="Partes">' + P.abas.map(function (a) { return '<button type="button" class="filtro' + (aba === a[0] ? ' ativo' : '') + '" role="tab" aria-selected="' + (aba === a[0]) + '" data-lja-aba="' + a[0] + '">' + a[1] + '</button>'; }).join('') + '</div>' : '') +
       '<div id="ljaCorpo"></div>';
     desenha();
   }
   function desenha() {
     var c = $('#ljaCorpo'); if (!c) return;
-    ({ produtos: produtos, combos: combos, entrega: entrega, horario: horario, textos: textos })[aba](c);
-  }
-
-  /* ---------- produtos ---------- */
-  function cats() { return S().produtos.reduce(function (l, p) { if (p.cat && l.indexOf(p.cat) < 0) l.push(p.cat); return l; }, []); }
-  function produtos(c) {
-    c.innerHTML = '<div class="painel"><h2>Produtos <small id="ljaConta"></small></h2>' +
-      '<div class="lja-filtros"><input class="peq" id="ljaBusca" type="search" placeholder="Buscar produto" aria-label="Buscar produto" value="' + esc(F.termo) + '">' +
-      '<select class="peq" id="ljaCat" aria-label="Categoria"><option value="">Todas as categorias</option>' + cats().map(function (k) { return '<option' + (k === F.cat ? ' selected' : '') + '>' + esc(k) + '</option>'; }).join('') + '</select></div>' +
-      '<p class="lja-dica">Promoção: deixe vazio para tirar. Estoque em quilos aceita meio quilo (0,5). “Destaque” leva o produto para o topo da loja.</p>' +
-      '<div class="rolagem"><table class="lja-tab"><thead><tr><th>Produto</th><th class="num">Preço (R$)</th><th class="num">Promoção (R$)</th><th class="num">Estoque</th><th>Destaque</th><th>Fração</th><th></th></tr></thead><tbody id="ljaLinhas"></tbody></table></div></div>';
-    linhas();
-  }
-  function linhaProd(p) {
-    var u = JPL.unidade(p), ab = F.abertos[p.id];
-    return '<tr data-pid="' + esc(p.id) + '"><td><b>' + esc(p.nome) + '</b><small>' + esc(p.cat) + ' · ' + esc(u.rotulo) + '</small></td>' +
-      '<td class="num"><input class="peq lja-num" inputmode="decimal" data-campo="preco" aria-label="Preço de ' + esc(p.nome) + '" value="' + esc(String(p.preco).replace('.', ',')) + '"></td>' +
-      '<td class="num"><input class="peq lja-num" inputmode="decimal" data-campo="promo" aria-label="Promoção de ' + esc(p.nome) + '" placeholder="—" value="' + (p.promo ? esc(String(p.promo).replace('.', ',')) : '') + '"></td>' +
-      '<td class="num"><input class="peq lja-num" inputmode="decimal" data-campo="estoque" aria-label="Estoque de ' + esc(p.nome) + '" value="' + esc(String(p.estoque).replace('.', ',')) + '"> <small>' + (u.porQuilo ? 'kg' : esc(u.plural)) + '</small></td>' +
-      '<td><label class="lja-chk"><input type="checkbox" data-campo="dest"' + (p.dest ? ' checked' : '') + ' aria-label="Destaque: ' + esc(p.nome) + '"><span>Destaque</span></label></td>' +
-      '<td><select class="peq" data-campo="fracionado" aria-label="Fração de ' + esc(p.nome) + '"><option value="auto"' + (p.fracionado == null ? ' selected' : '') + '>Automático</option><option value="sim"' + (p.fracionado === true ? ' selected' : '') + '>Aceita 0,5</option><option value="nao"' + (p.fracionado === false ? ' selected' : '') + '>Só inteiro</option></select></td>' +
-      '<td><button type="button" class="btn pequeno claro" data-lja-det="' + esc(p.id) + '" aria-expanded="' + !!ab + '">' + (ab ? 'Fechar' : 'Detalhes') + '</button></td></tr>' +
-      (ab ? '<tr class="lja-det" data-pid="' + esc(p.id) + '"><td colspan="7"><div class="lja-det-grade">' +
-        '<div class="campo largo"><label for="d-desc-' + esc(p.id) + '">Descrição (opcional)</label><textarea id="d-desc-' + esc(p.id) + '" rows="2" maxlength="300" data-campo="desc">' + esc(p.desc || '') + '</textarea></div>' +
-        '<div class="campo largo"><label for="d-dica-' + esc(p.id) + '">Dica de preparo (opcional)</label><textarea id="d-dica-' + esc(p.id) + '" rows="2" maxlength="300" data-campo="dica" placeholder="Ex.: descongele na geladeira e refogue 3 minutos">' + esc(p.dica || '') + '</textarea></div>' +
-        (u.porQuilo ? '' : '<div class="campo"><label for="d-peso-' + esc(p.id) + '">Peso aproximado de cada ' + esc(u.curto) + ' (kg, opcional)</label><input id="d-peso-' + esc(p.id) + '" inputmode="decimal" data-campo="pesoAprox" value="' + (p.pesoAprox ? esc(String(p.pesoAprox).replace('.', ',')) : '') + '" placeholder="Ex.: 0,4"></div>') +
-        '</div></td></tr>' : '');
-  }
-  function linhas() {
-    var lista = JPL.filtra(S().produtos, { termo: F.termo, cat: F.cat });
-    $('#ljaLinhas').innerHTML = lista.length ? lista.map(linhaProd).join('') : '<tr><td colspan="7" class="vazio">Nenhum produto encontrado.</td></tr>';
-    $('#ljaConta').textContent = lista.length + ' de ' + S().produtos.length;
-  }
-  function mudaProduto(el) {
-    var id = el.closest('[data-pid]').dataset.pid, p = prod(id), k = el.dataset.campo; if (!p) return;
-    var v = el.type === 'checkbox' ? el.checked : el.value;
-    if (k === 'preco') { var n = numero(v); if (!(n > 0)) { ctx.toast('O preço precisa ser maior que zero.'); el.value = String(p.preco).replace('.', ','); return; } p.preco = Math.round(n * 100) / 100; if (p.promo && p.promo >= p.preco) delete p.promo; }
-    else if (k === 'promo') { if (String(v).trim() === '') delete p.promo; else { var m = numero(v); if (!(m > 0) || m >= p.preco) { ctx.toast('A promoção precisa ser menor que o preço normal.'); el.value = p.promo ? String(p.promo).replace('.', ',') : ''; return; } p.promo = Math.round(m * 100) / 100; } }
-    else if (k === 'estoque') { var e = numero(v); if (e === null || e < 0) { ctx.toast('Informe o estoque (0 ou mais).'); el.value = String(p.estoque).replace('.', ','); return; } p.estoque = Math.round(e * 100) / 100; }
-    else if (k === 'dest') { if (v) p.dest = true; else delete p.dest; }
-    else if (k === 'fracionado') { if (v === 'auto') delete p.fracionado; else p.fracionado = v === 'sim'; }
-    else if (k === 'pesoAprox') { var w = numero(v); if (String(v).trim() === '') delete p.pesoAprox; else if (w > 0) p.pesoAprox = w; else { ctx.toast('Informe o peso em quilos, por exemplo 0,4.'); return; } }
-    else if (k === 'desc' || k === 'dica') { var t = String(v).trim(); if (t) p[k] = t; else delete p[k]; }
-    salvaProdutos('Salvo: ' + p.nome + '.');
-    if (k === 'preco' || k === 'promo') { var tr = el.closest('tr'); $$('[data-campo="promo"]', tr).forEach(function (x) { x.value = p.promo ? String(p.promo).replace('.', ',') : ''; }); }
+    ({ combos: combos, entrega: entrega, horario: horario, textos: textos })[aba](c);
   }
 
   /* ---------- combos ---------- */
@@ -159,8 +119,7 @@
     document.addEventListener('click', function (e) {
       var t = e.target.closest('button'); if (!t) return;
       var d = t.dataset;
-      if (d.ljaAba) { aba = d.ljaAba; render($('#tela')); }
-      else if (d.ljaDet) { F.abertos[d.ljaDet] = !F.abertos[d.ljaDet]; linhas(); }
+      if (d.ljaAba) { aba = d.ljaAba; render($('#tela'), parte); }
       else if (t.hasAttribute('data-lja-novo-combo')) { cfg.combos.push({ id: 'cb-' + Date.now().toString(36), nome: 'Novo combo', ativo: false, desc: '', itens: [], preco: 0 }); cfgSalvar('Combo criado (inativo até você incluir os itens e ativar).'); desenha(); }
       else if (d.ljaDelCombo !== undefined) { var cb = cfg.combos[+d.ljaDelCombo]; if (cb && confirm('Remover o combo “' + cb.nome + '”?')) { cfg.combos.splice(+d.ljaDelCombo, 1); cfgSalvar('Combo removido.'); desenha(); } }
       else if (d.ljaDelItem) { var ij = d.ljaDelItem.split(':'); cfg.combos[+ij[0]].itens.splice(+ij[1], 1); cfgSalvar('Item tirado do combo.'); desenha(); }
@@ -181,9 +140,7 @@
     });
     document.addEventListener('change', function (e) {
       var el = e.target; if (!$('#ljaCorpo')) return;
-      if (el.id === 'ljaCat') { F.cat = el.value; linhas(); }
-      else if (el.closest('[data-pid]') && el.dataset.campo) mudaProduto(el);
-      else if (el.dataset.cc) mudaCombo(el);
+      if (el.dataset.cc) mudaCombo(el);
       else if (el.hasAttribute('data-ci-q')) {
         var tr = el.closest('[data-cj]'), sec = el.closest('[data-ci]'), it = cfg.combos[+sec.dataset.ci].itens[+tr.dataset.cj], q = numero(el.value);
         if (!(q > 0)) { ctx.toast('A quantidade precisa ser maior que zero.'); el.value = String(it[1]).replace('.', ','); return; }
@@ -204,7 +161,6 @@
       else if (el.dataset.hc) mudaHorario(el);
       else if (el.dataset.tc) mudaTexto(el);
     });
-    document.addEventListener('input', function (e) { if (e.target.id === 'ljaBusca') { F.termo = e.target.value; linhas(); } });
   }
 
   window.LJA = { init: init, render: render };

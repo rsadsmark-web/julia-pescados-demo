@@ -247,17 +247,19 @@
   function movimenta(fn, ok) { var r = fn(); if (!r.ok) { toast(r.erro); return; } JP.salvar(); toast(ok(r)); estoque(); selos(); }
 
   /* ---------- roteamento ---------- */
-  var MODULOS = { visao: visao, pedidos: pedidosTela, whatsapp: function () { WAA.render(tela); }, conversas: crmTela, funil: crmTela, campanhas: crmTela, receitas: posVendaTela, avaliacoes: posVendaTela, entregas: extrasTela, recompra: extrasTela, espera: extrasTela, atacado: extrasTela, clientes: clientes, nf: function () { if (window.JP_VAZIO) NFA.render(tela); else nf(); }, estoque: estoque, loja: lojaTela };
-  function lojaTela() { LJA.render(tela); }
+  var MODULOS = { visao: visao, pedidos: pedidosTela, whatsapp: function () { WAA.render(tela); }, conversas: crmTela, funil: crmTela, campanhas: crmTela, receitas: posVendaTela, avaliacoes: posVendaTela, entregas: extrasTela, recompra: extrasTela, espera: extrasTela, atacado: extrasTela, clientes: clientes, nf: function () { if (window.JP_VAZIO) NFA.render(tela); else nf(); }, estoque: estoque, loja: lojaTela, frete: lojaTela, combos: lojaTela, produtos: produtosTela, categorias: produtosTela };
+  function produtosTela() { PRA.render(tela, modulo); }
+  function lojaTela() { LJA.render(tela, modulo); }
   function crmTela() { CRM.render(modulo, parametro, tela); }
   function posVendaTela() { PVA.render(modulo, tela); }
   function extrasTela() { EXP.render(modulo, tela); }
   function ir() {
     var h = (location.hash || '#visao').slice(1).split('/'), param = h[1] || '';
-    h = h[0]; if (h === 'crm') h = 'funil'; if (h === 'ia') h = 'conversas'; if (!MODULOS[h]) h = 'visao';
+    h = h[0]; if (h === 'crm') h = 'funil'; if (h === 'ia') h = 'conversas'; if (h === 'unidades') h = 'produtos'; if (!MODULOS[h]) h = 'visao';
     modulo = h; parametro = param; recarrega();
     if (mapa && h !== 'pedidos') { mapa.remove(); mapa = null; }
-    document.querySelectorAll('#menu a').forEach(function (a) { a.classList.toggle('ativo', a.dataset.m === h); });
+    document.querySelectorAll('#menu a').forEach(function (a) { var on = a.dataset.m === h; a.classList.toggle('ativo', on); if (on) { a.setAttribute('aria-current', 'page'); $('#menuAtual').textContent = a.textContent.replace(/\d+$/, ''); } else a.removeAttribute('aria-current'); });
+    fechaMenu();
     MODULOS[h](); selos(); window.scrollTo(0, 0);
   }
 
@@ -385,7 +387,12 @@
   EXP.init({ estado: function () { return S; }, recarrega: recarrega, esc: esc, toast: toast, ha: ha, brl: JP.brl, dataHora: JP.dataHora, selos: selos, modulo: function () { return modulo; } });
   WAA.init({ esc: esc, toast: toast });
   NFA.init({ esc: esc, toast: toast, estado: function () { return S; } });
+  PRA.init({ estado: function () { return S; }, esc: esc, toast: toast });
   LJA.init({ estado: function () { return S; }, esc: esc, toast: toast });
+  // menu no celular: botão abre e fecha a lista agrupada
+  function fechaMenu() { var b = $('#menuBotao'); document.body.classList.remove('menu-aberto'); if (b) b.setAttribute('aria-expanded', 'false'); }
+  $('#menuBotao').addEventListener('click', function () { var ab = document.body.classList.toggle('menu-aberto'); this.setAttribute('aria-expanded', String(ab)); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && document.body.classList.contains('menu-aberto')) { fechaMenu(); $('#menuBotao').focus(); } });
   window.addEventListener('hashchange', ir);
   ir();
 })();

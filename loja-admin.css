@@ -1,4 +1,4 @@
-/* Painel — tela "Loja online" */
+/* Painel — tela "Loja online" (combos, frete, horário e textos) */
 .adm .lja-filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
 .adm .lja-filtros .peq { max-width: 260px; }
 .adm .lja-dica { color: var(--suave); font-size: 14px; margin: 0 0 12px; }
