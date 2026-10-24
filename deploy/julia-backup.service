@@ -1,0 +1,10 @@
+[Unit]
+Description=Backup diário da Júlia Pescados (dump + Drive)
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/julia-pescados
+ExecStart=/bin/sh /opt/julia-pescados/scripts/backup-diario.sh
+# código 2 = só o Drive falhou/ficou pendente; o Argos avisa pelo verifica-backup.sh
+SuccessExitStatus=2

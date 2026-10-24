@@ -30,11 +30,23 @@ async function iniciaBanco() {
       token_hash TEXT PRIMARY KEY, usuario_id INT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
       criado TIMESTAMPTZ NOT NULL DEFAULT now(), expira TIMESTAMPTZ NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS auditoria (
+      id BIGSERIAL PRIMARY KEY, quando TIMESTAMPTZ NOT NULL DEFAULT now(), usuario TEXT, acao TEXT NOT NULL, detalhe TEXT, ip TEXT);
+    CREATE INDEX IF NOT EXISTS auditoria_quando ON auditoria (quando DESC);
     CREATE TABLE IF NOT EXISTS kv (
       chave TEXT PRIMARY KEY, valor TEXT NOT NULL, versao INT NOT NULL DEFAULT 1,
       atualizado TIMESTAMPTZ NOT NULL DEFAULT now(), atualizado_por INT
     );`);
 }
+
+/* ---------- auditoria: quem fez o quê (login, senhas, usuários, WhatsApp, nota fiscal). Nunca grava senha nem token. ---------- */
+async function auditar(req, acao, detalhe, usuario) {
+  try {
+    await pool.query('INSERT INTO auditoria (usuario, acao, detalhe, ip) VALUES ($1,$2,$3,$4)',
+      [String(usuario || (req.usuario && req.usuario.usuario) || '').slice(0, 60) || null, String(acao).slice(0, 60), detalhe ? String(detalhe).replace(/[\u0000-\u001f]/g, ' ').slice(0, 300) : null, ipDe(req)]);
+  } catch (e) { console.error('auditoria', e.message); }
+}
+app.locals.auditar = auditar;
 
 /* ---------- senhas ---------- */
 function hashSenha(s) {
@@ -108,15 +120,16 @@ app.post('/api/login', limite({ janelaMs: 60000, max: 20, grupo: 'login:', mensa
   const r = await pool.query('SELECT * FROM usuarios WHERE usuario = $1 AND ativo', [usuario]);
   const u = r.rows[0];
   const ok = u ? confereSenha(senha, u.senha_hash) : (confereSenha(senha, 'scrypt$00$' + '00'.repeat(64)), false);
-  if (!ok) { falhou(k1); falhou(k2); return res.status(401).json({ erro: 'Usuário ou senha incorretos.' }); }
+  if (!ok) { falhou(k1); falhou(k2); auditar(req, 'login.falha', 'usuário informado: ' + usuario, usuario); return res.status(401).json({ erro: 'Usuário ou senha incorretos.' }); }
   const token = crypto.randomBytes(32).toString('hex');
   await pool.query('INSERT INTO sessoes (token_hash, usuario_id, expira) VALUES ($1,$2, now() + $3::int * interval \'1 day\')', [sha(token), u.id, SESSAO_DIAS]);
   await pool.query('DELETE FROM sessoes WHERE expira < now()');
   setaCookie(req, res, token, SESSAO_DIAS * 86400);
+  auditar(req, 'login.ok', null, u.usuario);
   res.json({ ok: true, trocar: u.senha_provisoria });
 });
 app.get('/api/sair', async (req, res) => {
-  const t = cookies(req)[COOKIE]; if (t) await pool.query('DELETE FROM sessoes WHERE token_hash = $1', [sha(t)]);
+  const t = cookies(req)[COOKIE]; if (t) { const u = await usuarioDaSessao(req).catch(() => null); await pool.query('DELETE FROM sessoes WHERE token_hash = $1', [sha(t)]); if (u) auditar(req, 'sair', null, u.usuario); }
   setaCookie(req, res, '', 0); res.redirect('/login');
 });
 
@@ -152,6 +165,7 @@ app.post('/api/trocar-senha', async (req, res) => {
   if (senhaFraca(nova)) return res.status(400).json({ erro: 'A nova senha precisa ter ao menos 10 caracteres.' });
   if (nova === atual) return res.status(400).json({ erro: 'Escolha uma senha diferente da atual.' });
   await pool.query('UPDATE usuarios SET senha_hash = $1, senha_provisoria = FALSE WHERE id = $2', [hashSenha(nova), req.usuario.id]);
+  auditar(req, 'senha.troca', null);
   const t = cookies(req)[COOKIE];
   await pool.query('DELETE FROM sessoes WHERE usuario_id = $1 AND token_hash <> $2', [req.usuario.id, sha(t)]);
   res.json({ ok: true });
@@ -200,11 +214,13 @@ app.post('/api/usuarios', soAdmin, async (req, res) => {
   if (senhaFraca(b.senha)) return res.status(400).json({ erro: 'A senha provisória precisa ter ao menos 10 caracteres.' });
   try {
     await pool.query('INSERT INTO usuarios (usuario, nome, senha_hash, papel, senha_provisoria) VALUES ($1,$2,$3,$4,TRUE)', [usuario, nome, hashSenha(b.senha), papel]);
+    auditar(req, 'usuario.criado', usuario + ' (' + papel + ')');
     res.json({ ok: true });
   } catch (e) { if (e.code === '23505') return res.status(409).json({ erro: 'Esse usuário já existe.' }); throw e; }
 });
 app.patch('/api/usuarios/:id', soAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10), b = req.body || {};
+  auditar(req, 'usuario.alterado', 'id ' + id + (b.ativo === false ? ': desativado' : b.ativo === true ? ': reativado' : '') + (b.senha !== undefined ? ': senha provisória redefinida' : ''));
   if (b.ativo === false) {
     const a = await pool.query("SELECT count(*)::int n FROM usuarios WHERE papel='admin' AND ativo AND id <> $1", [id]);
     if (!a.rows[0].n) return res.status(400).json({ erro: 'Não dá para desativar o último administrador.' });
@@ -216,6 +232,10 @@ app.patch('/api/usuarios/:id', soAdmin, async (req, res) => {
     await pool.query('DELETE FROM sessoes WHERE usuario_id = $1', [id]);
   }
   res.json({ ok: true });
+});
+
+app.get('/api/auditoria', soAdmin, async (req, res) => {
+  res.json((await pool.query('SELECT id, quando, usuario, acao, detalhe, ip FROM auditoria ORDER BY id DESC LIMIT 200')).rows);
 });
 
 /* ---------- arquivos do site ---------- */

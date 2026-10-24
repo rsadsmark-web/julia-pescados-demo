@@ -1,0 +1,10 @@
+[Unit]
+Description=Backup diário da Júlia Pescados às 03h30 (Fortaleza)
+
+[Timer]
+OnCalendar=*-*-* 03:30:00 America/Fortaleza
+Persistent=true
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target

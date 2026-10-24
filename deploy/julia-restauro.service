@@ -1,0 +1,8 @@
+[Unit]
+Description=Teste semanal de restauração do backup da Júlia (banco temporário)
+After=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/julia-pescados
+ExecStart=/bin/sh /opt/julia-pescados/scripts/testa-restauracao.sh

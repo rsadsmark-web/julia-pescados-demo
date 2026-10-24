@@ -168,6 +168,7 @@ module.exports = function (app, pool, ganchos) {
         }
       } catch (e) { if (e.http) return res.status(e.http).json({ erro: e.message }); throw e; }
       await pool.query('INSERT INTO wa_config (id, cfg) VALUES (1, $1) ON CONFLICT (id) DO UPDATE SET cfg = EXCLUDED.cfg, atualizado = now()', [n]);
+      app.locals.auditar && app.locals.auditar(req, 'whatsapp.config', 'chave geral ' + (n.ligado ? 'LIGADA' : 'desligada') + ', modo teste ' + (n.teste ? 'sim' : 'NAO') + ', ' + n.numerosTeste.length + ' número(s) de teste');
       res.json({ ok: true, cfg: n });
     }));
     app.post('/api/whatsapp/optout', seguro(async (req, res) => {

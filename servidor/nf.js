@@ -34,6 +34,7 @@ module.exports = function (app, pool) {
       e.uf = String(e.uf || '').toUpperCase().slice(0, 2); e.cnpj = String(e.cnpj || '').replace(/\D/g, '').slice(0, 14); e.cep = String(e.cep || '').replace(/\D/g, '').slice(0, 8);
       e.ie = String(e.ie || '').replace(/\D/g, '').slice(0, 14); e.numero = String(e.numero || '').slice(0, 20); e.fone = String(e.fone || '').replace(/\D/g, '').slice(0, 13); e.codMunicipio = String(e.codMunicipio || '').replace(/\D/g, '').slice(0, 7);
       await pool.query('INSERT INTO nf_config (id, cfg) VALUES (1, $1) ON CONFLICT (id) DO UPDATE SET cfg = EXCLUDED.cfg, atualizado = now()', [novo]);
+      app.locals.auditar && app.locals.auditar(req, 'nf.config', 'provedor ' + novo.provedor + ', ambiente ' + novo.ambiente);
       res.json({ ok: true, cfg: novo });
     }));
     app.post('/api/nf/rascunho', seguro(async (req, res) => {
@@ -46,6 +47,7 @@ module.exports = function (app, pool) {
       if (ja && ja.estado === 'emitida') return res.status(409).json({ erro: 'Este pedido já tem nota emitida.' });
       await pool.query(`INSERT INTO nf_rascunho (ref, pedido, payload, pendencias) VALUES ($1,$2,$3,$4)
         ON CONFLICT (ref) DO UPDATE SET payload = EXCLUDED.payload, pendencias = EXCLUDED.pendencias, atualizado = now()`, [r.ref, ped.id, r.payload, JSON.stringify(r.pendencias)]);
+      app.locals.auditar && app.locals.auditar(req, 'nf.rascunho', r.ref + (r.ok ? ' pronto' : ' com ' + r.pendencias.length + ' pendência(s)'));
       res.json({ ok: r.ok, ref: r.ref, pendencias: r.pendencias, payload: r.payload });
     }));
     app.post('/api/nf/emitir', soAdmin, seguro(async (req, res) => {
@@ -58,6 +60,7 @@ module.exports = function (app, pool) {
       let r; try { r = await fetch(base(cfg) + '/v2/nfe?ref=' + encodeURIComponent(x.ref), { method: 'POST', headers: { Authorization: 'Basic ' + Buffer.from(a.token + ':').toString('base64'), 'Content-Type': 'application/json' }, body: JSON.stringify(x.payload), signal: AbortSignal.timeout(30000) }); }
       catch (e) { return res.status(502).json({ erro: 'Provedor indisponível: ' + e.message }); }
       const j = await r.json().catch(() => ({}));
+      app.locals.auditar && app.locals.auditar(req, 'nf.emissao', x.ref + (r.ok ? ' enviada ao provedor' : ' recusada pelo provedor'));
       await pool.query('UPDATE nf_rascunho SET estado = $2, retorno = $3, atualizado = now() WHERE ref = $1', [x.ref, r.ok ? 'enviada' : 'erro', j]);
       res.status(r.ok ? 202 : 502).json({ ok: r.ok, retorno: j });
     }));
