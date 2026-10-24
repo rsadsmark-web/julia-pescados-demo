@@ -1,0 +1,554 @@
+{
+ "fonte": "https://juliapescados.smartpos.app/",
+ "extraido_em": "2026-10-23",
+ "categorias": [
+  "Camarões",
+  "Peixes & Mariscos",
+  "Petiscos - Farinha Pan",
+  "Petiscos - Fritura",
+  "Produtos Regionais",
+  "Temperos E Alhos"
+ ],
+ "produtos": [
+  {
+   "codigo": "1002",
+   "nome": "Filé De Camarão M 51/60 - IQF (Kg)",
+   "preco": 55.5,
+   "preco_promocional": null,
+   "categoria": "Camarões",
+   "estoque": 57.0,
+   "tem_variacao": false,
+   "id_smartpos": "63f94de2ea1d5430e0732d0c"
+  },
+  {
+   "codigo": "2003",
+   "nome": "Filé De Pargo C/ Pele (Kg)",
+   "preco": 52.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 3.0,
+   "tem_variacao": false,
+   "id_smartpos": "63f94e35ea1d5430e073303b"
+  },
+  {
+   "codigo": "136",
+   "nome": "Alho Roxo Descascado (Kg)",
+   "preco": 38.0,
+   "preco_promocional": null,
+   "categoria": "Temperos E Alhos",
+   "estoque": 8.0,
+   "tem_variacao": false,
+   "id_smartpos": "66a9a0edcebb3d5445c5bb76"
+  },
+  {
+   "codigo": "131",
+   "nome": "Arraia Desfiada Pré Cozida (Kg)",
+   "preco": 36.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 10.0,
+   "tem_variacao": false,
+   "id_smartpos": "66a1ac74cebb3d5445c2e47f"
+  },
+  {
+   "codigo": "195",
+   "nome": "Bisteca Suína Temperada (Kg)",
+   "preco": 33.0,
+   "preco_promocional": null,
+   "categoria": "Produtos Regionais",
+   "estoque": 5.0,
+   "tem_variacao": false,
+   "id_smartpos": "68840d5016128d35c58f8f87"
+  },
+  {
+   "codigo": "125",
+   "nome": "Bolinha De Camarão - Fritura (Bandeja C/",
+   "preco": 20.0,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Farinha Pan",
+   "estoque": 5.0,
+   "tem_variacao": false,
+   "id_smartpos": "66a1aa3fcebb3d5445c2e41d"
+  },
+  {
+   "codigo": "244",
+   "nome": "Bolinha de Camarão - Fritura (Bandeja c/ 24 Und)",
+   "preco": 27.0,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Fritura",
+   "estoque": 5.0,
+   "tem_variacao": false,
+   "id_smartpos": "6aa336f7ee5a97536c8eb085"
+  },
+  {
+   "codigo": "127",
+   "nome": "Bolinha De Caranguejo - Fritura (Bandeja",
+   "preco": 22.0,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Farinha Pan",
+   "estoque": 4.0,
+   "tem_variacao": false,
+   "id_smartpos": "66a1aadfcebb3d5445c2e43f"
+  },
+  {
+   "codigo": "245",
+   "nome": "Bolinha de Carne do Sol - Fritura (Bandeja C/24 Und)",
+   "preco": 27.0,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Fritura",
+   "estoque": 9.0,
+   "tem_variacao": false,
+   "id_smartpos": "6aa33720ee5a97536c8eb089"
+  },
+  {
+   "codigo": "243",
+   "nome": "Bolinha De Peixe - Fritura (Bandeja C/ 2",
+   "preco": 25.0,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Fritura",
+   "estoque": 7.0,
+   "tem_variacao": false,
+   "id_smartpos": "6aa2f478ee5a97536c8e98d3"
+  },
+  {
+   "codigo": "126",
+   "nome": "Bolinha De Peixe - Fritura (Bandeja C/12",
+   "preco": 19.0,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Farinha Pan",
+   "estoque": 8.0,
+   "tem_variacao": false,
+   "id_smartpos": "66a1aa89cebb3d5445c2e433"
+  },
+  {
+   "codigo": "242",
+   "nome": "Bolinha De Queijo - 24 Und",
+   "preco": 25.0,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Fritura",
+   "estoque": 8.0,
+   "tem_variacao": false,
+   "id_smartpos": "6aa2f44dee5a97536c8e98b1"
+  },
+  {
+   "codigo": "165",
+   "nome": "Buchada Fechada De Carneiro Temperada (K",
+   "preco": 51.0,
+   "preco_promocional": null,
+   "categoria": "Produtos Regionais",
+   "estoque": 0.0,
+   "tem_variacao": false,
+   "id_smartpos": "675372cbee6bc67893ebf3fd"
+  },
+  {
+   "codigo": "124",
+   "nome": "Camarão Empanado C/ CreamCheese - Fritur",
+   "preco": 27.0,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Farinha Pan",
+   "estoque": 22.0,
+   "tem_variacao": false,
+   "id_smartpos": "66a12bf5cebb3d5445c295ef"
+  },
+  {
+   "codigo": "128",
+   "nome": "Camarão Empanado Tradicional - Fritura (",
+   "preco": 24.0,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Farinha Pan",
+   "estoque": 13.0,
+   "tem_variacao": false,
+   "id_smartpos": "66a1ab27cebb3d5445c2e452"
+  },
+  {
+   "codigo": "218",
+   "nome": "Camarão Sem Cabeça (Kg) IQF",
+   "preco": 51.0,
+   "preco_promocional": null,
+   "categoria": "Camarões",
+   "estoque": -6.0,
+   "tem_variacao": false,
+   "id_smartpos": "69a4b72ead5a54465a7f8d50"
+  },
+  {
+   "codigo": "132",
+   "nome": "Carne De Caranguejo (Kg)",
+   "preco": 84.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 5.0,
+   "tem_variacao": false,
+   "id_smartpos": "66a1acb3cebb3d5445c2e483"
+  },
+  {
+   "codigo": "167",
+   "nome": "Carne Do Sol Cozida E Desfiada (500g)",
+   "preco": 44.0,
+   "preco_promocional": null,
+   "categoria": "Produtos Regionais",
+   "estoque": 11.0,
+   "tem_variacao": false,
+   "id_smartpos": "675789aaee6bc67893ed0bd7"
+  },
+  {
+   "codigo": "194",
+   "nome": "Carneiro Temperado (Kg)",
+   "preco": 46.5,
+   "preco_promocional": null,
+   "categoria": "Produtos Regionais",
+   "estoque": 0.0,
+   "tem_variacao": false,
+   "id_smartpos": "68840cf816128d35c58f8f6a"
+  },
+  {
+   "codigo": "241",
+   "nome": "Coxinha De Frango - 24 Und",
+   "preco": 25.0,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Fritura",
+   "estoque": 8.0,
+   "tem_variacao": false,
+   "id_smartpos": "6aa2f42eee5a97536c8e98a1"
+  },
+  {
+   "codigo": "2005",
+   "nome": "Filé De Abadejo (Kg)",
+   "preco": 41.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": -30.0,
+   "tem_variacao": false,
+   "id_smartpos": "63f94961ea1d5430e0730405"
+  },
+  {
+   "codigo": "250",
+   "nome": "Filé de Arabaiana",
+   "preco": 41.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 4.0,
+   "tem_variacao": false,
+   "id_smartpos": "6ab9a53ba4b95313f43cff62"
+  },
+  {
+   "codigo": "2000",
+   "nome": "Filé De Atum (Kg)",
+   "preco": 36.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 7.0,
+   "tem_variacao": false,
+   "id_smartpos": "63f94e24ea1d5430e0732f9a"
+  },
+  {
+   "codigo": "163",
+   "nome": "Filé De Bacalhau Saithé Dessalgado (Kg)",
+   "preco": 75.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 3.0,
+   "tem_variacao": false,
+   "id_smartpos": "674f4ca7ee6bc67893ea1d26"
+  },
+  {
+   "codigo": "232",
+   "nome": "Filé De Camarão Big XGG Télson 16/20",
+   "preco": 85.0,
+   "preco_promocional": null,
+   "categoria": "Camarões",
+   "estoque": 0.0,
+   "tem_variacao": false,
+   "id_smartpos": "6a3fe80c8c8fa34586a42d94"
+  },
+  {
+   "codigo": "174",
+   "nome": "Filé De Camarão Evisc. XG 26/30 Télson",
+   "preco": 78.0,
+   "preco_promocional": null,
+   "categoria": "Camarões",
+   "estoque": 4.0,
+   "tem_variacao": false,
+   "id_smartpos": "676dc542ee6bc67893f3ad44"
+  },
+  {
+   "codigo": "252",
+   "nome": "Filé de Camarão Eviscerado XXG 16/20",
+   "preco": 88.0,
+   "preco_promocional": null,
+   "categoria": "Camarões",
+   "estoque": 30.0,
+   "tem_variacao": false,
+   "id_smartpos": "6ad933efa4b95313f442fbca"
+  },
+  {
+   "codigo": "1010",
+   "nome": "Filé De Camarão G1 41/50 - IQF (kg)",
+   "preco": 62.5,
+   "preco_promocional": null,
+   "categoria": "Camarões",
+   "estoque": 28.0,
+   "tem_variacao": false,
+   "id_smartpos": "63fac814f80a845c30a49243"
+  },
+  {
+   "codigo": "135",
+   "nome": "Filé De Camarão G2 36/40 - IQF - Eviscer",
+   "preco": 67.0,
+   "preco_promocional": null,
+   "categoria": "Camarões",
+   "estoque": 38.0,
+   "tem_variacao": false,
+   "id_smartpos": "66a9a04bcebb3d5445c5bb5c"
+  },
+  {
+   "codigo": "140",
+   "nome": "Filé De Camarão GG - 31/35 IQF - Eviscer",
+   "preco": 72.5,
+   "preco_promocional": null,
+   "categoria": "Camarões",
+   "estoque": 1.0,
+   "tem_variacao": false,
+   "id_smartpos": "66b3b29c6fd4de5bb23271ec"
+  },
+  {
+   "codigo": "145",
+   "nome": "Filé De Camarão XG - 26/30 Evisverado -",
+   "preco": 77.5,
+   "preco_promocional": null,
+   "categoria": "Camarões",
+   "estoque": 9.0,
+   "tem_variacao": false,
+   "id_smartpos": "66be522c6fd4de5bb236378b"
+  },
+  {
+   "codigo": "147",
+   "nome": "Filé De Camarão XGG - 21/25 Eviscerado -",
+   "preco": 84.0,
+   "preco_promocional": null,
+   "categoria": "Camarões",
+   "estoque": 2.0,
+   "tem_variacao": false,
+   "id_smartpos": "66be52a06fd4de5bb23637e9"
+  },
+  {
+   "codigo": "219",
+   "nome": "Filé De Panga S/Gordura (Kg)",
+   "preco": 43.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 1.0,
+   "tem_variacao": false,
+   "id_smartpos": "69cdc03be1dd81090cd26c27"
+  },
+  {
+   "codigo": "130",
+   "nome": "Filé De Pescada Amarela (Kg)",
+   "preco": 57.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 5.0,
+   "tem_variacao": false,
+   "id_smartpos": "66a1ac18cebb3d5445c2e477"
+  },
+  {
+   "codigo": "2004",
+   "nome": "Filé De Pescada Branca (Kg)",
+   "preco": 42.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 5.0,
+   "tem_variacao": false,
+   "id_smartpos": "63f94f00ea1d5430e07337d3"
+  },
+  {
+   "codigo": "2008",
+   "nome": "Filé De Salmão (Kg)",
+   "preco": 94.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 1.0,
+   "tem_variacao": false,
+   "id_smartpos": "63f94e47ea1d5430e07330fc"
+  },
+  {
+   "codigo": "2006",
+   "nome": "Filé De Sirigado (Kg)",
+   "preco": 53.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 8.0,
+   "tem_variacao": false,
+   "id_smartpos": "63f94e3cea1d5430e0733089"
+  },
+  {
+   "codigo": "115",
+   "nome": "Filé de Tilápia (Kg)",
+   "preco": 49.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 5.0,
+   "tem_variacao": false,
+   "id_smartpos": "669af1ba9307847575c926bd"
+  },
+  {
+   "codigo": "168",
+   "nome": "Frango Cozido Temperado E Desfiado (500g",
+   "preco": 30.0,
+   "preco_promocional": null,
+   "categoria": "Produtos Regionais",
+   "estoque": 7.0,
+   "tem_variacao": false,
+   "id_smartpos": "675789fbee6bc67893ed0bf4"
+  },
+  {
+   "codigo": "116",
+   "nome": "Galinha Caipira Neutra - (Unidade ~ 1.20",
+   "preco": 32.0,
+   "preco_promocional": null,
+   "categoria": "Produtos Regionais",
+   "estoque": 4.0,
+   "tem_variacao": false,
+   "id_smartpos": "669af28d9307847575c9272c"
+  },
+  {
+   "codigo": "187",
+   "nome": "Isca De Peixe (12 Unid.)",
+   "preco": 31.0,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Farinha Pan",
+   "estoque": 10.0,
+   "tem_variacao": false,
+   "id_smartpos": "67febce8711f853f4ed47987"
+  },
+  {
+   "codigo": "117",
+   "nome": "Panelada Temperada (Kg)",
+   "preco": 31.0,
+   "preco_promocional": null,
+   "categoria": "Produtos Regionais",
+   "estoque": -5.0,
+   "tem_variacao": false,
+   "id_smartpos": "669af32d9307847575c9277a"
+  },
+  {
+   "codigo": "247",
+   "nome": "Pastel Carne do Sol C/ Queijo - (12 und)",
+   "preco": 26.5,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Fritura",
+   "estoque": 9.0,
+   "tem_variacao": false,
+   "id_smartpos": "6aa337b8ee5a97536c8eb0d7"
+  },
+  {
+   "codigo": "248",
+   "nome": "Pastel de Frango-Fritura (Bdj c/ 12 und)",
+   "preco": 24.5,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Fritura",
+   "estoque": 9.0,
+   "tem_variacao": false,
+   "id_smartpos": "6aa33807ee5a97536c8eb0f3"
+  },
+  {
+   "codigo": "246",
+   "nome": "Pastel de Queijo - Fritura (Bdj c/ 12)",
+   "preco": 24.5,
+   "preco_promocional": null,
+   "categoria": "Petiscos - Fritura",
+   "estoque": 4.0,
+   "tem_variacao": false,
+   "id_smartpos": "6aa3377dee5a97536c8eb0c2"
+  },
+  {
+   "codigo": "133",
+   "nome": "Polvo Inteiro (Kg)",
+   "preco": 55.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 0.0,
+   "tem_variacao": false,
+   "id_smartpos": "66a1acf5cebb3d5445c2e489"
+  },
+  {
+   "codigo": "3003",
+   "nome": "Posta De Cavala (Kg)",
+   "preco": 42.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 0.0,
+   "tem_variacao": false,
+   "id_smartpos": "63f94f2eea1d5430e0733972"
+  },
+  {
+   "codigo": "0101010",
+   "nome": "Posta De Serra (Kg)",
+   "preco": 38.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 1.0,
+   "tem_variacao": false,
+   "id_smartpos": "642eafc0650bf4427a8a24f9"
+  },
+  {
+   "codigo": "118",
+   "nome": "Posta de Tilápia S/ Cabeça (Kg)",
+   "preco": 35.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 13.0,
+   "tem_variacao": false,
+   "id_smartpos": "669af3cd9307847575c92ac4"
+  },
+  {
+   "codigo": "199",
+   "nome": "Sarrabulho Suíno Temperado (Kg)",
+   "preco": 23.0,
+   "preco_promocional": null,
+   "categoria": "Produtos Regionais",
+   "estoque": 1.0,
+   "tem_variacao": false,
+   "id_smartpos": "6941b7ede8b459442bb4e07d"
+  },
+  {
+   "codigo": "119",
+   "nome": "Tempero Extra Julia Pescados",
+   "preco": 3.5,
+   "preco_promocional": null,
+   "categoria": "Temperos E Alhos",
+   "estoque": -6.0,
+   "tem_variacao": false,
+   "id_smartpos": "669af4429307847575c92b14"
+  },
+  {
+   "codigo": "134",
+   "nome": "Tempero Pronto JP (200grs)",
+   "preco": 19.0,
+   "preco_promocional": null,
+   "categoria": "Temperos E Alhos",
+   "estoque": 3.0,
+   "tem_variacao": false,
+   "id_smartpos": "66a1b33ecebb3d5445c2e5ae"
+  },
+  {
+   "codigo": "120",
+   "nome": "Tilápia Inteira Tratada e Desossada (Peç",
+   "preco": 39.0,
+   "preco_promocional": null,
+   "categoria": "Peixes & Mariscos",
+   "estoque": 14.0,
+   "tem_variacao": false,
+   "id_smartpos": "669af5299307847575c92b77"
+  },
+  {
+   "codigo": "221",
+   "nome": "Tripa De Porco Temperada (700grs)",
+   "preco": 32.0,
+   "preco_promocional": null,
+   "categoria": "Produtos Regionais",
+   "estoque": 0.0,
+   "tem_variacao": false,
+   "id_smartpos": "69fb32fe3389d14b45fac284"
+  }
+ ]
+}
