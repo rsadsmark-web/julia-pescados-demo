@@ -164,7 +164,7 @@
   }
   function registra(p) {
     S = JP.estado();
-    var id = 'JP-' + (++S.seq); p.id = id;
+    var id = window.JP_PUBLICO ? 'JP-' + JP_PUBLICO.codigo() : 'JP-' + (++S.seq); p.id = id;   // página pública: código aleatório, sem colisão entre aparelhos
     if (EX.aposCorte()) p.agendado = EX.proxDia().texto;   // depois do corte: aceita, mas avisa que é no dia seguinte
     S.pedidos.unshift(p);
     // cliente novo na carteira, ou soma ao existente

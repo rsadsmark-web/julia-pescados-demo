@@ -4,6 +4,7 @@ const express = require('express');
 const crypto = require('crypto');
 const path = require('path');
 const { Pool } = require('pg');
+const { limite, ipDe } = require('./limite');
 
 const PORTA = +process.env.PORT || 3000;
 const SITE = process.env.SITE_DIR || path.join(__dirname, '..', 'site');
@@ -11,6 +12,7 @@ const SESSAO_DIAS = 7;
 const COOKIE = 'jp_sess';
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL, max: 6 });
+process.on('unhandledRejection', (e) => console.error('rejeição não tratada', e && e.message));
 const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
@@ -83,11 +85,14 @@ app.get('/saude', async (req, res) => {
   try { await pool.query('SELECT 1'); res.json({ ok: true }); } catch (e) { res.status(503).json({ ok: false }); }
 });
 
-/* ---------- login (público) ---------- */
+/* ---------- rotas públicas: pedido e lista de espera da loja (com limite por IP) ---------- */
 app.use('/api', express.json({ limit: '20kb' }));
-app.post('/api/login', async (req, res) => {
+const pub = require('./publico')(app, pool);
+
+/* ---------- login (público) ---------- */
+app.post('/api/login', limite({ janelaMs: 60000, max: 20, grupo: 'login:', mensagem: 'Muitas tentativas. Aguarde um minuto.' }), async (req, res) => {
   const usuario = String((req.body || {}).usuario || '').trim().toLowerCase().slice(0, 60), senha = String((req.body || {}).senha || '');
-  const k1 = 'ip:' + req.ip, k2 = 'u:' + usuario;
+  const k1 = 'ip:' + ipDe(req), k2 = 'u:' + usuario;
   if (bloqueado(k1) || bloqueado(k2)) return res.status(429).json({ erro: 'Muitas tentativas. Aguarde 15 minutos e tente de novo.' });
   const r = await pool.query('SELECT * FROM usuarios WHERE usuario = $1 AND ativo', [usuario]);
   const u = r.rows[0];
@@ -105,6 +110,7 @@ app.get('/api/sair', async (req, res) => {
 });
 
 /* ---------- tudo abaixo exige login ---------- */
+app.use('/api', limite({ janelaMs: 60000, max: 600, grupo: 'painel:' })); // folga para o painel; barra abuso
 const LIVRES = new Set(['/login.html', '/login.js', '/img/marca/logo-julia-96.png', '/img/marca/logo-julia-192.png', '/img/marca/logo-julia-32.png', '/img/marca/apple-touch-icon.png', '/manifest.webmanifest']);
 app.use(async (req, res, next) => {
   try {
@@ -142,7 +148,9 @@ app.post('/api/trocar-senha', async (req, res) => {
 
 /* ---------- estado do sistema (chave/valor) ---------- */
 const CHAVES = new Set(['jp_demo_v1', 'jp_crm_v1', 'jp_ex_v1', 'jp_pv_v1', 'jp_rs_ia_v1']);
+app.get('/api/entradas/pendentes', async (req, res) => res.json({ n: await pub.pendentes() }));
 app.get('/api/kv', async (req, res) => {
+  try { await pub.absorve(); } catch (e) { console.error('absorve', e.message); } // pedidos e inscrições feitos na loja entram no estado antes de o painel carregar
   const r = await pool.query('SELECT chave, valor, versao FROM kv');
   const o = {}; r.rows.forEach((x) => { o[x.chave] = { valor: x.valor, versao: x.versao }; });
   res.json(o);
@@ -161,6 +169,7 @@ app.put('/api/kv/:chave', express.text({ type: '*/*', limit: '30mb' }), async (r
       `INSERT INTO kv (chave, valor, versao, atualizado_por) VALUES ($1,$2,$3,$4)
        ON CONFLICT (chave) DO UPDATE SET valor = EXCLUDED.valor, versao = EXCLUDED.versao, atualizado = now(), atualizado_por = EXCLUDED.atualizado_por`, [k, valor, nv, req.usuario.id]);
     await c.query('COMMIT'); res.json({ ok: true, versao: nv });
+    if (k === 'jp_demo_v1' || k === 'jp_ex_v1') pub.agendaPublica(); // catálogo público atualizado
   } catch (e) { await c.query('ROLLBACK').catch(() => {}); throw e; } finally { c.release(); }
 });
 
@@ -203,6 +212,7 @@ module.exports = { pool, hashSenha, iniciaBanco };
 if (require.main === module) {
   (async () => {
     for (let i = 0; i < 30; i++) { try { await iniciaBanco(); break; } catch (e) { console.log('aguardando o banco…', e.code || e.message); await new Promise((r) => setTimeout(r, 2000)); if (i === 29) process.exit(1); } }
+    await pub.iniciaTabelas(); await pub.publica().catch((e) => console.error('publica', e.message));
     app.listen(PORTA, () => console.log('Júlia Pescados no ar na porta ' + PORTA));
   })();
 }
