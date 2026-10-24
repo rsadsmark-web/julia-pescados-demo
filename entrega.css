@@ -1,0 +1,32 @@
+/* Júlia Pescados — telas públicas do rastreio (entregador e cliente), mobile primeiro. */
+.ent { margin: 0; min-height: 100vh; min-height: 100dvh; background: var(--creme); color: var(--tinta); font-family: var(--corpo); display: flex; flex-direction: column; }
+.ent-topo { background: var(--lata-escuro); color: #fff; padding: 12px 16px; display: flex; align-items: center; gap: 10px; }
+.ent-topo img { border-radius: 8px; }
+.ent-topo b { font-family: var(--titulo); font-size: 18px; font-weight: 400; display: block; line-height: 1.1; }
+.ent-topo small { font-family: var(--rotulo); letter-spacing: .08em; text-transform: uppercase; opacity: .85; }
+.ent-mapa { height: 46vh; min-height: 260px; width: 100%; z-index: 0; background: var(--marinho-claro); }
+.ent-corpo { padding: 14px 16px 28px; display: grid; gap: 12px; max-width: 560px; width: 100%; margin: 0 auto; }
+.ent-cartao { background: var(--papel); border: 1px solid var(--linha); border-radius: var(--raio); padding: 14px; }
+.ent-cartao h1, .ent-cartao h2 { margin: 0 0 6px; font-size: 18px; }
+.ent-grande { font-size: 22px; font-weight: 700; margin: 0; }
+.ent-suave { color: var(--suave); font-size: 14px; margin: 4px 0 0; }
+.ent-eta { font-family: var(--titulo); font-size: 28px; color: var(--lata); margin: 2px 0; }
+.ent-botao { appearance: none; border: 0; border-radius: 12px; padding: 16px; font: 700 17px var(--corpo); width: 100%; background: var(--lata); color: #fff; cursor: pointer; min-height: 52px; }
+.ent-botao:disabled { opacity: .5; }
+.ent-botao.claro { background: var(--papel); color: var(--lata-escuro); border: 2px solid var(--lata); }
+.ent-botao.ok { background: var(--ok); }
+.ent-faixa { padding: 10px 14px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+.ent-faixa.ok { background: #dff3e6; color: #14502c; }
+.ent-faixa.aviso { background: #fff1d1; color: var(--alerta); }
+.ent-faixa.erro { background: #fbe0dd; color: var(--perigo); }
+.ent-etapas { display: flex; gap: 6px; list-style: none; padding: 0; margin: 0 0 10px; }
+.ent-etapas li { flex: 1; text-align: center; font-size: 12px; padding-top: 10px; border-top: 5px solid var(--linha); color: var(--suave); }
+.ent-etapas li.feito { border-color: var(--ok); color: var(--ok); font-weight: 700; }
+.ent-etapas li.atual { border-color: var(--lata); color: var(--lata); font-weight: 700; }
+.ent-aviso-privacidade { font-size: 13px; line-height: 1.45; }
+.ent-aviso-privacidade li { margin: 4px 0; }
+.ent-oculto { display: none !important; }
+.ent-campo { width: 100%; font: 16px var(--corpo); padding: 12px; border-radius: 10px; border: 1px solid var(--linha); background: #fff; }
+.ent-tela-cheia { flex: 1; display: grid; place-items: center; text-align: center; padding: 28px; }
+.ent-tela-cheia h1 { font-family: var(--titulo); font-weight: 400; font-size: 26px; margin: 0 0 8px; color: var(--lata-escuro); }
+.ent-link { color: var(--marinho); font-weight: 700; }

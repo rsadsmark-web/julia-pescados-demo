@@ -14,7 +14,8 @@ rmSync(saida, { recursive: true, force: true });
 mkdirSync(saida, { recursive: true });
 
 const paginas = ['index.html', 'receitas.html', 'login.html'];
-const arquivos = new Set(['manifest.webmanifest', 'base.css']);
+// entrega.css e os scripts do rastreio são das telas /e/<token> e /r/<token> (páginas servidas pelo Node, com links absolutos)
+const arquivos = new Set(['manifest.webmanifest', 'base.css', 'entrega.css', 'entrega-lib.js', 'entrega-mapa.js', 'entregador.js', 'acompanhar.js']);
 for (const p of paginas) {
   if (!existsSync(join(raiz, p))) continue;
   arquivos.add(p);

@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="origin">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#6f1710">
+<title>Entrega — Julia Pescados</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/img/marca/logo-julia-32.png">
+<link rel="apple-touch-icon" href="/img/marca/apple-touch-icon.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<link rel="stylesheet" href="/base.css">
+<link rel="stylesheet" href="/entrega.css">
+</head>
+<body class="ent">
+<header class="ent-topo"><img src="/img/marca/logo-julia-96.png" width="40" height="40" alt=""><span><b>Julia</b><small>Entrega</small></span></header>
+<div id="carregando" class="ent-tela-cheia"><p>Abrindo a entrega…</p></div>
+<div id="erro" class="ent-tela-cheia ent-oculto"><div><h1 id="erroTitulo">Link indisponível</h1><p id="erroTexto" class="ent-suave"></p></div></div>
+<main id="app" class="ent-oculto">
+  <div id="mapa" class="ent-mapa" role="img" aria-label="Mapa com a sua posição e o destino"></div>
+  <div class="ent-corpo">
+    <div id="faixa" class="ent-faixa ent-oculto" role="status" aria-live="polite"></div>
+    <section class="ent-cartao" aria-labelledby="pedidoTitulo">
+      <h1 id="pedidoTitulo"></h1>
+      <p class="ent-grande" id="endereco"></p>
+      <p class="ent-suave" id="detalhes"></p>
+      <p class="ent-suave ent-oculto" id="aproximado">O ponto no mapa é aproximado (centro do bairro). Confira o endereço.</p>
+      <p><a id="rotaExterna" class="ent-link" target="_blank" rel="noopener">Abrir a rota no aplicativo de mapas</a></p>
+    </section>
+    <section id="privacidade" class="ent-cartao ent-aviso-privacidade ent-oculto">
+      <h2>Antes de começar</h2>
+      <ul>
+        <li>Ao tocar em <b>Iniciar entrega</b>, o seu celular compartilha a sua localização <b>só durante esta entrega</b>, para o cliente e a Júlia acompanharem.</li>
+        <li>O compartilhamento <b>para</b> quando você marca entregue ou não entregue. O trajeto é apagado em seguida.</li>
+        <li>Deixe esta tela aberta e o celular com sinal e GPS ligados.</li>
+      </ul>
+    </section>
+    <button id="iniciar" class="ent-botao ent-oculto" type="button">Iniciar entrega</button>
+    <section id="emRota" class="ent-oculto">
+      <p class="ent-suave" id="sinal"></p>
+      <button id="concluir" class="ent-botao ok" type="button">Entreguei</button>
+      <p></p>
+      <button id="abreFalha" class="ent-botao claro" type="button">Não consegui entregar</button>
+      <div id="falha" class="ent-cartao ent-oculto">
+        <label for="motivo">O que aconteceu?</label>
+        <select id="motivo" class="ent-campo"><option>Cliente ausente</option><option>Endereço não encontrado</option><option>Cliente recusou</option><option>Outro motivo</option></select>
+        <p></p><button id="confirmaFalha" class="ent-botao" type="button">Confirmar</button>
+      </div>
+    </section>
+    <p id="fim" class="ent-cartao ent-oculto"></p>
+  </div>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<script src="/entrega-lib.js"></script>
+<script src="/entrega-mapa.js"></script>
+<script src="/entregador.js"></script>
+</body>
+</html>

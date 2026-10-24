@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="referrer" content="origin">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#6f1710">
+<title>Acompanhe sua entrega — Julia Pescados</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/img/marca/logo-julia-32.png">
+<link rel="apple-touch-icon" href="/img/marca/apple-touch-icon.png">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<link rel="stylesheet" href="/base.css">
+<link rel="stylesheet" href="/entrega.css">
+</head>
+<body class="ent">
+<header class="ent-topo"><img src="/img/marca/logo-julia-96.png" width="40" height="40" alt=""><span><b>Julia</b><small>Pescados</small></span></header>
+<div id="carregando" class="ent-tela-cheia"><p>Buscando seu pedido…</p></div>
+<div id="erro" class="ent-tela-cheia ent-oculto"><div><h1 id="erroTitulo">Link indisponível</h1><p id="erroTexto" class="ent-suave"></p></div></div>
+<main id="app" class="ent-oculto">
+  <div id="mapa" class="ent-mapa" role="img" aria-label="Mapa com a posição do entregador e o seu endereço"></div>
+  <div class="ent-corpo">
+    <div id="faixa" class="ent-faixa ent-oculto" role="status" aria-live="polite"></div>
+    <section class="ent-cartao" aria-live="polite">
+      <ol class="ent-etapas" id="etapas"><li data-e="1">Recebido</li><li data-e="2">Preparando</li><li data-e="3">A caminho</li><li data-e="4">Entregue</li></ol>
+      <p class="ent-grande" id="titulo"></p>
+      <p class="ent-eta ent-oculto" id="eta"></p>
+      <p class="ent-suave" id="detalhe"></p>
+    </section>
+  </div>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<script src="/entrega-lib.js"></script>
+<script src="/entrega-mapa.js"></script>
+<script src="/acompanhar.js"></script>
+</body>
+</html>
