@@ -30,20 +30,20 @@
   var CATEGORIAS = ['Camarão', 'Peixes e filés', 'Frutos do mar', 'Kits'];
 
   var PRODUTOS = [
-    { id: 'p1', fresco: true, nome: 'Camarão cinza inteiro', cat: 'Camarão', un: 'kg', preco: 49.9, estoque: 42, min: 15, img: 'camarao-cru.jpg', desc: 'Camarão cinza fresco, calibre 40/50. Ideal para frigideira e moqueca.', ncm: '0306.17.00', dest: true },
-    { id: 'p2', nome: 'Camarão sem cabeça', cat: 'Camarão', un: 'kg', preco: 56.9, estoque: 36, min: 15, img: 'camarao-congelado.jpg', desc: 'Sem cabeça e com casca. Mais rendimento, menos trabalho.', ncm: '0306.17.00' },
-    { id: 'p3', nome: 'Camarão descascado', cat: 'Camarão', un: 'kg', preco: 79.9, estoque: 18, min: 10, img: 'camarao-descascado.jpg', desc: 'Limpo e pronto para o preparo. Congelado em pacote de 1 kg.', ncm: '0306.17.00', dest: true },
-    { id: 'p4', fresco: true, nome: 'Camarão VG', cat: 'Camarão', un: 'kg', preco: 64.9, estoque: 9, min: 12, img: 'camarao-cru.jpg', desc: 'Camarão graúdo, perfeito para grelhar ou empanar.', ncm: '0306.17.00' },
-    { id: 'p5', fresco: true, nome: 'Filé de tilápia', cat: 'Peixes e filés', un: 'kg', preco: 36.9, estoque: 55, min: 20, img: 'file-tilapia.jpg', desc: 'Filé sem espinha, embalado a vácuo. Campeão de vendas.', ncm: '0304.62.00', dest: true },
-    { id: 'p6', fresco: true, nome: 'Tilápia inteira', cat: 'Peixes e filés', un: 'kg', preco: 24.9, estoque: 30, min: 12, img: 'peixes.jpg', desc: 'Inteira, escamada e eviscerada. Pronta para assar.', ncm: '0303.23.00' },
-    { id: 'p7', fresco: true, nome: 'Filé de salmão', cat: 'Peixes e filés', un: 'kg', preco: 89.9, estoque: 14, min: 8, img: 'salmao.jpg', desc: 'Filé de salmão em peça, congelado.', ncm: '0304.41.00' },
-    { id: 'p8', fresco: true, nome: 'Posta de serra', cat: 'Peixes e filés', un: 'kg', preco: 39.9, estoque: 7, min: 10, img: 'peixes.jpg', desc: 'Postas altas, ótimas para frito, assado ou caldeirada.', ncm: '0303.89.90' },
-    { id: 'p9', nome: 'Anéis de lula', cat: 'Frutos do mar', un: 'kg', preco: 42.9, estoque: 20, min: 8, img: 'lula.jpg', desc: 'Lula limpa em anéis, para fritar ou refogar.', ncm: '0307.43.00' },
-    { id: 'p10', nome: 'Mix de frutos do mar', cat: 'Frutos do mar', un: 'kg', preco: 58.9, estoque: 16, min: 8, img: 'frutos-do-mar.jpg', desc: 'Camarão, lula e marisco para paella e risoto.', ncm: '0307.99.90' },
-    { id: 'p11', nome: 'Kit Churrasco de Camarão', cat: 'Kits', un: 'kit', preco: 84.9, estoque: 25, min: 8, img: 'camarao-congelado.jpg', desc: 'Camarão e tilápia prontos para a grelha: dá para 6 pessoas.', inclui: [['p2', 1], ['p5', 1]], ncm: '0306.17.00', dest: true },
-    { id: 'p12', nome: 'Kit Família', cat: 'Kits', un: 'kit', preco: 119.9, estoque: 12, min: 6, img: 'frutos-do-mar.jpg', desc: 'Moqueca, frito e arroz de uma vez: camarão, filé e lula.', inclui: [['p3', 1], ['p5', 1], ['p9', 0.5]], ncm: '0306.17.00' },
-    { id: 'p13', nome: 'Kit Moqueca', cat: 'Kits', un: 'kit', preco: 89.9, estoque: 20, min: 6, img: 'peixes.jpg', desc: 'Postas de serra, camarão e filé para uma moqueca cearense de verdade.', ncm: '0303.89.90', inclui: [['p8', 1], ['p3', 0.5], ['p5', 0.5]] },
-    { id: 'p14', nome: 'Kit Semana', cat: 'Kits', un: 'kit', preco: 169.9, estoque: 15, min: 5, img: 'frutos-do-mar.jpg', desc: 'Peixe, camarão e lula para cinco refeições diferentes durante a semana.', ncm: '0306.17.00', inclui: [['p5', 2], ['p2', 1], ['p8', 1], ['p9', 0.5]] }
+    { id: 'p1', fresco: true, nome: 'Camarão cinza inteiro', cat: 'Camarão', un: 'kg', preco: 49.9, estoque: 42, min: 15, img: 'camarao-cru.webp', desc: 'Camarão cinza fresco, calibre 40/50. Ideal para frigideira e moqueca.', ncm: '0306.17.00', dest: true },
+    { id: 'p2', nome: 'Camarão sem cabeça', cat: 'Camarão', un: 'kg', preco: 56.9, estoque: 36, min: 15, img: 'camarao-congelado.webp', desc: 'Sem cabeça e com casca. Mais rendimento, menos trabalho.', ncm: '0306.17.00' },
+    { id: 'p3', nome: 'Camarão descascado', cat: 'Camarão', un: 'kg', preco: 79.9, estoque: 18, min: 10, img: 'camarao-descascado.webp', desc: 'Limpo e pronto para o preparo. Congelado em pacote de 1 kg.', ncm: '0306.17.00', dest: true },
+    { id: 'p4', fresco: true, nome: 'Camarão VG', cat: 'Camarão', un: 'kg', preco: 64.9, estoque: 9, min: 12, img: 'camarao-cru.webp', desc: 'Camarão graúdo, perfeito para grelhar ou empanar.', ncm: '0306.17.00' },
+    { id: 'p5', fresco: true, nome: 'Filé de tilápia', cat: 'Peixes e filés', un: 'kg', preco: 36.9, estoque: 55, min: 20, img: 'file-tilapia.webp', desc: 'Filé sem espinha, embalado a vácuo. Campeão de vendas.', ncm: '0304.62.00', dest: true },
+    { id: 'p6', fresco: true, nome: 'Tilápia inteira', cat: 'Peixes e filés', un: 'kg', preco: 24.9, estoque: 30, min: 12, img: 'peixes.webp', desc: 'Inteira, escamada e eviscerada. Pronta para assar.', ncm: '0303.23.00' },
+    { id: 'p7', fresco: true, nome: 'Filé de salmão', cat: 'Peixes e filés', un: 'kg', preco: 89.9, estoque: 14, min: 8, img: 'salmao.webp', desc: 'Filé de salmão em peça, congelado.', ncm: '0304.41.00' },
+    { id: 'p8', fresco: true, nome: 'Posta de serra', cat: 'Peixes e filés', un: 'kg', preco: 39.9, estoque: 7, min: 10, img: 'peixes.webp', desc: 'Postas altas, ótimas para frito, assado ou caldeirada.', ncm: '0303.89.90' },
+    { id: 'p9', nome: 'Anéis de lula', cat: 'Frutos do mar', un: 'kg', preco: 42.9, estoque: 20, min: 8, img: 'lula.webp', desc: 'Lula limpa em anéis, para fritar ou refogar.', ncm: '0307.43.00' },
+    { id: 'p10', nome: 'Mix de frutos do mar', cat: 'Frutos do mar', un: 'kg', preco: 58.9, estoque: 16, min: 8, img: 'frutos-do-mar.webp', desc: 'Camarão, lula e marisco para paella e risoto.', ncm: '0307.99.90' },
+    { id: 'p11', nome: 'Kit Churrasco de Camarão', cat: 'Kits', un: 'kit', preco: 84.9, estoque: 25, min: 8, img: 'camarao-congelado.webp', desc: 'Camarão e tilápia prontos para a grelha: dá para 6 pessoas.', inclui: [['p2', 1], ['p5', 1]], ncm: '0306.17.00', dest: true },
+    { id: 'p12', nome: 'Kit Família', cat: 'Kits', un: 'kit', preco: 119.9, estoque: 12, min: 6, img: 'frutos-do-mar.webp', desc: 'Moqueca, frito e arroz de uma vez: camarão, filé e lula.', inclui: [['p3', 1], ['p5', 1], ['p9', 0.5]], ncm: '0306.17.00' },
+    { id: 'p13', nome: 'Kit Moqueca', cat: 'Kits', un: 'kit', preco: 89.9, estoque: 20, min: 6, img: 'peixes.webp', desc: 'Postas de serra, camarão e filé para uma moqueca cearense de verdade.', ncm: '0303.89.90', inclui: [['p8', 1], ['p3', 0.5], ['p5', 0.5]] },
+    { id: 'p14', nome: 'Kit Semana', cat: 'Kits', un: 'kit', preco: 169.9, estoque: 15, min: 5, img: 'frutos-do-mar.webp', desc: 'Peixe, camarão e lula para cinco refeições diferentes durante a semana.', ncm: '0306.17.00', inclui: [['p5', 2], ['p2', 1], ['p8', 1], ['p9', 0.5]] }
   ];
 
   function agoraMs() { return Date.now(); }
@@ -116,7 +116,8 @@
   // Estados salvos antes das novidades ganham kits novos, marcação de lote fresco e último pedido dos clientes.
   function migrar(e) {
     var mudou = false;
-    PRODUTOS.forEach(function (novo) {
+    e.produtos.forEach(function (x) { if (/\.jpg$/.test(x.img || '')) { x.img = x.img.replace(/\.jpg$/, '.webp'); mudou = true; } });   // fotos agora em WebP
+    if (!window.JP_VAZIO) PRODUTOS.forEach(function (novo) {   // sistema real: o catálogo vem do banco (importação do SmartPOS), sem recriar os produtos de demonstração
       var atual = e.produtos.filter(function (x) { return x.id === novo.id; })[0];
       if (!atual) { e.produtos.push(JSON.parse(JSON.stringify(novo))); mudou = true; return; }
       if (novo.cat === 'Kits' || novo.fresco) {
@@ -128,12 +129,19 @@
       if (c.endereco === undefined && ENDERECOS[c.nome]) { c.endereco = ENDERECOS[c.nome]; mudou = true; }
     });
     if (mudou) { try { localStorage.setItem(CHAVE, JSON.stringify(e)); } catch (x) {} }
+    categoriasDe(e);
     return e;
+  }
+  // No sistema real as categorias são as dos produtos (na ordem em que aparecem); a lista fixa só vale para a demonstração.
+  function categoriasDe(e) {
+    if (!window.JP_VAZIO) return;
+    var l = []; e.produtos.forEach(function (p) { if (p.cat && l.indexOf(p.cat) < 0) l.push(p.cat); });
+    if (l.length) { CATEGORIAS.length = 0; l.forEach(function (c) { CATEGORIAS.push(c); }); }
   }
   var estado = null;
   function carregar() {
     try { var s = localStorage.getItem(CHAVE); if (s) { estado = migrar(JSON.parse(s)); return estado; } } catch (e) {}
-    estado = semente(); salvar(); return estado;
+    estado = semente(); categoriasDe(estado); salvar(); return estado;
   }
   function salvar() { try { localStorage.setItem(CHAVE, JSON.stringify(estado)); } catch (e) {} }
   function resetar() { try { localStorage.removeItem(CHAVE); } catch (e) {} estado = null; carregar(); }
