@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const { limite } = require('./limite');
 const { validaPedido, txt, digitos } = require('./pedido');
+const JPC = require(path.join(process.env.SITE_DIR || path.join(__dirname, '..'), 'catalogo-lib.js'));
 
 const DIR = process.env.DINAMICO_DIR || path.join(__dirname, '..', 'dinamico');
 
@@ -27,8 +28,8 @@ module.exports = function (app, pool) {
     const kv = {}; r.rows.forEach((x) => { try { kv[x.chave] = JSON.parse(x.valor); } catch (e) {} });
     if (!kv.jp_demo_v1 || !Array.isArray(kv.jp_demo_v1.produtos)) return;
     const saida = {
-      produtos: kv.jp_demo_v1.produtos.map((p) => ({ id: p.id, fresco: p.fresco, dest: p.dest, nome: p.nome, cat: p.cat, un: p.un, preco: p.preco, estoque: p.estoque, min: p.min,
-        img: String(p.img || '').replace(/\.jpg$/, '.webp'), desc: p.desc, dica: p.dica, promo: p.promo, fracionado: p.fracionado, pesoAprox: p.pesoAprox, inclui: p.inclui })),
+      produtos: JPC.publicos(kv.jp_demo_v1).map((p) => ({ id: p.id, fresco: p.fresco, dest: p.dest, nome: p.nome, cat: p.cat, un: p.un, preco: p.preco, estoque: p.estoque, min: p.min,
+        img: /^\//.test(p.img || '') ? p.img : String(p.img || '').replace(/\.jpg$/, '.webp'), desc: p.desc, dica: p.dica, promo: p.promo, fracionado: p.fracionado, pesoAprox: p.pesoAprox, inclui: p.inclui })),
       corte: kv.jp_ex_v1 && kv.jp_ex_v1.entrega && +kv.jp_ex_v1.entrega.corte || 14,
       loja: kv.jp_loja_v1 || null
     };
@@ -53,7 +54,7 @@ module.exports = function (app, pool) {
     const kvr = await pool.query("SELECT chave, valor FROM kv WHERE chave IN ('jp_demo_v1','jp_loja_v1')");
     const kv = {}; kvr.rows.forEach((x) => { try { kv[x.chave] = JSON.parse(x.valor); } catch (e) {} });
     if (!kv.jp_demo_v1 || !Array.isArray(kv.jp_demo_v1.produtos)) return res.status(503).json({ erro: 'Loja ainda não liberada.' });
-    const pedido = validaPedido(req.body, kv.jp_demo_v1.produtos, kv.jp_loja_v1);
+    const pedido = validaPedido(req.body, JPC.publicos(kv.jp_demo_v1), kv.jp_loja_v1);
     if (pedido.erro) return res.status(400).json({ erro: pedido.erro });
     const r = await pool.query('INSERT INTO entradas (tipo, codigo, dados) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING', ['pedido', pedido.id, pedido]);
     res.status(r.rowCount ? 201 : 409).json({ ok: !!r.rowCount, id: pedido.id });

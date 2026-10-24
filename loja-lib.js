@@ -227,11 +227,14 @@
     return { itens: out, faltou: faltou };
   }
 
+  // foto do produto: arquivo do site (img/...) ou foto enviada pelo painel (/fotos/...)
+  function fotoUrl(img) { img = String(img || ''); return /^\//.test(img) ? img : 'img/' + img; }
+
   return {
     padrao: padrao, mescla: mescla, unidade: unidade, arredonda: arredonda, arredondaBaixo: arredondaBaixo, fmtQtd: fmtQtd, avisoPeso: avisoPeso,
     precoEfetivo: precoEfetivo, emPromocao: emPromocao, totalLinha: totalLinha, agora: agora, situacaoLoja: situacaoLoja, resumoHorario: resumoHorario,
     janelas: janelas, diasAgendaveis: diasAgendaveis, textoAgendado: textoAgendado, frete: frete, kmEntre: kmEntre, minimo: minimo, filtra: filtra,
     precoSeparado: precoSeparado, comboDisponivel: comboDisponivel, comboComoProduto: comboComoProduto, combosAtivos: combosAtivos, refazPedido: refazPedido,
-    semAcento: semAcento, num: num
+    semAcento: semAcento, num: num, fotoUrl: fotoUrl
   };
 });

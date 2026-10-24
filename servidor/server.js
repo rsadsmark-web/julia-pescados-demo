@@ -112,6 +112,7 @@ app.get('/saude', async (req, res) => {
 const wa = require('./whatsapp')(app, pool); // WhatsApp (uazapi): desligado por padrão; o webhook tem corpo próprio, por isso vem antes
 app.use('/api', express.json({ limit: '20kb' }));
 const pub = require('./publico')(app, pool);
+const fotos = require('./fotos'); fotos.publico(app); // fotos dos produtos: leitura pública
 
 /* ---------- login (público) ---------- */
 app.post('/api/login', limite({ janelaMs: 60000, max: 20, grupo: 'login:', mensagem: 'Muitas tentativas. Aguarde um minuto.' }), async (req, res) => {
@@ -157,6 +158,7 @@ app.use(async (req, res, next) => {
 app.get('/config.js', (req, res) => {
   res.type('application/javascript').send('window.JP_VAZIO=true;window.JP_USUARIO=' + JSON.stringify({ nome: req.usuario.nome, usuario: req.usuario.usuario, papel: req.usuario.papel }) + ';');
 });
+fotos.painel(app); // envio de foto do produto (exige login)
 app.get('/api/eu', (req, res) => res.json(req.usuario));
 
 app.post('/api/trocar-senha', async (req, res) => {

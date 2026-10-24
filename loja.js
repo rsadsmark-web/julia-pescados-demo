@@ -77,7 +77,7 @@
     if (u.fracionado && u.porQuilo) det += '<p class="lj-peso">Vendido por peso: o valor é ajustado na pesagem.</p>';
     if (!u.porQuilo && +p.pesoAprox > 0) det += '<p class="lj-peso">Cada ' + u.curto + ' pesa cerca de ' + L.num(p.pesoAprox) + ' kg.</p>';
     return '<article class="lj-card' + (sem ? ' esgotado' : '') + '" id="prod-' + esc(p.id) + '">' +
-      '<div class="lj-foto" style="background-image:url(img/' + esc(p.img) + ')">' + (promo ? '<span class="lj-tag promo">Promoção</span>' : p.dest && !p.combo ? '<span class="lj-tag">Destaque</span>' : '') + (econ > 0.5 ? '<span class="lj-tag verde">Economize ' + brl(econ) + '</span>' : '') + '</div>' +
+      '<div class="lj-foto" style="background-image:url(' + esc(L.fotoUrl(p.img)) + ')">' + (promo ? '<span class="lj-tag promo">Promoção</span>' : p.dest && !p.combo ? '<span class="lj-tag">Destaque</span>' : '') + (econ > 0.5 ? '<span class="lj-tag verde">Economize ' + brl(econ) + '</span>' : '') + '</div>' +
       '<div class="lj-card-corpo"><h3>' + esc(p.nome) + '</h3><p class="lj-un">' + esc(u.rotulo) + '</p>' +
       (det ? '<details class="lj-det"><summary>Ver detalhes</summary>' + det + '</details>' : '') +
       '<div class="lj-card-rodape"><div class="lj-preco">' + (promo || atac() && !p.combo && pe < p.preco ? '<s>' + brl(p.preco) + '</s>' : '') + '<b>' + brl(pe) + '</b><small>' + (u.porQuilo ? '/ kg' : p.combo ? '/ kit' : '') + '</small></div>' +
@@ -163,7 +163,7 @@
     if (atac()) h += '<div class="lj-aviso rosa"><b>Atacado, ' + esc(atac().nome) + '.</b> Preço da tabela de restaurantes.</div>';
     h += '<ul class="lj-itens">' + c.its.map(function (i) {
       var u = L.unidade(i.p), aviso = i.p.combo ? '' : L.avisoPeso(i.p, i.qtd), aberto = !!notasAbertas[i.id];
-      return '<li class="lj-item"><div class="lj-mini" style="background-image:url(img/' + esc(i.p.img) + ')"></div>' +
+      return '<li class="lj-item"><div class="lj-mini" style="background-image:url(' + esc(L.fotoUrl(i.p.img)) + ')"></div>' +
         '<div class="lj-item-info"><b>' + esc(i.p.nome) + '</b><small>' + brl(i.preco) + ' ' + (u.porQuilo ? 'por kg' : i.p.combo ? 'por kit' : '· ' + esc(u.rotulo)) + '</small>' +
         '<div class="lj-qtd" role="group" aria-label="Quantidade de ' + esc(i.p.nome) + '"><button type="button" data-d="-1" data-id="' + esc(i.id) + '" aria-label="Diminuir">−</button><output>' + esc(L.fmtQtd(i.p, i.qtd)) + '</output><button type="button" data-d="1" data-id="' + esc(i.id) + '" aria-label="Aumentar">+</button></div></div>' +
         '<div class="lj-item-total"><b>' + brl(i.total) + '</b><button type="button" class="lj-link peq" data-nota="' + esc(i.id) + '">' + (aberto ? 'Ocultar observação' : notas[i.id] ? 'Ver observação' : 'Observação') + '</button></div>' +
