@@ -31,6 +31,9 @@ As telas respondem sem extensão: `/` (loja), `/receitas`, `/login`, `/trocar-se
 ## Pedidos e delivery (etapa 3)
 `pedidos-lib.js` (testado em `tests/pedidos.test.mjs`) concentra as regras: fluxo novo → confirmado → separando → pronto → saiu (entrega) ou entregue (retirada), cancelamento com motivo (devolve o estoque), entregador (menos ocupado primeiro), pagamento com referência do comprovante e comanda de 80 mm. O frete é a taxa do bairro mais R$ 1,50 por km acima de 8 km (editável em Loja online → Frete e mínimo). Estoque baixa ao confirmar. Cada mudança fica no histórico do pedido.
 
+## Rastreio de entrega (etapa 3)
+Entregador e cliente acompanham a entrega no mapa por link (sem app e sem login): `entregador.html` (`/e/<token>`), `acompanhar.html` (`/r/<token>`), `entrega-lib.js`, `entrega-mapa.js`, `entrega-admin.js` (painel) e `servidor/entrega.js`. Mapa OpenStreetMap, custo zero, privacidade (a posição some ao concluir) e tratamento de erros: ver `docs/RASTREIO-ENTREGA.md`. Testes: `tests/entrega*.test.mjs`.
+
 ## WhatsApp pela uazapi (etapa 4) — pronto e DESLIGADO
 `servidor/whatsapp-lib.js` (travas, número, opt-out, leitura do webhook; testes em `tests/whatsapp.test.mjs`) e `servidor/whatsapp.js` (fila de saída, webhook, entrada no CRM). Tela "WhatsApp" no painel: estado, travas e últimas mensagens.
 - Nada sai sem: `WHATSAPP_LIBERADO=sim` + `UAZAPI_URL` + `UAZAPI_TOKEN` no `.env` **e** chave geral ligada no painel. Em modo teste (padrão), só os números de teste recebem.
