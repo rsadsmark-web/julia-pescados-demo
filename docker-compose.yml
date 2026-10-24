@@ -41,6 +41,11 @@ services:
       # IA de atendimento: sem a chave não existe resposta automática (a IA também nasce desligada no painel).
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       NF_EMISSAO_LIBERADA: ${NF_EMISSAO_LIBERADA:-nao}
+      # Rastreio de entrega: tudo opcional. Sem valores usa o mapa do OpenStreetMap, a rota do OSRM e a busca de endereço do Nominatim (sem custo).
+      TILES_URL: ${TILES_URL:-}
+      TILES_ATRIBUICAO: ${TILES_ATRIBUICAO:-}
+      OSRM_URL: ${OSRM_URL:-}
+      NOMINATIM_URL: ${NOMINATIM_URL:-}
       NODE_OPTIONS: --max-old-space-size=160   # heap abaixo do limite do contêiner: o Node recolhe memória antes de ser morto
     volumes:
       - ./dinamico:/app/dinamico   # catálogo público (estado-publico.json), servido pelo Caddy direto do disco

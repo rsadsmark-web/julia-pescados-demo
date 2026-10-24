@@ -113,6 +113,7 @@ const wa = require('./whatsapp')(app, pool); // WhatsApp (uazapi): desligado por
 app.use('/api', express.json({ limit: '20kb' }));
 const pub = require('./publico')(app, pool);
 const fotos = require('./fotos'); fotos.publico(app); // fotos dos produtos: leitura pública
+const entrega = require('./entrega')(app, pool); entrega.rotasPublicas(); entrega.paginas(SITE); // rastreio de entrega: links com token (entregador e cliente), sem login
 
 /* ---------- login (público) ---------- */
 app.post('/api/login', limite({ janelaMs: 60000, max: 20, grupo: 'login:', mensagem: 'Muitas tentativas. Aguarde um minuto.' }), async (req, res) => {
@@ -137,7 +138,8 @@ app.get('/api/sair', async (req, res) => {
 
 /* ---------- tudo abaixo exige login ---------- */
 app.use('/api', limite({ janelaMs: 60000, max: 600, grupo: 'painel:' })); // folga para o painel; barra abuso
-const LIVRES = new Set(['/login', '/login.js', '/img/marca/logo-julia-96.png', '/img/marca/logo-julia-192.png', '/img/marca/logo-julia-32.png', '/img/marca/apple-touch-icon.png', '/manifest.webmanifest']);
+const LIVRES = new Set(['/login', '/login.js', '/img/marca/logo-julia-96.png', '/img/marca/logo-julia-192.png', '/img/marca/logo-julia-32.png', '/img/marca/apple-touch-icon.png', '/manifest.webmanifest',
+  '/base.css', '/entrega.css', '/entrega-lib.js', '/entrega-mapa.js', '/entregador.js', '/acompanhar.js']); // as duas últimas linhas: telas públicas do rastreio (/e/ e /r/)
 app.use(async (req, res, next) => {
   try {
     if (LIVRES.has(req.path)) return next();
@@ -205,6 +207,7 @@ app.put('/api/kv/:chave', express.text({ type: '*/*', limit: '30mb' }), async (r
 /* ---------- usuários (só administrador) ---------- */
 const soAdmin = (req, res, next) => (req.usuario.papel === 'admin' ? next() : res.status(403).json({ erro: 'Só o administrador faz isso.' }));
 wa.rotasPainel(soAdmin);
+entrega.rotasPainel(soAdmin); // painel: gerar links, ver as entregas no mapa, sincronizar status
 const iaa = require('./ia')(app, pool, wa); iaa.rotas(soAdmin); // atendimento por IA: desligado e sem chave por padrão
 const nfe = require('./nf')(app, pool); nfe.rotas(soAdmin); // nota fiscal: rascunhos e configuração; emissão desligada por padrão
 app.get('/api/usuarios', soAdmin, async (req, res) => {
@@ -256,7 +259,7 @@ module.exports = { pool, hashSenha, iniciaBanco };
 if (require.main === module) {
   (async () => {
     for (let i = 0; i < 30; i++) { try { await iniciaBanco(); break; } catch (e) { console.log('aguardando o banco…', e.code || e.message); await new Promise((r) => setTimeout(r, 2000)); if (i === 29) process.exit(1); } }
-    await pub.iniciaTabelas(); await wa.iniciaTabelas(); await nfe.iniciaTabelas(); await iaa.iniciaTabelas(); wa.iniciaFila(); await pub.publica().catch((e) => console.error('publica', e.message));
+    await pub.iniciaTabelas(); await entrega.iniciaTabelas(); entrega.iniciaLimpeza(); await wa.iniciaTabelas(); await nfe.iniciaTabelas(); await iaa.iniciaTabelas(); wa.iniciaFila(); await pub.publica().catch((e) => console.error('publica', e.message));
     app.listen(PORTA, () => console.log('Júlia Pescados no ar na porta ' + PORTA));
   })();
 }
