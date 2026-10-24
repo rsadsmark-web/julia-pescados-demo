@@ -1,0 +1,21 @@
+/* Painel — tela "Loja online" */
+.adm .lja-filtros { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.adm .lja-filtros .peq { max-width: 260px; }
+.adm .lja-dica { color: var(--suave); font-size: 14px; margin: 0 0 12px; }
+.adm .lja-tab td { vertical-align: middle; }
+.adm .lja-tab td:first-child { white-space: normal; min-width: 180px; }
+.adm .lja-num { width: 96px; text-align: right; }
+.adm .lja-nome { min-width: 190px; max-width: 280px; }
+.adm .lja-chk { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.adm .lja-chk input { width: 18px; height: 18px; accent-color: var(--marinho); }
+.adm .lja-det td { background: var(--creme); }
+.adm .lja-det-grade, .adm .lja-grade2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+.adm .lja-det-grade .largo, .adm .lja-grade2 .largo { grid-column: 1 / -1; }
+.adm .lja-det-grade textarea, .adm .lja-grade2 textarea { border: 2px solid var(--marinho); border-radius: 6px; padding: 9px 11px; background: var(--papel); width: 100%; font: inherit; }
+.adm .lja-det-grade input, .adm .lja-grade2 input { border: 2px solid var(--marinho); border-radius: 6px; padding: 9px 11px; background: var(--papel); width: 100%; }
+.adm .lja-add { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 4px; align-items: center; }
+.adm .lja-combo { border: 2px solid var(--marinho); border-radius: 10px; padding: 14px 16px; margin-top: 14px; background: var(--papel); }
+.adm .lja-combo-cab { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+.adm .lja-combo-cab .btn { margin-left: auto; }
+.adm .lja-soma { margin: 10px 0 0; color: var(--suave); }
+.adm .lja-tab input[type="time"] { max-width: 130px; }

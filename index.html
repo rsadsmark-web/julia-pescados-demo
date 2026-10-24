@@ -3,127 +3,159 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Julia Pescados — Camarão e pescados com delivery em Fortaleza</title>
-<meta name="description" content="Distribuidora de camarão e pescados. Varejo e atacado. Delivery em Fortaleza e Caucaia.">
-<meta name="theme-color" content="#9c2417">
+<title>Júlia Pescados — Camarão e pescados frescos em Fortaleza</title>
+<meta name="description" content="Filé de camarão, peixes, petiscos e produtos regionais com entrega em Fortaleza e Caucaia ou retirada. Peça sem cadastro, só com nome e WhatsApp.">
+<meta name="theme-color" content="#ffa40e">
 <link rel="icon" type="image/png" sizes="32x32" href="img/marca/logo-julia-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="img/marca/logo-julia-192.png">
 <link rel="apple-touch-icon" href="img/marca/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow+Condensed:wght@500;600;700&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<link rel="stylesheet" href="base.css?v=4ed252addd">
-<link rel="stylesheet" href="loja.css?v=cc7b952d52">
-<link rel="stylesheet" href="posvenda-loja.css?v=d2aecf5b7d">
-<link rel="stylesheet" href="loja-extras.css?v=4f6db498a8">
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Barlow+Condensed:wght@600;700&family=Hanken+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="loja-v2.css">
 </head>
-<body>
-<div class="aviso-demo">Ambiente de implantação — pedidos e pagamentos ainda simulados. <a href="/admin">Abrir painel administrativo</a></div>
-<div class="faixa-corte" id="faixaCorte" role="status" hidden></div>
+<body class="lj">
+<div class="lj-demo">Loja em implantação · RS Tech Marketing</div>
 
-<header class="topo">
-  <a class="logo-marca" href="#" aria-label="Julia Pescados">
-    <img src="img/marca/logo-julia-96.png" srcset="img/marca/logo-julia-192.png 2x" width="56" height="56" alt="">
-    <span><b>Julia</b><small>PESCADOS</small></span>
+<header class="lj-topo">
+  <a class="lj-marca" href="/" aria-label="Júlia Pescados, início">
+    <img src="img/marca/logo-julia-96.png" srcset="img/marca/logo-julia-192.png 2x" width="48" height="48" alt="">
+    <span><b>Júlia</b><small>Pescados</small></span>
   </a>
-  <nav class="topo-nav" aria-label="Seções">
+  <button type="button" class="lj-status" id="statusLoja" aria-live="polite"><i aria-hidden="true"></i><span>Carregando…</span></button>
+  <nav class="lj-nav" aria-label="Seções">
     <a href="#catalogo">Produtos</a>
     <a href="/receitas">Receitas</a>
     <a href="#entrega">Entrega</a>
-    <button type="button" id="abrirAtacado" class="link-btn">Sou restaurante</button>
-    <button type="button" id="abrirAcomp" class="link-btn">Meu pedido</button>
+    <button type="button" id="abrirAtacado" class="lj-link">Sou restaurante</button>
   </nav>
-  <button class="carrinho-btn" id="abrirCarrinho" aria-label="Abrir carrinho">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6h15l-1.6 8.2a2 2 0 0 1-2 1.6H8.6a2 2 0 0 1-2-1.6L5 3H2"/><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/></svg>
+  <button class="lj-carrinho" id="abrirCarrinho" aria-label="Abrir carrinho">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6h15l-1.6 8.2a2 2 0 0 1-2 1.6H8.6a2 2 0 0 1-2-1.6L5 3H2"/><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/></svg>
     <span id="qtdCarrinho">0</span>
   </button>
 </header>
 
-<section class="heroi">
-  <div class="heroi-texto">
-    <span class="chip laranja">Varejo e atacado</span>
-    <h1>O universo do <em>camarão</em>, direto na sua casa.</h1>
-    <p>Camarão e pescados frescos e congelados, com delivery em Fortaleza e Caucaia. Funcionamos das 6h às 14h, de segunda a sábado.</p>
-    <div class="heroi-acoes">
-      <a class="btn" href="#catalogo">Escolher produtos</a>
-      <a class="btn linha branco" href="#entrega">Ver taxas de entrega</a>
+<div class="lj-aviso-fechada" id="avisoFechada" role="status" hidden></div>
+
+<section class="lj-banner" aria-labelledby="bannerTitulo">
+  <div class="lj-banner-texto">
+    <span class="lj-selo" id="bannerSelo"></span>
+    <h1 id="bannerTitulo"></h1>
+    <p id="bannerTexto"></p>
+    <div class="lj-banner-acoes">
+      <a class="lj-btn grande" href="#catalogo">Escolher produtos</a>
+      <a class="lj-btn linha" href="#entrega">Ver frete e horário</a>
     </div>
   </div>
-  <div class="heroi-foto" role="img" aria-label="Prato com camarão, lula, peixe e mariscos frescos">
-    <svg class="anel" viewBox="0 0 400 400" aria-hidden="true"><defs><path id="circ" d="M200,200 m-170,0 a170,170 0 1,1 340,0 a170,170 0 1,1 -340,0"/></defs><text><textPath href="#circ" textLength="1060" lengthAdjust="spacing">JULIA PESCADOS • FORTALEZA • CAUCAIA • DELIVERY • </textPath></text></svg>
-    <div class="heroi-selo"><b>6h às 14h</b><span>segunda a sábado</span></div>
+  <div class="lj-banner-fotos" aria-hidden="true">
+    <span style="background-image:url(img/produtos/1010.webp)"></span>
+    <span style="background-image:url(img/produtos/2008.webp)"></span>
+    <span style="background-image:url(img/produtos/244.webp)"></span>
+    <span style="background-image:url(img/produtos/0101010.webp)"></span>
   </div>
 </section>
 
-<div class="fita" aria-hidden="true"><div class="fita-trilho">
-  <span>Camarão</span><span>Filé de tilápia</span><span>Salmão</span><span>Anéis de lula</span><span>Frutos do mar</span><span>Posta de serra</span><span>Kits</span>
-  <span>Camarão</span><span>Filé de tilápia</span><span>Salmão</span><span>Anéis de lula</span><span>Frutos do mar</span><span>Posta de serra</span><span>Kits</span>
-</div></div>
-
-<section class="faixa">
-  <div><svg class="fx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.5h11v9h-11z"/><path d="M13.5 9.5h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.7"/><circle cx="17" cy="17.5" r="1.7"/></svg><p><b>Delivery</b><span>Fortaleza e Caucaia</span></p></div>
-  <div><svg class="fx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M4.9 6l14.2 12M19.1 6 4.9 18M9 3.5l3 2.5 3-2.5M9 20.5l3-2.5 3 2.5"/></svg><p><b>Embalado a vácuo</b><span>Cadeia do frio mantida</span></p></div>
-  <div><svg class="fx-ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1-5h16l1 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/></svg><p><b>Atacado</b><span>Preço especial para restaurantes</span></p></div>
+<section class="lj-fatos" aria-label="Como funciona">
+  <div><b>Sem cadastro</b><span>Só nome e WhatsApp</span></div>
+  <div><b id="fatoMinimo">Pedido mínimo</b><span>Frete por bairro, antes de pedir</span></div>
+  <div><b>Entrega ou retirada</b><span id="fatoHorario">Fortaleza e Caucaia</span></div>
 </section>
 
-<section id="atacadoPainel" class="atacado-painel" aria-label="Atacado para restaurantes" hidden></section>
+<section id="atacadoPainel" class="lj-atacado" aria-label="Atacado para restaurantes" hidden></section>
 
-<main id="catalogo" class="miolo">
-  <div class="miolo-cab">
-    <div><h2>Nossos produtos</h2><p class="sub">Frescos e congelados, embalados a vácuo.</p></div>
-    <div class="busca"><input id="busca" type="search" placeholder="Buscar produto" aria-label="Buscar produto"></div>
+<section class="lj-recompra" id="recompra" aria-labelledby="recompraTitulo">
+  <div>
+    <h2 id="recompraTitulo">Já pediu antes?</h2>
+    <p>Informe seu WhatsApp e repita o último pedido com um toque.</p>
   </div>
-  <div class="cats" id="cats" role="tablist" aria-label="Categorias"></div>
-  <div class="grade" id="grade"></div>
+  <form class="lj-recompra-form" id="formRecompra" novalidate>
+    <label class="sr" for="recFone">Seu WhatsApp com DDD</label>
+    <input id="recFone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(85) 9 0000-0000">
+    <button class="lj-btn" type="submit">Buscar pedido</button>
+  </form>
+  <div id="recompraResultado" class="lj-recompra-res" aria-live="polite"></div>
+</section>
+
+<section class="lj-vitrine" id="vitrineDestaques" aria-labelledby="destTitulo" hidden>
+  <div class="lj-secao-cab"><h2 id="destTitulo">Destaques e promoções</h2></div>
+  <div class="lj-trilho" id="trilhoDestaques"></div>
+</section>
+
+<section class="lj-vitrine" id="vitrineCombos" aria-labelledby="comboTitulo" hidden>
+  <div class="lj-secao-cab"><h2 id="comboTitulo">Combos</h2><p>Kits prontos para economizar tempo na hora de pedir.</p></div>
+  <div class="lj-trilho" id="trilhoCombos"></div>
+</section>
+
+<main id="catalogo" class="lj-catalogo">
+  <div class="lj-secao-cab"><h2>Todos os produtos</h2><p id="contagem"></p></div>
+  <div class="lj-controles">
+    <div class="lj-busca">
+      <label class="sr" for="busca">Buscar produto</label>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="busca" type="search" placeholder="Buscar: camarão, tilápia, pastel…" autocomplete="off">
+    </div>
+    <div class="lj-ordem">
+      <label class="sr" for="ordem">Ordenar por</label>
+      <select id="ordem">
+        <option value="">Ordem da loja</option>
+        <option value="az">A a Z</option>
+        <option value="menor">Menor preço</option>
+        <option value="maior">Maior preço</option>
+        <option value="promo">Promoções primeiro</option>
+      </select>
+    </div>
+  </div>
+  <div class="lj-cats" id="cats" role="group" aria-label="Filtrar por categoria"></div>
+  <div class="lj-grade" id="grade"></div>
 </main>
 
-<section id="entrega" class="entrega">
-  <div class="entrega-cab">
-    <h2>Taxa de entrega<br>por bairro</h2>
-    <p>A taxa do bairro vale até 8 km da nossa base. Acima disso, somamos R$ 1,50 por km excedente. A taxa final aparece no carrinho assim que o bairro é escolhido.</p>
-  </div>
-  <div class="tabela-taxas" id="tabelaTaxas"></div>
-  <p class="nota">Valores e bairros de exemplo para a demonstração.</p>
+<section class="lj-sobre" aria-labelledby="sobreTitulo">
+  <h2 id="sobreTitulo">Quem somos</h2>
+  <p id="apresentacao"></p>
 </section>
 
-<footer class="rodape">
-  <a class="logo-marca branca" href="#" aria-label="Julia Pescados"><img src="img/marca/logo-julia-192.png" width="88" height="88" alt=""><span><b>Julia</b><small>PESCADOS</small></span></a>
-  <p>Distribuidora de pescados. Varejo e atacado. Delivery Fortaleza e Caucaia.</p>
-  <p><a href="https://www.instagram.com/juliapescados/" target="_blank" rel="noopener">@juliapescados</a></p>
-  <p class="nota claro">Demonstração criada pela RS Tech Marketing. Fotos ilustrativas de bancos livres.</p>
+<section id="entrega" class="lj-entrega" aria-labelledby="entregaTitulo">
+  <div class="lj-entrega-cab">
+    <h2 id="entregaTitulo">Entrega, retirada e horário</h2>
+    <p>O frete aparece no carrinho assim que você escolhe o bairro, antes de informar qualquer dado. Prefere retirar? Não paga frete.</p>
+    <dl class="lj-horarios" id="horarios"></dl>
+    <p class="lj-minimo-info" id="minimoTxt"></p>
+  </div>
+  <div class="lj-taxas" id="tabelaTaxas"></div>
+</section>
+
+<footer class="lj-rodape">
+  <a class="lj-marca" href="/" aria-label="Júlia Pescados, início"><img src="img/marca/logo-julia-192.png" width="64" height="64" alt=""><span><b>Júlia</b><small>Pescados</small></span></a>
+  <address id="contato"></address>
+  <p class="lj-peq">Ambiente de implantação criado pela RS Tech Marketing. <a href="/admin">Painel</a></p>
 </footer>
 
-<!-- Carrinho -->
-<div class="veu" id="veu" hidden></div>
-<aside class="gaveta" id="gaveta" aria-label="Carrinho" aria-hidden="true">
-  <div class="gaveta-cab"><h2>Seu pedido</h2><button class="fechar" id="fecharCarrinho" aria-label="Fechar">×</button></div>
-  <div class="gaveta-corpo" id="corpoCarrinho"></div>
-</aside>
-
-<!-- Acompanhamento -->
-<div class="modal" id="modalAcomp" role="dialog" aria-modal="true" aria-labelledby="acompTitulo" hidden>
-  <div class="modal-caixa">
-    <div class="gaveta-cab"><h2 id="acompTitulo">Acompanhar pedido</h2><button class="fechar" id="fecharAcomp" aria-label="Fechar">×</button></div>
-    <div id="acompConteudo"></div>
-  </div>
+<div class="lj-barra" id="barraCarrinho" hidden>
+  <button type="button" id="barraAbrir"><span id="barraQtd"></span><b>Ver carrinho</b><span id="barraTotal"></span></button>
 </div>
 
-<!-- Lista de espera e atacado -->
-<div class="modal" id="modalEx" role="dialog" aria-modal="true" aria-labelledby="exTitulo" hidden>
-  <div class="modal-caixa estreita">
-    <div class="gaveta-cab"><h2 id="exTitulo"></h2><button class="fechar" id="fecharEx" aria-label="Fechar">×</button></div>
+<!-- Carrinho -->
+<div class="lj-veu" id="veu" hidden></div>
+<aside class="lj-gaveta" id="gaveta" role="dialog" aria-modal="true" aria-labelledby="gavetaTitulo" aria-hidden="true">
+  <div class="lj-gaveta-cab"><h2 id="gavetaTitulo">Seu pedido</h2><button class="lj-fechar" id="fecharCarrinho" aria-label="Fechar carrinho">×</button></div>
+  <div class="lj-gaveta-corpo" id="corpoCarrinho"></div>
+</aside>
+
+<!-- Meu pedido, lista de espera e atacado -->
+<div class="lj-modal" id="modalEx" role="dialog" aria-modal="true" aria-labelledby="exTitulo" hidden>
+  <div class="lj-modal-caixa">
+    <div class="lj-gaveta-cab"><h2 id="exTitulo"></h2><button class="lj-fechar" id="fecharEx" aria-label="Fechar">×</button></div>
     <div id="exConteudo"></div>
   </div>
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="publico.js?v=01050e006d"></script>
-<script src="shared.js?v=e5dfdd11ca"></script>
-<script src="receitas-dados.js?v=9acd40e599"></script>
-<script src="posvenda-dados.js?v=b94244da13"></script>
-<script src="extras-dados.js?v=95f1d32cb8"></script>
-<script src="loja.js?v=eabb26aa3d"></script>
+<script src="publico.js"></script>
+<script src="shared.js"></script>
+<script src="loja-lib.js"></script>
+<script src="posvenda-dados.js"></script>
+<script src="extras-dados.js"></script>
+<script src="loja.js"></script>
 </body>
 </html>

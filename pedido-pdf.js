@@ -64,7 +64,7 @@
     y += 8; doc.setTextColor.apply(doc, TEXTO); doc.setFont('helvetica', 'normal'); doc.setFontSize(10.5);
     p.itens.forEach(function (i, n) {
       if (n % 2) { doc.setFillColor(251, 245, 237); doc.rect(12, y, L - 24, 8, 'F'); }
-      doc.text(String(i.nome), X.prod, y + 5.4);
+      doc.text(String(i.nome) + (i.obs ? ' (' + String(i.obs).slice(0, 40) + ')' : ''), X.prod, y + 5.4);
       doc.text(qtdTxt(i.qtd) + ' ' + (i.un || ''), X.qtd, y + 5.4, { align: 'right' });
       doc.text(brl(i.preco) + (i.un ? ' / ' + i.un : ''), X.preco, y + 5.4, { align: 'right' });
       doc.text(brl(i.preco * i.qtd), X.tot, y + 5.4, { align: 'right' });
@@ -112,7 +112,7 @@
       y += 11; doc.setTextColor.apply(doc, TEXTO); doc.setFont('helvetica', 'normal'); doc.setFontSize(9);
       doc.text((p.tipo === 'retirada' ? 'Retirada' : p.endereco + (p.bairro ? ' — ' + p.bairro : '')) + '  ·  ' + p.pagamento + '  ·  ' + situacao(p, sit), 14, y); y += 5;
       p.itens.forEach(function (i) {
-        doc.text('• ' + qtdTxt(i.qtd) + ' ' + (i.un || '') + ' de ' + i.nome, 16, y); doc.text(brl(i.preco * i.qtd), L - 14, y, { align: 'right' }); y += 5;
+        doc.text('• ' + qtdTxt(i.qtd) + ' ' + (i.un || '') + ' de ' + i.nome + (i.obs ? ' (' + i.obs + ')' : ''), 16, y); doc.text(brl(i.preco * i.qtd), L - 14, y, { align: 'right' }); y += 5;
       });
       if (p.obs) { doc.setTextColor.apply(doc, SUAVE); doc.text('Obs.: ' + p.obs, 16, y); doc.setTextColor.apply(doc, TEXTO); y += 5; }
       y += 4;

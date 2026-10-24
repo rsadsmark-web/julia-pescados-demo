@@ -6,12 +6,9 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const { limite } = require('./limite');
+const { validaPedido, txt, digitos } = require('./pedido');
 
 const DIR = process.env.DINAMICO_DIR || path.join(__dirname, '..', 'dinamico');
-const MAX_ITENS = 40;
-const PAGAMENTOS = ['Pix', 'Dinheiro', 'Cartão na entrega', 'Pagar na retirada'];
-const txt = (v, n) => String(v == null ? '' : v).replace(/[\u0000-\u001f<>]/g, ' ').trim().slice(0, n);
-const digitos = (v) => String(v || '').replace(/\D/g, '');
 
 const seguro = (fn) => (req, res, next) => fn(req, res, next).catch(next); // Express 4 não captura erro de rota assíncrona
 
@@ -26,13 +23,14 @@ module.exports = function (app, pool) {
   /* ---------- catálogo estático ---------- */
   let timer = null;
   async function publica() {
-    const r = await pool.query("SELECT chave, valor FROM kv WHERE chave IN ('jp_demo_v1','jp_ex_v1')");
+    const r = await pool.query("SELECT chave, valor FROM kv WHERE chave IN ('jp_demo_v1','jp_ex_v1','jp_loja_v1')");
     const kv = {}; r.rows.forEach((x) => { try { kv[x.chave] = JSON.parse(x.valor); } catch (e) {} });
     if (!kv.jp_demo_v1 || !Array.isArray(kv.jp_demo_v1.produtos)) return;
     const saida = {
       produtos: kv.jp_demo_v1.produtos.map((p) => ({ id: p.id, fresco: p.fresco, dest: p.dest, nome: p.nome, cat: p.cat, un: p.un, preco: p.preco, estoque: p.estoque, min: p.min,
-        img: String(p.img || '').replace(/\.jpg$/, '.webp'), desc: p.desc, inclui: p.inclui })),
-      corte: kv.jp_ex_v1 && kv.jp_ex_v1.entrega && +kv.jp_ex_v1.entrega.corte || 14
+        img: String(p.img || '').replace(/\.jpg$/, '.webp'), desc: p.desc, dica: p.dica, promo: p.promo, fracionado: p.fracionado, pesoAprox: p.pesoAprox, inclui: p.inclui })),
+      corte: kv.jp_ex_v1 && kv.jp_ex_v1.entrega && +kv.jp_ex_v1.entrega.corte || 14,
+      loja: kv.jp_loja_v1 || null
     };
     fs.mkdirSync(DIR, { recursive: true });
     const tmp = path.join(DIR, '.estado-publico.tmp'), dest = path.join(DIR, 'estado-publico.json');
@@ -52,28 +50,32 @@ module.exports = function (app, pool) {
   };
 
   app.post('/api/pedidos', geral, porIp, globalDoBanco, exigeJson, seguro(async (req, res) => {
-    const b = req.body || {}, codigo = txt(b.id, 20).toUpperCase();
-    if (!/^JP-[A-Z0-9]{4,10}$/.test(codigo)) return res.status(400).json({ erro: 'Pedido inválido.' });
-    const kvr = await pool.query("SELECT valor FROM kv WHERE chave = 'jp_demo_v1'");
-    if (!kvr.rows[0]) return res.status(503).json({ erro: 'Loja ainda não liberada.' });
-    let catalogo; try { catalogo = JSON.parse(kvr.rows[0].valor).produtos; } catch (e) { return res.status(503).json({ erro: 'Loja indisponível.' }); }
-    const porId = new Map(catalogo.map((p) => [p.id, p]));
-    const itens = (Array.isArray(b.itens) ? b.itens : []).slice(0, MAX_ITENS).map((i) => {
-      const p = porId.get(txt(i.id, 20)), q = +i.qtd;
-      return p && q > 0 && q <= 500 ? { id: p.id, nome: p.nome, un: p.un, preco: +(i.preco > 0 && i.preco <= p.preco ? i.preco : p.preco), qtd: q } : null; // preço do cliente só vale se for menor (atacado); nunca maior que o do catálogo
-    }).filter(Boolean);
-    const fone = digitos(b.fone);
-    if (!itens.length || fone.length < 10 || fone.length > 13 || !txt(b.cliente, 80)) return res.status(400).json({ erro: 'Pedido incompleto.' });
-    const entrega = b.tipo === 'entrega';
-    const pedido = {
-      id: codigo, cliente: txt(b.cliente, 80), fone: txt(b.fone, 20), tipo: entrega ? 'entrega' : 'retirada',
-      bairro: entrega ? txt(b.bairro, 60) : '', endereco: entrega ? txt(b.endereco, 200) : '', obs: txt(b.obs, 300),
-      pagamento: PAGAMENTOS.includes(b.pagamento) ? b.pagamento : txt(b.pagamento, 30), itens, taxa: Math.min(Math.max(+b.taxa || 0, 0), 150),
-      criado: Date.now(), confirmado: false, baixa: false, motoboy: null, fixo: null, origemSite: true,
-      agendado: txt(b.agendado, 60) || undefined, recompra: b.recompra ? true : undefined
-    };
-    const r = await pool.query('INSERT INTO entradas (tipo, codigo, dados) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING', ['pedido', codigo, pedido]);
-    res.status(r.rowCount ? 201 : 409).json({ ok: !!r.rowCount, id: codigo });
+    const kvr = await pool.query("SELECT chave, valor FROM kv WHERE chave IN ('jp_demo_v1','jp_loja_v1')");
+    const kv = {}; kvr.rows.forEach((x) => { try { kv[x.chave] = JSON.parse(x.valor); } catch (e) {} });
+    if (!kv.jp_demo_v1 || !Array.isArray(kv.jp_demo_v1.produtos)) return res.status(503).json({ erro: 'Loja ainda não liberada.' });
+    const pedido = validaPedido(req.body, kv.jp_demo_v1.produtos, kv.jp_loja_v1);
+    if (pedido.erro) return res.status(400).json({ erro: pedido.erro });
+    const r = await pool.query('INSERT INTO entradas (tipo, codigo, dados) VALUES ($1,$2,$3) ON CONFLICT DO NOTHING', ['pedido', pedido.id, pedido]);
+    res.status(r.rowCount ? 201 : 409).json({ ok: !!r.rowCount, id: pedido.id });
+  }));
+
+  // Recompra: com o WhatsApp informado, devolve só o que ela precisa para repetir (itens e primeiro nome), sem endereço nem valores.
+  const chaveFone = (v) => { let d = digitos(v); if (d.length > 11 && d.startsWith('55')) d = d.slice(2); return d.length >= 10 ? d.slice(0, 2) + d.slice(-8) : ''; };
+  const porIpRecompra = limite({ janelaMs: 10 * 60000, max: 10, grupo: 'rec:', mensagem: 'Muitas consultas. Tente de novo em alguns minutos.' });
+  app.post('/api/ultimo-pedido', geral, porIpRecompra, exigeJson, seguro(async (req, res) => {
+    const chave = chaveFone((req.body || {}).fone);
+    if (!chave) return res.status(400).json({ erro: 'Informe um WhatsApp válido com DDD.' });
+    let achado = null;
+    const fila = await pool.query("SELECT dados FROM entradas WHERE tipo = 'pedido' ORDER BY id DESC LIMIT 200");
+    for (const x of fila.rows) { const d = x.dados; if (chaveFone(d.fone) === chave) { achado = { nome: d.cliente, quando: d.criado, itens: d.itens.map((i) => [i.id, i.qtd]) }; break; } }
+    if (!achado) {
+      const kvr = await pool.query("SELECT valor FROM kv WHERE chave = 'jp_demo_v1'");
+      let estado = null; try { estado = kvr.rows[0] && JSON.parse(kvr.rows[0].valor); } catch (e) {}
+      const c = estado && (estado.clientes || []).find((x) => chaveFone(x.fone) === chave && x.itens && x.itens.length);
+      if (c) achado = { nome: c.nome, quando: c.ultima, itens: c.itens };
+    }
+    if (!achado) return res.status(404).json({ erro: 'Não encontramos pedido anterior com esse WhatsApp.' });
+    res.json({ nome: String(achado.nome || '').split(' ')[0], quando: achado.quando, itens: achado.itens });
   }));
 
   app.post('/api/espera', geral, porIp, globalDoBanco, exigeJson, seguro(async (req, res) => {

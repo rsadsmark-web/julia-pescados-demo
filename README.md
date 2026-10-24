@@ -20,3 +20,10 @@ Teste do PDF: `npm i jspdf@2.5.1 --no-save && node tests/pedido-pdf.test.mjs . d
 
 ## Endereços (sem .html)
 As telas respondem sem extensão: `/` (loja), `/receitas`, `/login`, `/trocar-senha`, `/admin` (painel; as abas são `#pedidos`, `#conversas` etc.), `/usuarios` e `/config-ia`. O endereço antigo com `.html` (e `/index`) redireciona com 301 para o limpo, mantendo a consulta. No Node isso está em `servidor/server.js` (redirecionamento + `express.static` com `extensions: ['html']`); no Caddy, em `deploy/Caddyfile.vps` (`redir` + `try_files {path}.html`). Os links dentro das páginas são absolutos (`/receitas`, `/admin`).
+
+## Loja pública (etapa 2)
+- `loja-lib.js`: regras puras (unidade e fração, preço/promoção, horário, agendamento, frete, mínimo, busca, combos, recompra), usadas pela loja no navegador e pelo servidor.
+- `loja.js`, `loja-v2.css`, `index.html`: loja mobile primeiro, pedido sem cadastro, carrinho com subtotal, mínimo e frete antes dos dados.
+- `servidor/pedido.js`: o servidor refaz preço, frete, mínimo e estoque do pedido; `/api/ultimo-pedido` serve a recompra por WhatsApp (limite por IP, sem endereço).
+- `loja-admin.js` (menu "Loja online" do painel): preço, promoção, estoque, destaque, fração, descrição e dica, combos, frete por bairro, mínimo, horário, banner e contato. Fica na chave `jp_loja_v1` e vai para `/estado-publico.json`.
+- Testes: `node tests/loja.test.mjs "$PWD"` e `node tests/smartpos.test.mjs "$PWD"`.

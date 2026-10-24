@@ -72,7 +72,7 @@
   function detalhePedido(p) {
     var ent = p.tipo === 'retirada';
     return '<div class="det-pedido"><div class="det-itens"><table><thead><tr><th>Produto</th><th class="num">Quantidade</th><th class="num">Preço unitário</th><th class="num">Total</th></tr></thead><tbody>' +
-      p.itens.map(function (i) { return '<tr><td>' + esc(i.nome) + '</td><td class="num">' + String(i.qtd).replace('.', ',') + ' ' + esc(i.un || '') + '</td><td class="num">' + JP.brl(i.preco) + '</td><td class="num">' + JP.brl(i.preco * i.qtd) + '</td></tr>'; }).join('') +
+      p.itens.map(function (i) { return '<tr><td>' + esc(i.nome) + (i.obs ? '<small>Observação: ' + esc(i.obs) + '</small>' : '') + '</td><td class="num">' + String(i.qtd).replace('.', ',') + ' ' + esc(i.un || '') + '</td><td class="num">' + JP.brl(i.preco) + '</td><td class="num">' + JP.brl(i.preco * i.qtd) + '</td></tr>'; }).join('') +
       '</tbody><tfoot><tr><td colspan="3">Subtotal</td><td class="num">' + JP.brl(JP.subtotal(p)) + '</td></tr><tr><td colspan="3">' + (ent ? 'Retirada' : 'Taxa de entrega' + (p.bairro ? ' (' + esc(p.bairro) + ')' : '')) + '</td><td class="num">' + JP.brl(p.taxa || 0) + '</td></tr><tr class="tot"><td colspan="3">Total do pedido</td><td class="num">' + JP.brl(JP.totalPedido(p)) + '</td></tr></tfoot></table></div>' +
       '<dl class="det-dados"><div><dt>Cliente</dt><dd>' + esc(p.cliente) + '</dd></div><div><dt>WhatsApp</dt><dd>' + esc(p.fone) + '</dd></div>' +
       '<div><dt>' + (ent ? 'Retirada' : 'Endereço de entrega') + '</dt><dd>' + (ent ? 'Retirada no local' : esc(p.endereco) + (p.bairro ? ' — ' + esc(p.bairro) : '')) + '</dd></div>' +
@@ -195,7 +195,8 @@
   }
 
   /* ---------- roteamento ---------- */
-  var MODULOS = { visao: visao, pedidos: pedidosTela, conversas: crmTela, funil: crmTela, campanhas: crmTela, receitas: posVendaTela, avaliacoes: posVendaTela, entregas: extrasTela, recompra: extrasTela, espera: extrasTela, atacado: extrasTela, clientes: clientes, nf: nf, estoque: estoque };
+  var MODULOS = { visao: visao, pedidos: pedidosTela, conversas: crmTela, funil: crmTela, campanhas: crmTela, receitas: posVendaTela, avaliacoes: posVendaTela, entregas: extrasTela, recompra: extrasTela, espera: extrasTela, atacado: extrasTela, clientes: clientes, nf: nf, estoque: estoque, loja: lojaTela };
+  function lojaTela() { LJA.render(tela); }
   function crmTela() { CRM.render(modulo, parametro, tela); }
   function posVendaTela() { PVA.render(modulo, tela); }
   function extrasTela() { EXP.render(modulo, tela); }
@@ -283,6 +284,7 @@
   });
   PVA.init({ estado: function () { return S; }, esc: esc, toast: toast, ha: ha, dataHora: JP.dataHora, selos: selos, modulo: function () { return modulo; } });
   EXP.init({ estado: function () { return S; }, recarrega: recarrega, esc: esc, toast: toast, ha: ha, brl: JP.brl, dataHora: JP.dataHora, selos: selos, modulo: function () { return modulo; } });
+  LJA.init({ estado: function () { return S; }, esc: esc, toast: toast });
   window.addEventListener('hashchange', ir);
   ir();
 })();

@@ -1,433 +1,441 @@
-/* Loja Julia Pescados — lado do cliente */
+/* Loja Júlia Pescados — lado do cliente. Pedido sem cadastro, quantidade fracionada, frete e mínimo antes de pedir,
+   horário com agendamento, combos e recompra. As contas vêm de loja-lib.js (as mesmas que o servidor refaz). */
 (function () {
-  var S = JP.estado();
+  var S = JP.estado(), L = JPL;
   var $ = function (s, r) { return (r || document).querySelector(s); };
-  var carrinho = {};            // id -> quantidade
-  var cat = 'Todos', termo = '';
-  var tipo = 'entrega', pagamento = 'Pix';
-  var form = { nome: '', fone: '', bairro: '', endereco: '', troco: '', obs: '' };
-  var pedidoAcomp = localStorage.getItem('jp_ultimo_pedido') || null;
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var CFG = L.mescla(window.JP_LOJA_CFG);
+  var combosProd = [];                                          // combos ativos, no formato de produto (id cb-…)
 
-  var atacadoId = localStorage.getItem('jp_atacado') || '';   // restaurante identificado (atacado)
-  var repetindo = null;                                        // { clienteId, ref, data } quando o cliente chega pelo aviso de recompra
-  var naFila = [];                                             // produtos em que este aparelho já pediu aviso de lote fresco
-  try { naFila = JSON.parse(localStorage.getItem('jp_espera') || '[]'); } catch (e) { naFila = []; }
-  try { carrinho = JSON.parse(localStorage.getItem('jp_carrinho') || '{}'); } catch (e) { carrinho = {}; }
-  try { form = Object.assign(form, JSON.parse(localStorage.getItem('jp_form') || '{}')); } catch (e) {}
+  var carrinho = {}, notas = {}, form = { nome: '', fone: '', bairro: '', endereco: '', troco: '', obs: '' };
+  var tipo = 'entrega', pagamento = 'Pix', quando = { modo: 'agora', dia: '', janela: '' };
+  var filtro = { termo: '', cat: 'Todos', ordem: '', so: '' };
+  var enviando = false, ultimo = null, recompraDe = null, notasAbertas = {};
+  var atacadoId = localStorage.getItem('jp_atacado') || '';
+  var naFila = [];
+  function le(k, padrao) { try { var v = JSON.parse(localStorage.getItem(k) || 'null'); return v == null ? padrao : v; } catch (e) { return padrao; } }
+  carrinho = le('jp_carrinho', {}); notas = le('jp_carrinho_obs', {}); naFila = le('jp_espera', []); ultimo = le('jp_ultimo', null);
+  form = Object.assign(form, le('jp_form', {}));
+  Object.keys(notas).forEach(function (k) { if (notas[k]) notasAbertas[k] = 1; });
 
-  function prod(id) { return S.produtos.filter(function (p) { return p.id === id; })[0]; }
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function brl(v) { return JP.brl(v); }
+  function salva() { localStorage.setItem('jp_carrinho', JSON.stringify(carrinho)); localStorage.setItem('jp_carrinho_obs', JSON.stringify(notas)); localStorage.setItem('jp_form', JSON.stringify(form)); }
   function atac() { return atacadoId ? EX.restaurante(atacadoId) : null; }
-  function precoDe(p) { return atac() ? EX.precoAtacado(p) : p.preco; }
-  function salvaCarrinho() { localStorage.setItem('jp_carrinho', JSON.stringify(carrinho)); localStorage.setItem('jp_form', JSON.stringify(form)); }
 
-  /* ---------- catálogo ---------- */
+  /* ---------- catálogo em memória ---------- */
+  function monta() {
+    S = JP.estado();
+    combosProd = L.combosAtivos(CFG, S.produtos).map(function (c) { return L.comboComoProduto(c, S.produtos); });
+  }
+  function todos() { return S.produtos.concat(combosProd); }
+  function prod(id) { return todos().filter(function (p) { return p.id === id; })[0]; }
+  function precoDe(p) { var a = atac(); return a && !p.combo ? Math.min(EX.precoAtacado(p), L.precoEfetivo(p)) : L.precoEfetivo(p); }
+  function limpaCarrinho() { Object.keys(carrinho).forEach(function (id) { if (!prod(id)) { delete carrinho[id]; delete notas[id]; } }); }
+
+  /* ---------- horário ---------- */
+  function sit() { return L.situacaoLoja(CFG, L.agora()); }
+  function desenhaStatus() {
+    var s = sit(), b = $('#statusLoja');
+    b.className = 'lj-status ' + (s.aberto ? 'aberto' : 'fechado');
+    $('span', b).textContent = s.aberto ? 'Aberto até ' + s.ate.replace(':', 'h').replace(/h00$/, 'h') : 'Fechado agora';
+    b.title = s.texto;
+    var av = $('#avisoFechada');
+    if (s.aberto) av.hidden = true;
+    else { av.hidden = false; av.innerHTML = '<b>' + esc(s.texto) + '.</b> Você pode montar o pedido agora e <b>agendar</b> a entrega ou a retirada para quando abrirmos.'; }
+  }
+
+  /* ---------- topo, banner e rodapé ---------- */
+  function desenhaFixos() {
+    var b = CFG.banner;
+    $('#bannerTitulo').textContent = b.titulo; $('#bannerTexto').textContent = b.texto; $('#bannerSelo').textContent = b.selo; $('#bannerSelo').hidden = !b.selo;
+    $('#apresentacao').textContent = CFG.apresentacao;
+    $('#fatoMinimo').textContent = CFG.minimo > 0 ? 'Pedido mínimo ' + brl(CFG.minimo) : 'Sem pedido mínimo';
+    $('#fatoHorario').textContent = L.resumoHorario(CFG).split(' · ')[0];
+    $('#minimoTxt').textContent = CFG.minimo > 0 ? 'Pedido mínimo de ' + brl(CFG.minimo) + ', sem contar o frete.' : 'Sem pedido mínimo.';
+    $('#horarios').innerHTML = L.resumoHorario(CFG).split(' · ').map(function (l) { var i = l.indexOf(', '); return '<div><dt>' + esc(l.slice(0, i)) + '</dt><dd>' + esc(l.slice(i + 2)) + '</dd></div>'; }).join('');
+    $('#tabelaTaxas').innerHTML = CFG.bairros.map(function (x) { return '<div class="lj-taxa"><span>' + esc(x.nome) + '</span><b>' + brl(x.taxa) + '</b></div>'; }).join('');
+    var c = CFG.contato;
+    $('#contato').innerHTML = '<a href="https://wa.me/' + esc(c.whats) + '" target="_blank" rel="noopener">WhatsApp ' + esc(c.telefone) + '</a>' + (c.endereco ? '<span>' + esc(c.endereco) + '</span>' : '') +
+      (c.instagram ? '<a href="https://www.instagram.com/' + esc(c.instagram) + '/" target="_blank" rel="noopener">@' + esc(c.instagram) + '</a>' : '');
+  }
+
+  /* ---------- cartões de produto ---------- */
+  function ctrlHtml(p) {
+    var q = carrinho[p.id] || 0, u = L.unidade(p), sem = p.estoque <= 0;
+    if (sem) return p.fresco ? '<button type="button" class="lj-btn linha pequeno" data-espera="' + p.id + '">' + (naFila.indexOf(p.id) >= 0 ? '✓ Na fila do próximo lote' : 'Avise-me do próximo lote') + '</button>' : '<span class="lj-esgotado">Esgotado</span>';
+    if (!q) return '<button type="button" class="lj-btn" data-add="' + p.id + '">Adicionar</button>';
+    return '<div class="lj-qtd" role="group" aria-label="Quantidade de ' + esc(p.nome) + '"><button type="button" data-d="-1" data-id="' + p.id + '" aria-label="Diminuir ' + (u.fracionado ? 'meio quilo' : 'uma unidade') + '">−</button><output aria-live="polite">' + esc(L.fmtQtd(p, q)) + '</output><button type="button" data-d="1" data-id="' + p.id + '" aria-label="Aumentar ' + (u.fracionado ? 'meio quilo' : 'uma unidade') + '">+</button></div>';
+  }
+  function cardHtml(p) {
+    var u = L.unidade(p), promo = !p.combo && L.emPromocao(p), pe = precoDe(p), sem = p.estoque <= 0;
+    var econ = p.combo ? L.precoSeparado(p, S.produtos) - p.preco : 0;
+    var det = '';
+    if (p.combo) det = '<ul class="lj-inclui">' + p.itens.map(function (c) { var q = S.produtos.filter(function (x) { return x.id === c[0]; })[0]; return q ? '<li>' + esc(L.fmtQtd(q, c[1])) + ' de ' + esc(q.nome) + '</li>' : ''; }).join('') + '</ul>';
+    if (p.desc && !p.combo) det += '<p>' + esc(p.desc) + '</p>';
+    if (p.dica) det += '<p class="lj-dica"><b>Dica de preparo:</b> ' + esc(p.dica) + '</p>';
+    if (u.fracionado && u.porQuilo) det += '<p class="lj-peso">Vendido por peso: o valor é ajustado na pesagem.</p>';
+    if (!u.porQuilo && +p.pesoAprox > 0) det += '<p class="lj-peso">Cada ' + u.curto + ' pesa cerca de ' + L.num(p.pesoAprox) + ' kg.</p>';
+    return '<article class="lj-card' + (sem ? ' esgotado' : '') + '" id="prod-' + esc(p.id) + '">' +
+      '<div class="lj-foto" style="background-image:url(img/' + esc(p.img) + ')">' + (promo ? '<span class="lj-tag promo">Promoção</span>' : p.dest && !p.combo ? '<span class="lj-tag">Destaque</span>' : '') + (econ > 0.5 ? '<span class="lj-tag verde">Economize ' + brl(econ) + '</span>' : '') + '</div>' +
+      '<div class="lj-card-corpo"><h3>' + esc(p.nome) + '</h3><p class="lj-un">' + esc(u.rotulo) + '</p>' +
+      (det ? '<details class="lj-det"><summary>Ver detalhes</summary>' + det + '</details>' : '') +
+      '<div class="lj-card-rodape"><div class="lj-preco">' + (promo || atac() && !p.combo && pe < p.preco ? '<s>' + brl(p.preco) + '</s>' : '') + '<b>' + brl(pe) + '</b><small>' + (u.porQuilo ? '/ kg' : p.combo ? '/ kit' : '') + '</small></div>' +
+      '<div class="lj-ctrl" data-ctrl="' + esc(p.id) + '">' + ctrlHtml(p) + '</div></div></div></article>';
+  }
+  function atualizaCards(id) {
+    var p = prod(id); if (!p) return;
+    $$('[data-ctrl="' + id + '"]').forEach(function (el) { el.innerHTML = ctrlHtml(p); });
+  }
+
   function desenhaCats() {
-    var l = ['Todos'].concat(JP.CATEGORIAS);
-    $('#cats').innerHTML = l.map(function (c) {
-      return '<button class="cat' + (c === cat ? ' ativa' : '') + '" role="tab" aria-selected="' + (c === cat) + '" data-c="' + esc(c) + '">' + esc(c) + '</button>';
-    }).join('');
+    var cats = ['Todos'].concat(S.produtos.reduce(function (l, p) { if (p.cat && l.indexOf(p.cat) < 0) l.push(p.cat); return l; }, []));
+    var h = cats.map(function (c) { return '<button type="button" class="lj-cat' + (c === filtro.cat && !filtro.so ? ' ativa' : '') + '" data-c="' + esc(c) + '" aria-pressed="' + (c === filtro.cat && !filtro.so) + '">' + esc(c) + '</button>'; }).join('');
+    h += '<button type="button" class="lj-cat promo' + (filtro.so === 'promo' ? ' ativa' : '') + '" data-so="promo" aria-pressed="' + (filtro.so === 'promo') + '">Promoções</button>';
+    $('#cats').innerHTML = h;
   }
   function desenhaGrade() {
-    var lista = S.produtos.filter(function (p) {
-      return (cat === 'Todos' || p.cat === cat) && (!termo || p.nome.toLowerCase().indexOf(termo) >= 0);
-    });
-    $('#grade').innerHTML = lista.length ? lista.map(function (p) {
-      var sem = p.estoque <= 0, a = atac(), kit = p.inclui && p.inclui.length;
-      var econ = kit ? JP.precoSeparado(p, S.produtos) - p.preco : 0;
-      var fila = naFila.indexOf(p.id) >= 0;
-      return '<article class="card' + (sem ? ' esgotado' : '') + '" id="prod-' + p.id + '">' +
-        '<div class="card-foto" style="background-image:url(img/' + p.img + ')">' + (p.dest ? '<span class="chip">Mais pedido</span>' : '') + (econ > 0.5 ? '<span class="chip verde">Economize ' + JP.brl(econ) + '</span>' : '') + '</div>' +
-        '<div class="card-corpo"><h3>' + esc(p.nome) + '</h3><p>' + esc(p.desc) + '</p>' +
-        (kit ? '<ul class="kit-inclui" aria-label="O que vem no kit">' + p.inclui.map(function (c) { var q = S.produtos.filter(function (x) { return x.id === c[0]; })[0]; return q ? '<li>' + (c[1] < 1 ? c[1] * 1000 + ' g' : c[1] + ' kg') + ' de ' + esc(q.nome.charAt(0).toLowerCase() + q.nome.slice(1)) + '</li>' : ''; }).join('') + '</ul>' : '') +
-        '<div class="card-rodape"><span class="preco">' + (a ? '<s class="preco-velho">' + JP.brl(p.preco) + '</s> ' : '') + JP.brl(precoDe(p)) + ' <small>/ ' + p.un + (a ? ' · atacado' : '') + '</small></span>' +
-        '<button class="btn pequeno" data-add="' + p.id + '"' + (sem ? ' disabled' : '') + '>' + (sem ? 'Esgotado' : 'Adicionar') + '</button></div>' +
-        (p.fresco ? '<button type="button" class="espera-btn' + (fila ? ' na-fila' : '') + '" data-espera="' + p.id + '">' + (fila ? '✓ Você está na fila do próximo lote' : (sem || p.estoque <= p.min ? 'Avise-me quando chegar lote fresco' : 'Avisar quando chegar lote novo')) + '</button>' : '') +
-        '</div></article>';
-    }).join('') : '<p class="vazio">Nenhum produto encontrado.</p>';
+    var lista = L.filtra(S.produtos, { termo: filtro.termo, cat: filtro.cat, ordem: filtro.ordem, so: filtro.so });
+    $('#grade').innerHTML = lista.length ? lista.map(cardHtml).join('') : '<p class="lj-vazio">Nenhum produto encontrado' + (filtro.termo ? ' para “' + esc(filtro.termo) + '”' : '') + '. <button type="button" class="lj-link" data-limpa>Limpar busca e filtros</button></p>';
+    $('#contagem').textContent = lista.length + (lista.length === 1 ? ' produto' : ' produtos');
   }
-  function desenhaTaxas() {
-    $('#tabelaTaxas').innerHTML = JP.BAIRROS.map(function (b) {
-      var f = JP.frete(b.nome);
-      return '<div class="taxa"><span>' + esc(b.nome) + '<small>cerca de ' + f.km.toFixed(1).replace('.', ',') + ' km</small></span><b>' + JP.brl(f.total) + '</b></div>';
-    }).join('');
+  function desenhaVitrines() {
+    var dest = S.produtos.filter(function (p) { return (p.dest || L.emPromocao(p)) && p.estoque > 0; }).sort(function (a, b) { return (L.emPromocao(b) ? 1 : 0) - (L.emPromocao(a) ? 1 : 0); }).slice(0, 12);
+    $('#vitrineDestaques').hidden = !dest.length; $('#trilhoDestaques').innerHTML = dest.map(cardHtml).join('');
+    $('#vitrineCombos').hidden = !combosProd.length; $('#trilhoCombos').innerHTML = combosProd.map(cardHtml).join('');
   }
 
   /* ---------- carrinho ---------- */
   function itens() {
     return Object.keys(carrinho).filter(function (id) { return carrinho[id] > 0 && prod(id); }).map(function (id) {
-      var p = prod(id); return { id: id, nome: p.nome, un: p.un, preco: precoDe(p), qtd: carrinho[id], img: p.img };
+      var p = prod(id); return { id: id, p: p, qtd: carrinho[id], preco: precoDe(p), total: Math.round(precoDe(p) * 100 * carrinho[id]) / 100 };
     });
   }
-  function atualizaContador() {
-    var n = itens().reduce(function (s, i) { return s + 1 * (i.qtd > 0); }, 0);
-    $('#qtdCarrinho').textContent = n;
-  }
-  function add(id, d) {
-    var p = prod(id); if (!p) return;
-    var novo = Math.max(0, +((carrinho[id] || 0) + d).toFixed(1));
-    if (novo > p.estoque) novo = p.estoque;
-    if (novo <= 0) delete carrinho[id]; else carrinho[id] = novo;
-    salvaCarrinho(); atualizaContador();
-    var b = $('#abrirCarrinho'); b.classList.remove('pulso'); void b.offsetWidth; b.classList.add('pulso');
-    if ($('#gaveta').classList.contains('aberta')) desenhaCarrinho();
-  }
   function calc() {
-    var its = itens(), sub = its.reduce(function (s, i) { return s + i.preco * i.qtd; }, 0);
-    var f = tipo === 'entrega' && form.bairro ? JP.frete(form.bairro) : null;
-    var taxa = f ? f.total : 0;
-    return { its: its, sub: sub, f: f, taxa: taxa, total: sub + taxa };
+    var its = itens(), sub = its.reduce(function (s, i) { return s + i.total; }, 0);
+    var f = tipo === 'entrega' && form.bairro ? L.frete(CFG, form.bairro) : null, taxa = f ? f.taxa : 0;
+    return { its: its, sub: Math.round(sub * 100) / 100, f: f, taxa: taxa, total: Math.round((sub + taxa) * 100) / 100, min: atac() ? { ok: true, falta: 0, minimo: 0 } : L.minimo(CFG, sub) };
   }
+  function desenhaBarra() {
+    var c = calc(), n = c.its.length;
+    $('#qtdCarrinho').textContent = n; $('#qtdCarrinho').hidden = !n;
+    var bar = $('#barraCarrinho'); bar.hidden = !n;
+    $('#barraQtd').textContent = n + (n === 1 ? ' item' : ' itens'); $('#barraTotal').textContent = brl(c.sub);
+    document.body.classList.toggle('com-barra', n > 0);
+  }
+  function muda(id, d) {
+    var p = prod(id); if (!p) return '';
+    var u = L.unidade(p), atual = carrinho[id] || 0, aviso = '';
+    var novo = Math.round((atual + d * u.passo) * 100) / 100;
+    if (novo < u.min - 1e-9) novo = 0;
+    if (novo > p.estoque) { novo = L.arredondaBaixo(p, p.estoque); aviso = 'Temos só ' + L.fmtQtd(p, novo) + ' de ' + p.nome + ' no momento.'; }
+    if (novo <= 0) { delete carrinho[id]; delete notas[id]; } else carrinho[id] = novo;
+    salva(); atualizaCards(id); desenhaBarra();
+    var b = $('#abrirCarrinho'); b.classList.remove('pulso'); void b.offsetWidth; b.classList.add('pulso');
+    if (aviso) aviso = anuncia(aviso);
+    return aviso;
+  }
+  function anuncia(t) { var a = $('#anuncio'); if (!a) { a = document.createElement('div'); a.id = 'anuncio'; a.className = 'lj-toast'; a.setAttribute('role', 'status'); document.body.appendChild(a); } a.textContent = t; a.hidden = false; clearTimeout(anuncia.h); anuncia.h = setTimeout(function () { a.hidden = true; }, 3800); return t; }
+
   function pgtos() { return tipo === 'entrega' ? ['Pix', 'Cartão na entrega', 'Dinheiro'] : ['Pix', 'Cartão na retirada', 'Dinheiro']; }
+  function quandoValido() {
+    var s = sit(), now = L.agora();
+    if (!s.aberto) quando.modo = 'agendar';
+    if (quando.modo !== 'agendar') return;
+    var dias = L.diasAgendaveis(CFG, now, 7);
+    if (!dias.some(function (d) { return d.iso === quando.dia; })) quando.dia = dias[0] ? dias[0].iso : '';
+    var js = quando.dia ? L.janelas(CFG, quando.dia, now) : [];
+    if (!js.some(function (j) { return j.de === quando.janela; })) quando.janela = js[0] ? js[0].de : '';
+  }
+  function textoQuando() {
+    if (quando.modo !== 'agendar') return '';
+    var js = L.janelas(CFG, quando.dia, L.agora()), j = js.filter(function (x) { return x.de === quando.janela; })[0];
+    return j ? L.textoAgendado(quando.dia, j) : '';
+  }
 
-  function desenhaCarrinho() {
-    var c = calc(), el = $('#corpoCarrinho');
-    if (!c.its.length) { el.innerHTML = '<p class="vazio">Seu carrinho está vazio.<br>Escolha alguns produtos para começar.</p>'; return; }
+  function desenhaCarrinho(foco) {
+    var el = $('#corpoCarrinho'), topo = el.scrollTop, c = calc();
+    if (!c.its.length) { el.innerHTML = '<div class="lj-vazio-carrinho"><p>Seu carrinho está vazio.</p><button type="button" class="lj-btn" id="irCatalogo">Escolher produtos</button></div>'; return; }
     if (pgtos().indexOf(pagamento) < 0) pagamento = 'Pix';
-    var h = (repetindo ? '<div class="aviso-repetir"><b>Seu pedido de ' + repetindo.data + ' já está aqui.</b> Confira os itens e o endereço e finalize: é só isso.</div>' : '') +
-      (atac() ? '<div class="aviso-repetir atacado"><b>Atacado — ' + esc(atac().nome) + '.</b> Preço fixo da tabela de restaurantes.</div>' : '') + '<div class="bloco">' + c.its.map(function (i) {
-      return '<div class="linha-item"><div class="mini" style="background-image:url(img/' + i.img + ')"></div><div><b>' + esc(i.nome) + '</b><small>' + JP.brl(i.preco) + ' / ' + i.un + '</small></div>' +
-        '<div style="text-align:right"><div class="qtd"><button data-d="-1" data-id="' + i.id + '" aria-label="Diminuir">−</button><span>' + i.qtd + '</span><button data-d="1" data-id="' + i.id + '" aria-label="Aumentar">+</button></div></div></div>';
-    }).join('') + '</div>';
+    quandoValido();
+    var h = '';
+    if (recompraDe) h += '<div class="lj-aviso ok"><b>Seu pedido de ' + esc(recompraDe) + ' já está aqui.</b> Confira e finalize.</div>';
+    if (atac()) h += '<div class="lj-aviso rosa"><b>Atacado, ' + esc(atac().nome) + '.</b> Preço da tabela de restaurantes.</div>';
+    h += '<ul class="lj-itens">' + c.its.map(function (i) {
+      var u = L.unidade(i.p), aviso = i.p.combo ? '' : L.avisoPeso(i.p, i.qtd), aberto = !!notasAbertas[i.id];
+      return '<li class="lj-item"><div class="lj-mini" style="background-image:url(img/' + esc(i.p.img) + ')"></div>' +
+        '<div class="lj-item-info"><b>' + esc(i.p.nome) + '</b><small>' + brl(i.preco) + ' ' + (u.porQuilo ? 'por kg' : i.p.combo ? 'por kit' : '· ' + esc(u.rotulo)) + '</small>' +
+        '<div class="lj-qtd" role="group" aria-label="Quantidade de ' + esc(i.p.nome) + '"><button type="button" data-d="-1" data-id="' + esc(i.id) + '" aria-label="Diminuir">−</button><output>' + esc(L.fmtQtd(i.p, i.qtd)) + '</output><button type="button" data-d="1" data-id="' + esc(i.id) + '" aria-label="Aumentar">+</button></div></div>' +
+        '<div class="lj-item-total"><b>' + brl(i.total) + '</b><button type="button" class="lj-link peq" data-nota="' + esc(i.id) + '">' + (aberto ? 'Ocultar observação' : notas[i.id] ? 'Ver observação' : 'Observação') + '</button></div>' +
+        (aviso ? '<p class="lj-peso-aviso">' + esc(aviso) + '</p>' : '') +
+        (aberto ? '<div class="lj-nota"><label class="sr" for="nota-' + esc(i.id) + '">Observação para ' + esc(i.p.nome) + '</label><input id="nota-' + esc(i.id) + '" data-nota-in="' + esc(i.id) + '" maxlength="120" value="' + esc(notas[i.id]) + '" placeholder="Ex.: limpo, sem casca, em postas finas"></div>' : '') + '</li>';
+    }).join('') + '</ul>';
 
-    h += '<div class="bloco"><h3>Como você quer receber</h3><div class="opcoes">' +
-      '<button class="opcao' + (tipo === 'entrega' ? ' ativa' : '') + '" data-tipo="entrega">Entrega</button>' +
-      '<button class="opcao' + (tipo === 'retirada' ? ' ativa' : '') + '" data-tipo="retirada">Retirada</button></div></div>';
-
-    h += '<div class="bloco"><h3>Seus dados</h3>' +
-      '<div class="campo"><label for="fNome">Nome</label><input id="fNome" autocomplete="name" value="' + esc(form.nome) + '" placeholder="Seu nome"></div>' +
-      '<div class="campo"><label for="fFone">WhatsApp</label><input id="fFone" type="tel" inputmode="tel" autocomplete="tel" value="' + esc(form.fone) + '" placeholder="(85) 9 0000-0000"></div>';
+    h += '<div class="lj-bloco"><h3>Receber ou retirar</h3><div class="lj-opcoes">' +
+      '<button type="button" class="lj-opcao' + (tipo === 'entrega' ? ' ativa' : '') + '" data-tipo="entrega" aria-pressed="' + (tipo === 'entrega') + '">Entrega</button>' +
+      '<button type="button" class="lj-opcao' + (tipo === 'retirada' ? ' ativa' : '') + '" data-tipo="retirada" aria-pressed="' + (tipo === 'retirada') + '">Retirada</button></div>';
     if (tipo === 'entrega') {
-      h += '<div class="campo"><label for="fBairro">Bairro</label><select id="fBairro"><option value="">Selecione o bairro</option>' +
-        JP.BAIRROS.map(function (b) { return '<option' + (b.nome === form.bairro ? ' selected' : '') + '>' + esc(b.nome) + '</option>'; }).join('') + '</select></div>' +
-        '<div class="campo"><label for="fEnd">Endereço</label><input id="fEnd" autocomplete="street-address" value="' + esc(form.endereco) + '" placeholder="Rua, número, complemento"></div>';
-      if (c.f) h += '<p class="dica">Distância estimada de ' + c.f.km.toFixed(1).replace('.', ',') + ' km. Taxa do bairro ' + JP.brl(c.f.taxaBairro) + (c.f.extra ? ' + ' + JP.brl(c.f.extra) + ' pela distância.' : '. Sem acréscimo de distância.') + '</p>';
+      h += '<div class="lj-campo"><label for="fBairro">Bairro</label><select id="fBairro"><option value="">Escolha o bairro para ver o frete</option>' +
+        CFG.bairros.map(function (b) { return '<option value="' + esc(b.nome) + '"' + (b.nome === form.bairro ? ' selected' : '') + '>' + esc(b.nome) + ' · ' + brl(b.taxa) + '</option>'; }).join('') + '</select></div>';
     } else {
-      h += '<p class="dica">Retirada na base de distribuição, de segunda a sábado, das 6h às 14h. O endereço é combinado pelo WhatsApp.</p>';
+      h += '<p class="lj-dica">Retirada na loja' + (CFG.contato.endereco ? ': ' + esc(CFG.contato.endereco) : '') + '. Sem frete. Atendemos ' + esc(L.resumoHorario(CFG)) + '.</p>';
     }
     h += '</div>';
 
-    h += '<div class="bloco"><h3>Pagamento</h3><div class="opcoes tres">' + pgtos().map(function (p) {
-      return '<button class="opcao' + (p === pagamento ? ' ativa' : '') + '" data-pg="' + p + '">' + p + '</button>';
-    }).join('') + '</div>' +
-      (pagamento === 'Dinheiro' ? '<div class="campo"><label for="fTroco">Troco para quanto?</label><input id="fTroco" inputmode="decimal" value="' + esc(form.troco) + '" placeholder="Ex.: 200"></div>' : '') +
-      (pagamento === 'Pix' ? '<p class="dica">Você recebe a chave Pix no WhatsApp para pagar depois de confirmarmos o pedido.</p>' : '') + '</div>' +
-      '<div class="bloco"><h3>Observações</h3><div class="campo"><label for="fObs">Algum pedido especial? (opcional)</label><textarea id="fObs" rows="2" maxlength="200" placeholder="Ex.: camarão sem casca, ligar ao chegar">' + esc(form.obs) + '</textarea></div></div>';
-
-    h += avisoCorteHtml();
-    h += '<div class="resumo"><div><span>Subtotal</span><span>' + JP.brl(c.sub) + '</span></div>' +
-      '<div><span>Taxa de entrega</span><span>' + (tipo === 'retirada' ? 'Grátis' : (c.f ? JP.brl(c.taxa) : 'Escolha o bairro')) + '</span></div>' +
-      '<div class="total"><span>Total</span><span>' + JP.brl(c.total) + '</span></div></div>' +
-      '<div id="erroForm" class="erro-campo" role="alert"></div>' +
-      '<button class="btn verde" id="finalizar">Finalizar pelo WhatsApp</button>' +
-      '<p class="dica" style="text-align:center">Demonstração: o pedido é registrado aqui e a conversa abre pronta no WhatsApp da Júlia.</p>';
-    el.innerHTML = h;
-  }
-
-  // Aviso do horário de corte: depois dele a loja aceita o pedido, mas a entrega é no próximo dia útil.
-  function avisoCorteHtml() {
-    var corte = EX.horaCorte();
-    if (EX.aposCorte()) {
-      var d = EX.proxDia().texto;
-      return '<div class="aviso-corte" role="alert"><b>Atenção: entrega ' + (tipo === 'retirada' ? 'só ' : '') + d + '.</b> Pedidos feitos depois das ' + corte + ' não saem no mesmo dia. Você pode fazer o pedido agora e ' + (tipo === 'retirada' ? 'retirar' : 'receber') + ' ' + d + '.</div>';
+    h += '<div class="lj-resumo" aria-label="Resumo do pedido"><div><span>Subtotal</span><b>' + brl(c.sub) + '</b></div>' +
+      '<div><span>' + (tipo === 'retirada' ? 'Retirada' : 'Frete' + (c.f ? ' · ' + esc(c.f.bairro.nome) : '')) + '</span><b>' + (tipo === 'retirada' ? 'Grátis' : c.f ? brl(c.taxa) : 'Escolha o bairro') + '</b></div>' +
+      '<div class="total"><span>Total</span><b>' + brl(c.total) + '</b></div></div>';
+    if (CFG.minimo > 0 && !atac()) {
+      var pct = Math.min(100, Math.round(c.sub / CFG.minimo * 100));
+      h += '<div class="lj-minimo ' + (c.min.ok ? 'ok' : '') + '"><div class="lj-minimo-txt">' + (c.min.ok ? '✓ Pedido mínimo de ' + brl(CFG.minimo) + ' atingido' : 'Faltam <b>' + brl(c.min.falta) + '</b> para o pedido mínimo de ' + brl(CFG.minimo)) + '</div><div class="lj-barra-min" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + pct + '"><i style="width:' + pct + '%"></i></div>' +
+        (c.min.ok ? '' : '<button type="button" class="lj-link" id="maisProdutos">Escolher mais produtos</button>') + '</div>';
     }
-    return '<p class="dica corte-ok">Pedidos até as ' + corte + ' são ' + (tipo === 'retirada' ? 'separados' : 'entregues') + ' hoje. Depois disso, ficam para o próximo dia útil.</p>';
-  }
-  function faixaCorte() {
-    var f = $('#faixaCorte'); if (!f) return;
-    if (EX.aposCorte()) { f.hidden = false; f.innerHTML = '<b>Já passamos das ' + EX.horaCorte() + '.</b> Você pode pedir agora: a entrega será ' + EX.proxDia().texto + '.'; } else f.hidden = true;
-  }
-  function abreGaveta() { desenhaCarrinho(); $('#gaveta').classList.add('aberta'); $('#gaveta').setAttribute('aria-hidden', 'false'); $('#veu').hidden = false; }
-  function fechaGaveta() { $('#gaveta').classList.remove('aberta'); $('#gaveta').setAttribute('aria-hidden', 'true'); $('#veu').hidden = true; }
 
-  /* ---------- finalização ---------- */
+    h += '<div class="lj-bloco"><h3>Seus dados</h3>' +
+      '<div class="lj-campo"><label for="fNome">Nome</label><input id="fNome" autocomplete="name" value="' + esc(form.nome) + '" placeholder="Como podemos chamar você?"></div>' +
+      '<div class="lj-campo"><label for="fFone">WhatsApp</label><input id="fFone" type="tel" inputmode="tel" autocomplete="tel" value="' + esc(form.fone) + '" placeholder="(85) 9 0000-0000"></div>' +
+      (tipo === 'entrega' ? '<div class="lj-campo"><label for="fEnd">Endereço de entrega</label><input id="fEnd" autocomplete="street-address" value="' + esc(form.endereco) + '" placeholder="Rua, número, complemento"></div>' : '') + '</div>';
+
+    var s = sit();
+    h += '<div class="lj-bloco"><h3>Quando</h3>';
+    if (s.aberto) h += '<div class="lj-opcoes"><button type="button" class="lj-opcao' + (quando.modo !== 'agendar' ? ' ativa' : '') + '" data-quando="agora" aria-pressed="' + (quando.modo !== 'agendar') + '">O quanto antes</button><button type="button" class="lj-opcao' + (quando.modo === 'agendar' ? ' ativa' : '') + '" data-quando="agendar" aria-pressed="' + (quando.modo === 'agendar') + '">Agendar</button></div>';
+    else h += '<p class="lj-aviso alerta"><b>' + esc(s.texto) + '.</b> Escolha abaixo o dia e o horário em que prefere receber ou retirar.</p>';
+    if (quando.modo === 'agendar') {
+      var dias = L.diasAgendaveis(CFG, L.agora(), 7), js = quando.dia ? L.janelas(CFG, quando.dia, L.agora()) : [];
+      h += '<div class="lj-duas"><div class="lj-campo"><label for="fDia">Dia</label><select id="fDia">' + dias.map(function (d) { return '<option value="' + d.iso + '"' + (d.iso === quando.dia ? ' selected' : '') + '>' + esc(d.rotulo) + (d.hoje ? ' (hoje)' : '') + '</option>'; }).join('') + '</select></div>' +
+        '<div class="lj-campo"><label for="fJanela">Horário</label><select id="fJanela">' + js.map(function (j) { return '<option value="' + j.de + '"' + (j.de === quando.janela ? ' selected' : '') + '>' + esc(j.rotulo) + '</option>'; }).join('') + '</select></div></div>';
+    } else h += '<p class="lj-dica">Separamos e ' + (tipo === 'retirada' ? 'deixamos pronto' : 'enviamos') + ' assim que o pedido for confirmado.</p>';
+    h += '</div>';
+
+    h += '<div class="lj-bloco"><h3>Pagamento na ' + (tipo === 'entrega' ? 'entrega' : 'retirada') + '</h3><div class="lj-opcoes tres">' + pgtos().map(function (p) {
+      return '<button type="button" class="lj-opcao' + (p === pagamento ? ' ativa' : '') + '" data-pg="' + p + '" aria-pressed="' + (p === pagamento) + '">' + p + '</button>';
+    }).join('') + '</div>' +
+      (pagamento === 'Dinheiro' ? '<div class="lj-campo"><label for="fTroco">Troco para quanto? (opcional)</label><input id="fTroco" inputmode="decimal" value="' + esc(form.troco) + '" placeholder="Ex.: 200"></div>' : '') +
+      (pagamento === 'Pix' ? '<p class="lj-dica">A chave Pix é enviada pelo WhatsApp quando a Júlia confirmar o pedido.</p>' : '') + '</div>' +
+      '<div class="lj-bloco"><div class="lj-campo"><label for="fObs">Recado para a Júlia (opcional)</label><textarea id="fObs" rows="2" maxlength="200" placeholder="Ex.: ligar ao chegar, deixar com o porteiro">' + esc(form.obs) + '</textarea></div></div>';
+
+    var bloqueio = !c.min.ok ? 'Faltam ' + brl(c.min.falta) + ' para o mínimo' : '';
+    h += '<div id="erroForm" class="lj-erro" role="alert"></div>' +
+      '<button type="button" class="lj-btn grande bloco" id="finalizar"' + (bloqueio || enviando ? ' disabled' : '') + '>' + (enviando ? 'Enviando…' : bloqueio || 'Enviar pedido · ' + brl(c.total)) + '</button>' +
+      '<p class="lj-dica centro">Sem cadastro e sem pagamento agora. A Júlia confirma o pedido pelo WhatsApp.</p>';
+    el.innerHTML = h; el.scrollTop = topo;
+    if (foco) { var f = $(foco, el); if (f) f.focus(); }
+  }
+  var ultimoFoco = null;
+  function abreGaveta() { desenhaCarrinho(); $('#gaveta').classList.add('aberta'); $('#gaveta').setAttribute('aria-hidden', 'false'); $('#veu').hidden = false; document.body.classList.add('trava'); ultimoFoco = document.activeElement; $('#fecharCarrinho').focus(); }
+  function fechaGaveta() { $('#gaveta').classList.remove('aberta'); $('#gaveta').setAttribute('aria-hidden', 'true'); $('#veu').hidden = true; document.body.classList.remove('trava'); if (ultimoFoco && ultimoFoco.focus) ultimoFoco.focus(); }
+
+  /* ---------- envio do pedido ---------- */
+  function codigoPedido() { return 'JP-' + JP_PUBLICO.codigo(); }
   function validar(c) {
+    if (!c.its.length) return 'Seu carrinho está vazio.';
+    if (!c.min.ok) return 'O pedido mínimo é ' + brl(c.min.minimo) + '. Faltam ' + brl(c.min.falta) + '.';
+    if (tipo === 'entrega' && !form.bairro) return 'Escolha o bairro para calcular o frete.';
     if (!form.nome.trim()) return 'Informe seu nome.';
     if (form.fone.replace(/\D/g, '').length < 10) return 'Informe um WhatsApp válido com DDD.';
-    if (tipo === 'entrega') {
-      if (!form.bairro) return 'Escolha o bairro da entrega.';
-      if (!form.endereco.trim()) return 'Informe o endereço de entrega.';
-    }
+    if (tipo === 'entrega' && !form.endereco.trim()) return 'Informe o endereço de entrega.';
+    if (quando.modo === 'agendar' && !textoQuando()) return 'Escolha o dia e o horário do agendamento.';
     return '';
   }
   function mensagem(p, c) {
-    var l = ['Olá, Julia Pescados! Quero fazer um pedido (' + p.id + '):', ''];
-    p.itens.forEach(function (i) { l.push('• ' + i.qtd + ' ' + i.un + ' de ' + i.nome + ' — ' + JP.brl(i.preco * i.qtd)); });
-    l.push('', 'Subtotal: ' + JP.brl(c.sub));
-    if (p.tipo === 'entrega') { l.push('Entrega em ' + p.bairro + ': ' + JP.brl(p.taxa)); l.push('Endereço: ' + p.endereco); }
-    else l.push('Retirada no local');
-    if (p.agendado) l.push('', '⏰ Pedido feito depois das ' + EX.horaCorte() + ': ' + (p.tipo === 'retirada' ? 'retirada ' : 'entrega ') + p.agendado + '.');
-    if (p.atacadoId) l.push('', 'Pedido de atacado (restaurante), preço fixo da tabela.');
-    if (p.obs) l.push('', 'Observações: ' + p.obs);
-    l.push('Total: ' + JP.brl(c.total), 'Pagamento: ' + p.pagamento + (p.pagamento === 'Dinheiro' && form.troco ? ' (troco para R$ ' + form.troco + ')' : ''), '', 'Nome: ' + p.cliente, 'WhatsApp: ' + p.fone);
+    var l = ['Olá, Júlia Pescados! Fiz o pedido ' + p.id + ' pelo site:', ''];
+    p.itens.forEach(function (i) { var pr = prod(i.id); l.push('• ' + (pr ? L.fmtQtd(pr, i.qtd) : i.qtd) + ' de ' + i.nome + ' — ' + brl(i.preco * i.qtd) + (i.obs ? ' (' + i.obs + ')' : '')); });
+    l.push('', 'Subtotal: ' + brl(c.sub));
+    if (p.tipo === 'entrega') { l.push('Entrega em ' + p.bairro + ': ' + brl(p.taxa), 'Endereço: ' + p.endereco); } else l.push('Retirada na loja');
+    if (p.agendado) l.push('Agendado: ' + p.agendado);
+    l.push('Total: ' + brl(c.total), 'Pagamento: ' + p.pagamento);
+    if (p.obs) l.push('Recado: ' + p.obs);
+    l.push('', 'Nome: ' + p.cliente);
     return l.join('\n');
   }
-  function registra(p) {
-    S = JP.estado();
-    var id = window.JP_PUBLICO ? 'JP-' + JP_PUBLICO.codigo() : 'JP-' + (++S.seq); p.id = id;   // página pública: código aleatório, sem colisão entre aparelhos
-    if (EX.aposCorte()) p.agendado = EX.proxDia().texto;   // depois do corte: aceita, mas avisa que é no dia seguinte
-    S.pedidos.unshift(p);
-    // cliente novo na carteira, ou soma ao existente
-    var digs = p.fone.replace(/\D/g, ''), cli = S.clientes.filter(function (x) { return x.fone.replace(/\D/g, '') === digs; })[0];
-    if (cli) { cli.pedidos += 1; cli.total += JP.totalPedido(p); cli.ultima = JP.agora(); cli.itens = p.itens.map(function (i) { return [i.id, i.qtd]; }); }
-    else S.clientes.unshift({ id: 'c' + (S.clientes.length + 1), nome: p.cliente, fone: p.fone, bairro: p.bairro || 'Retirada', pedidos: 1, total: JP.totalPedido(p), ultima: JP.agora(), itens: p.itens.map(function (i) { return [i.id, i.qtd]; }) });
-    // lead no CRM
-    S.leads.unshift({ id: 'l' + JP.agora(), nome: p.cliente, fone: p.fone, origem: 'Site — pedido ' + id, etapa: 'orcamento', valor: JP.totalPedido(p), itens: p.itens.map(function (i) { return i.qtd + ' ' + i.un + ' ' + i.nome; }).join(', '), msgs: [['c', 'Pedido ' + id + ' feito pelo site.']], pedidoId: id });
-    JP.salvar();
-    if (p.recompra && repetindo) EX.marcarRepetiu(repetindo.clienteId, id);
-    return id;
-  }
   function finalizar() {
-    var c = calc(), erro = validar(c);
-    if (erro) { $('#erroForm').textContent = erro; return; }
-    var p = {
-      cliente: form.nome.trim(), fone: form.fone.trim(), bairro: tipo === 'entrega' ? form.bairro : '', endereco: tipo === 'entrega' ? form.endereco.trim() : '',
-      tipo: tipo, pagamento: pagamento, itens: c.its.map(function (i) { return { id: i.id, nome: i.nome, un: i.un, preco: i.preco, qtd: i.qtd }; }),
-      taxa: c.taxa, criado: JP.agora(), confirmado: false, baixa: false, motoboy: null, fixo: null, origemSite: true, obs: form.obs.trim()
+    if (enviando) return;
+    var c = calc(), erro = validar(c), er = $('#erroForm');
+    if (erro) { er.textContent = erro; return; }
+    var obs = form.obs.trim();
+    if (pagamento === 'Dinheiro' && form.troco.trim()) obs = (obs ? obs + ' | ' : '') + 'Troco para R$ ' + form.troco.trim();
+    var corpo = {
+      id: codigoPedido(), cliente: form.nome.trim(), fone: form.fone.trim(), tipo: tipo, bairro: tipo === 'entrega' ? form.bairro : '', endereco: tipo === 'entrega' ? form.endereco.trim() : '',
+      pagamento: pagamento, obs: obs, agendado: textoQuando() || undefined,
+      itens: c.its.map(function (i) { var o = { id: i.id, qtd: i.qtd }; if (notas[i.id]) o.obs = notas[i.id]; if (atac() && !i.p.combo) o.preco = i.preco; return o; })
     };
-    if (atac()) p.atacadoId = atac().id;
-    if (repetindo) p.recompra = true;
-    var id = registra(p);
-    window.open('https://wa.me/' + JP.WHATS + '?text=' + encodeURIComponent(mensagem(p, c)), '_blank', 'noopener');
-    repetindo = null;
-    carrinho = {}; form.obs = ''; salvaCarrinho(); atualizaContador();
-    pedidoAcomp = id; localStorage.setItem('jp_ultimo_pedido', id);
-    fechaGaveta(); abreAcomp(true);
+    if (atac()) corpo.atacadoId = atac().id;
+    if (recompraDe) corpo.recompra = true;
+    enviando = true; desenhaCarrinho();
+    fetch('/api/pedidos', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, status: r.status, j: j }; }); })
+      .then(function (r) {
+        enviando = false;
+        if (!r.ok) { desenhaCarrinho(); var e2 = $('#erroForm'); if (e2) e2.textContent = r.j.erro || 'Não foi possível enviar agora. Tente de novo ou chame a Júlia no WhatsApp.'; return; }
+        ultimo = { id: corpo.id, quando: Date.now(), nome: corpo.cliente, itens: c.its.map(function (i) { return [i.id, i.qtd]; }), total: c.total, tipo: tipo, agendado: corpo.agendado || '', resumo: c.its.map(function (i) { return { nome: i.p.nome, qtd: L.fmtQtd(i.p, i.qtd), obs: notas[i.id] || '', total: i.total }; }), taxa: c.taxa, sub: c.sub, bairro: corpo.bairro, pagamento: pagamento, msg: mensagem(corpo, c) };
+        localStorage.setItem('jp_ultimo', JSON.stringify(ultimo)); localStorage.setItem('jp_ultimo_pedido', corpo.id);
+        carrinho = {}; notas = {}; form.obs = ''; recompraDe = null; salva(); desenhaBarra(); desenhaVitrines(); desenhaGrade(); desenhaRecompra();
+        mostraSucesso(ultimo);
+      })
+      .catch(function () { enviando = false; desenhaCarrinho(); var e3 = $('#erroForm'); if (e3) e3.textContent = 'Sem conexão. O pedido NÃO foi enviado e o carrinho foi mantido. Tente de novo ou chame a Júlia no WhatsApp.'; });
   }
-  // Atacado: o pedido recorrente do restaurante sai em um toque, com os dados já cadastrados.
-  function pedirRecorrente() {
-    var r = atac(); if (!r || !r.itens.length) return;
-    S = JP.estado();
-    var its = [], falta = '';
-    r.itens.forEach(function (i) { var p = prod(i.id); if (!p) return; if (i.qtd > p.estoque) falta = p.nome; its.push({ id: p.id, nome: p.nome, un: p.un, preco: EX.precoAtacado(p), qtd: i.qtd }); });
-    var er = $('#atErro');
-    if (falta) { er.textContent = 'Estoque insuficiente de ' + falta + ' para o pedido recorrente. Ajuste as quantidades no carrinho.'; return; }
-    var f = JP.frete(r.bairro), sub = its.reduce(function (t, i) { return t + i.preco * i.qtd; }, 0), taxa = f ? f.total : 0;
-    var p = { cliente: r.nome, fone: r.fone, bairro: r.bairro, endereco: r.endereco, tipo: 'entrega', pagamento: 'Pix', itens: its, taxa: taxa, criado: JP.agora(), confirmado: false, baixa: false, motoboy: null, fixo: null, origemSite: true, atacadoId: r.id, semWhats: true };
-    var id = registra(p);
-    pedidoAcomp = id; localStorage.setItem('jp_ultimo_pedido', id);
-    abreAcomp(true);
-  }
-  function carregaRecorrenteNoCarrinho() {
-    var r = atac(); if (!r) return;
-    carrinho = {}; r.itens.forEach(function (i) { var p = prod(i.id); if (p) carrinho[i.id] = Math.min(i.qtd, p.estoque); });
-    Object.assign(form, { nome: r.nome, fone: r.fone, bairro: r.bairro, endereco: r.endereco }); salvaCarrinho(); atualizaContador(); abreGaveta();
+  function mostraSucesso(u) {
+    fechaGaveta();
+    abreEx('Pedido enviado', '<div class="lj-ex-corpo"><div class="lj-aviso ok"><b>Pedido ' + esc(u.id) + ' recebido, ' + esc(String(u.nome).split(' ')[0]) + '!</b><br>A Júlia vai confirmar pelo seu WhatsApp' + (u.agendado ? '. ' + (u.tipo === 'retirada' ? 'Retirada' : 'Entrega') + ' agendada: ' + esc(u.agendado) : '') + '.</div>' +
+      '<ul class="lj-resumo-lista">' + u.resumo.map(function (i) { return '<li><span>' + esc(i.qtd) + ' · ' + esc(i.nome) + (i.obs ? '<small>' + esc(i.obs) + '</small>' : '') + '</span><b>' + brl(i.total) + '</b></li>'; }).join('') + '</ul>' +
+      '<div class="lj-resumo"><div><span>' + (u.tipo === 'retirada' ? 'Retirada' : 'Frete · ' + esc(u.bairro)) + '</span><b>' + brl(u.taxa) + '</b></div><div class="total"><span>Total · ' + esc(u.pagamento) + '</span><b>' + brl(u.total) + '</b></div></div>' +
+      '<p class="lj-dica">Itens vendidos por peso têm o valor ajustado na pesagem.</p>' +
+      '<a class="lj-btn linha bloco" target="_blank" rel="noopener" href="https://wa.me/' + esc(CFG.contato.whats) + '?text=' + encodeURIComponent(u.msg) + '">Também mandar este pedido no WhatsApp</a>' +
+      '<button type="button" class="lj-btn bloco" data-fecha-ex>Fazer outro pedido</button></div>');
   }
 
-  /* ---------- acompanhamento com mapa ---------- */
-  var mapa = null, camadas = {}, timer = null;
-  function pedidoAtual() { S = JP.estado(); return S.pedidos.filter(function (p) { return p.id === pedidoAcomp; })[0]; }
-
-  function abreAcomp(novo) {
-    $('#modalAcomp').hidden = false;
-    desenhaAcomp(novo);
-    clearInterval(timer); timer = setInterval(atualizaAcomp, 1000);
+  /* ---------- recompra ---------- */
+  function resolveItens(its) { return its.map(function (i) { var p = prod(i[0]); return p ? { p: p, qtd: i[1] } : null; }).filter(Boolean); }
+  function desenhaRecompra() {
+    var res = $('#recompraResultado'), h = '';
+    if (ultimo && ultimo.itens && ultimo.itens.length && !res.dataset.busca) {
+      var data = new Date(ultimo.quando).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      h = recompraHtml('Seu último pedido neste aparelho (' + data + ')', ultimo.itens, data);
+    } else if (res.dataset.busca) return;
+    res.innerHTML = h;
+    var f = $('#recFone'); if (f && !f.value && form.fone) f.value = form.fone;
   }
-  function fechaAcomp() { $('#modalAcomp').hidden = true; clearInterval(timer); if (mapa) { mapa.remove(); mapa = null; camadas = {}; } }
-
-  function desenhaAcomp(novo) {
-    var p = pedidoAtual(), el = $('#acompConteudo');
-    if (!p) { el.innerHTML = '<div class="acomp"><p class="vazio">Você ainda não fez nenhum pedido neste aparelho.</p></div>'; return; }
-    var retirada = p.tipo === 'retirada', nomes = retirada ? ['Pedido recebido', 'Confirmado', 'Preparando', 'Pronto'] : ['Pedido recebido', 'Preparando', 'Saiu para entrega', 'Chegou'];
-    var pix = p.pagamento === 'Pix' ? '<div class="dica">Pagamento por Pix: a chave é enviada pelo WhatsApp quando a Júlia confirmar.</div>' : '';
-    el.innerHTML = '<div class="acomp">' +
-      (novo ? '<div class="ok-topo"><h3>Pedido ' + p.id + ' enviado</h3><p class="dica">' + (p.semWhats ? 'O pedido recorrente já chegou à Júlia. Acompanhe por aqui.' : 'Abrimos a conversa no WhatsApp com os itens. Acompanhe por aqui.') + '</p></div>' : '<p class="dica">Pedido ' + p.id + ' — ' + esc(p.cliente) + '</p>') +
-      (p.agendado ? '<div class="aviso-corte" role="alert"><b>' + (retirada ? 'Retirada ' : 'Entrega ') + p.agendado + '.</b> Seu pedido foi feito depois das ' + EX.horaCorte() + ', o nosso horário de corte, e não sai hoje. Avisaremos pelo WhatsApp quando a ' + (retirada ? 'retirada estiver pronta' : 'entrega sair') + '.</div>' : '') +
-      '<div class="etapas" id="etapas">' + nomes.map(function (n) { return '<div class="etapa">' + n + '</div>'; }).join('') + '</div>' +
-      '<div class="faixa-estado"><div><b id="estadoTxt"></b><div class="dica" id="estadoSub"></div></div><button class="btn pequeno claro" id="simConf" hidden>Simular confirmação da Júlia</button></div>' +
-      (retirada ? '' : '<div id="mapaAcomp"></div>') + pix +
-      '<div class="resumo">' + p.itens.map(function (i) { return '<div><span>' + i.qtd + ' ' + i.un + ' · ' + esc(i.nome) + '</span><span>' + JP.brl(i.preco * i.qtd) + '</span></div>'; }).join('') +
-      '<div><span>' + (retirada ? 'Retirada' : 'Entrega — ' + esc(p.bairro)) + '</span><span>' + JP.brl(p.taxa) + '</span></div><div class="total"><span>Total · ' + esc(p.pagamento) + '</span><span>' + JP.brl(JP.totalPedido(p)) + '</span></div></div>' +
-      '<div id="avalAcomp"></div><div id="repetirAcomp"></div>' +
-      '<p class="dica" style="text-align:center">Demonstração acelerada: o trajeto do motoboy é simulado numa rota de exemplo.</p></div>';
-    avalChave = ''; avalNota = 0;
-    if (!retirada) montaMapa(p);
-    atualizaAcomp();
+  function recompraHtml(titulo, its, data) {
+    var rs = resolveItens(its);
+    if (!rs.length) return '<p class="lj-dica">Os produtos desse pedido não estão mais no catálogo.</p>';
+    return '<div class="lj-recompra-card"><b>' + esc(titulo) + '</b><ul>' + rs.map(function (i) { return '<li>' + esc(L.fmtQtd(i.p, i.qtd)) + ' · ' + esc(i.p.nome) + (i.p.estoque <= 0 ? ' <em>(esgotado)</em>' : '') + '</li>'; }).join('') + '</ul>' +
+      '<button type="button" class="lj-btn" data-refaz="' + esc(JSON.stringify(its)) + '" data-data="' + esc(data) + '">Pedir de novo</button></div>';
   }
-
-  function montaMapa(p) {
-    var b = JP.BAIRROS.filter(function (x) { return x.nome === p.bairro; })[0] || JP.BAIRROS[0];
-    mapa = L.map('mapaAcomp', { zoomControl: true, scrollWheelZoom: false }).setView([JP.BASE.lat, JP.BASE.lng], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OpenStreetMap' }).addTo(mapa);
-    var pts = JP.rota(b);
-    camadas.pts = pts;
-    L.polyline(pts, { color: '#0b4a5c', weight: 5, opacity: .85 }).addTo(mapa);
-    L.marker([JP.BASE.lat, JP.BASE.lng], { icon: L.divIcon({ className: '', html: '<div class="base-pin">Julia Pescados</div>', iconSize: [0, 0], iconAnchor: [50, 12] }) }).addTo(mapa);
-    L.marker([b.lat, b.lng], { icon: L.divIcon({ className: '', html: '<div class="destino-pin"></div>', iconSize: [22, 22], iconAnchor: [11, 22] }) }).addTo(mapa);
-    camadas.moto = L.marker(pts[0], { icon: L.divIcon({ className: '', html: '<div class="motoboy-pin">Moto</div>', iconSize: [34, 34], iconAnchor: [17, 17] }) }).addTo(mapa);
-    mapa.fitBounds(L.polyline(pts).getBounds(), { padding: [30, 30] });
-    setTimeout(function () { mapa && mapa.invalidateSize(); }, 150);
+  function buscaRecompra(e) {
+    e.preventDefault();
+    var fone = $('#recFone').value.trim(), res = $('#recompraResultado');
+    if (fone.replace(/\D/g, '').length < 10) { res.dataset.busca = '1'; res.innerHTML = '<p class="lj-erro" role="alert">Informe um WhatsApp válido com DDD.</p>'; return; }
+    res.dataset.busca = '1'; res.innerHTML = '<p class="lj-dica">Buscando…</p>';
+    fetch('/api/ultimo-pedido', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fone: fone }) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j }; }); })
+      .then(function (r) {
+        if (!r.ok) { res.innerHTML = '<p class="lj-dica" role="alert">' + esc(r.j.erro || 'Não foi possível buscar agora.') + '</p>'; return; }
+        form.fone = form.fone || fone; if (!form.nome) form.nome = r.j.nome || ''; salva();
+        var data = new Date(r.j.quando).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        res.innerHTML = recompraHtml('Olá, ' + (r.j.nome || 'cliente') + '! Seu último pedido (' + data + ')', r.j.itens, data);
+      })
+      .catch(function () { res.innerHTML = '<p class="lj-dica" role="alert">Sem conexão. Tente de novo.</p>'; });
   }
-
-  function atualizaAcomp() {
-    var p = pedidoAtual(); if (!p || $('#modalAcomp').hidden) return;
-    var s = JP.situacao(p), retirada = p.tipo === 'retirada';
-    var ordem = retirada ? { recebido: 0, preparando: 2, chegou: 3 } : { recebido: 0, preparando: 1, saiu: 2, chegou: 3 };
-    var idx = p.confirmado ? (s.cod === 'recebido' ? (retirada ? 1 : 0) : ordem[s.cod]) : 0;
-    var els = document.querySelectorAll('#etapas .etapa');
-    els.forEach(function (e, i) { e.className = 'etapa' + (i < idx || (s.cod === 'chegou' && i === 3) ? ' feita' : '') + (i === idx && s.cod !== 'chegou' ? ' atual' : ''); });
-    var txt = { recebido: p.agendado && p.confirmado ? 'Entrega agendada' : p.confirmado ? 'Pedido confirmado' : 'Pedido recebido', preparando: 'Preparando seu pedido', saiu: 'Saiu para entrega', chegou: retirada ? 'Pronto para retirada' : 'Seu pedido chegou' };
-    var sub = p.agendado && p.confirmado && !p.saiuEm ? (retirada ? 'Retirada ' : 'Entrega ') + p.agendado + '. Seu pedido está confirmado.' : !p.confirmado ? 'Aguardando a Júlia confirmar no WhatsApp.' : s.cod === 'saiu' ? 'Motoboy a caminho — ' + Math.round(s.prog * 100) + '% do trajeto.' : s.cod === 'chegou' ? 'Bom apetite!' : 'Estamos separando e embalando.';
-    $('#estadoTxt').textContent = txt[s.cod]; $('#estadoSub').textContent = sub;
-    $('#simConf').hidden = !!p.confirmado;
-    if (camadas.moto && camadas.pts) camadas.moto.setLatLng(JP.pontoNaRota(camadas.pts, s.prog));
-    if (!retirada && p.confirmado && s.cod === 'chegou') desenhaAval(p);
-    if (p.confirmado && s.cod === 'chegou' && $('#repetirAcomp') && !$('#repetirAcomp').innerHTML) $('#repetirAcomp').innerHTML = '<button class="btn mar" id="pedirDeNovo">Pedir de novo</button>';
-  }
-
-  /* ---------- avaliação depois da entrega (pós-venda) ---------- */
-  var avalChave = '', avalNota = 0;
-  var ROT_NOTA = ['', 'Ruim', 'Regular', 'Bom', 'Muito bom', 'Excelente'];
-  function desenhaAval(p) {
-    var el = $('#avalAcomp'); if (!el) return;
-    PV.recarregar();
-    var pv = PV.ler(), feita = PV.doPedido(p.id), chave = p.id + (feita ? '|feita|' + feita.nota : pv.aval.ativa ? '|form' : '|off');
-    if (chave === avalChave) return;
-    avalChave = chave;
-    if (!feita && !pv.aval.ativa) { el.innerHTML = ''; return; }
-    if (feita) {
-      el.innerHTML = '<div class="aval feita"><h3>Obrigada pela sua avaliação!</h3><p class="aval-est" role="img" aria-label="Nota ' + feita.nota + ' de 5">' + new Array(feita.nota + 1).join('★') + '<i>' + new Array(6 - feita.nota).join('☆') + '</i></p>' +
-        (feita.nota <= 3 ? '<p class="dica">Sentimos muito. A Júlia vai falar com você pelo WhatsApp para resolver.</p>' : '<p class="dica">Gostou? Indique a Julia Pescados para amigos e família: é só passar o nosso perfil <b>@juliapescados</b>.</p>') + '</div>';
-      return;
+  function refaz(its, data) {
+    monta();
+    var r = L.refazPedido(its, todos());
+    carrinho = {}; notas = {}; r.itens.forEach(function (i) { carrinho[i[0]] = i[1]; });
+    recompraDe = data; salva(); desenhaBarra(); desenhaGrade(); desenhaVitrines();
+    abreGaveta();
+    if (r.faltou.length) {
+      var nomes = r.faltou.map(function (id) { var p = prod(id); return p ? p.nome : 'um produto que saiu do catálogo'; });
+      anuncia('Ajustamos o pedido: ' + nomes.join(', ') + ' está indisponível ou com menos estoque.');
     }
-    el.innerHTML = '<div class="aval"><h3>Como foi o seu pedido?</h3><p class="dica">Dê uma nota de 1 a 5 e, se quiser, conte em uma frase como foi.</p>' +
-      '<div class="aval-notas" role="radiogroup" aria-label="Nota de 1 a 5">' + [1, 2, 3, 4, 5].map(function (n) { return '<button type="button" role="radio" aria-checked="false" class="aval-estrela" data-estrela="' + n + '" aria-label="' + n + ' de 5 — ' + ROT_NOTA[n] + '">★</button>'; }).join('') + '</div>' +
-      '<p class="aval-rot" id="avalRot" aria-live="polite">&nbsp;</p>' +
-      '<label class="sr" for="avalTxt">Comentário sobre o pedido</label><textarea id="avalTxt" rows="3" maxlength="300" placeholder="Seu comentário (opcional)"></textarea>' +
-      '<label class="aval-ind"><input type="checkbox" id="avalInd"> Vou indicar a Julia Pescados para amigos e família</label>' +
-      '<button class="btn" id="enviarAval" disabled>Enviar avaliação</button></div>';
-    avalNota = 0;
-  }
-  function marcaNota(n) {
-    avalNota = n;
-    document.querySelectorAll('.aval-estrela').forEach(function (b) { var on = +b.dataset.estrela <= n; b.classList.toggle('on', on); b.setAttribute('aria-checked', String(+b.dataset.estrela === n)); });
-    $('#avalRot').textContent = n + ' de 5 — ' + ROT_NOTA[n]; $('#enviarAval').disabled = false;
-  }
-  function enviaAval() {
-    var p = pedidoAtual(); if (!p || !avalNota) return;
-    PV.avaliar({ pedido: p.id, cliente: p.cliente, fone: p.fone, nota: avalNota, comentario: $('#avalTxt').value, indicou: $('#avalInd').checked, origem: 'Loja' });
-    avalChave = ''; desenhaAval(p);
+    if (!r.itens.length) { recompraDe = null; desenhaCarrinho(); }
   }
 
-  /* ---------- lista de espera de lote fresco e acesso ao atacado ---------- */
-  var exModo = '', exProd = '';
-  function abreEx(titulo, html) { $('#exTitulo').textContent = titulo; $('#exConteudo').innerHTML = html; $('#modalEx').hidden = false; var i = $('#exConteudo input'); if (i) i.focus(); }
-  function fechaEx() { $('#modalEx').hidden = true; }
+  /* ---------- lista de espera de lote fresco e atacado (mantidos) ---------- */
+  var exProd = '';
+  function abreEx(titulo, html) { $('#exTitulo').textContent = titulo; $('#exConteudo').innerHTML = html; $('#modalEx').hidden = false; document.body.classList.add('trava'); var i = $('#exConteudo input'); if (i) i.focus(); }
+  function fechaEx() { $('#modalEx').hidden = true; if ($('#gaveta').getAttribute('aria-hidden') !== 'false') document.body.classList.remove('trava'); }
   function abreEspera(id) {
-    var p = prod(id); if (!p) return; exModo = 'espera'; exProd = id;
-    if (naFila.indexOf(id) >= 0) { abreEx('Você já está na fila', '<div class="ex-corpo"><p>Assim que chegar lote fresco de <b>' + esc(p.nome) + '</b>, avisamos no seu WhatsApp.</p><button class="btn" data-fecha-ex>Fechar</button></div>'); return; }
-    abreEx('Avise-me do próximo lote', '<div class="ex-corpo"><p>Quando chegar lote fresco de <b>' + esc(p.nome) + '</b>, mandamos um aviso no seu WhatsApp, com o link para pedir.</p>' +
-      '<div class="campo"><label for="exNome">Nome</label><input id="exNome" autocomplete="name" value="' + esc(form.nome) + '"></div>' +
-      '<div class="campo"><label for="exFone">WhatsApp</label><input id="exFone" type="tel" inputmode="tel" autocomplete="tel" value="' + esc(form.fone) + '" placeholder="(85) 9 0000-0000"></div>' +
-      '<div id="exErro" class="erro-campo" role="alert"></div><button class="btn" id="enviarEspera">Quero ser avisado</button>' +
-      '<p class="dica">Demonstração: o aviso aparece na tela “Lote fresco” e nas Conversas do painel.</p></div>');
+    var p = prod(id); if (!p) return; exProd = id;
+    if (naFila.indexOf(id) >= 0) { abreEx('Você já está na fila', '<div class="lj-ex-corpo"><p>Assim que chegar lote fresco de <b>' + esc(p.nome) + '</b>, avisamos no seu WhatsApp.</p><button class="lj-btn" data-fecha-ex>Fechar</button></div>'); return; }
+    abreEx('Avise-me do próximo lote', '<div class="lj-ex-corpo"><p>Quando chegar lote fresco de <b>' + esc(p.nome) + '</b>, mandamos um aviso no seu WhatsApp.</p>' +
+      '<div class="lj-campo"><label for="exNome">Nome</label><input id="exNome" autocomplete="name" value="' + esc(form.nome) + '"></div>' +
+      '<div class="lj-campo"><label for="exFone">WhatsApp</label><input id="exFone" type="tel" inputmode="tel" autocomplete="tel" value="' + esc(form.fone) + '" placeholder="(85) 9 0000-0000"></div>' +
+      '<div id="exErro" class="lj-erro" role="alert"></div><button class="lj-btn" id="enviarEspera">Quero ser avisado</button></div>');
   }
   function enviaEspera() {
     var nome = $('#exNome').value.trim(), fone = $('#exFone').value.trim();
     if (!nome) { $('#exErro').textContent = 'Informe seu nome.'; return; }
     if (fone.replace(/\D/g, '').length < 10) { $('#exErro').textContent = 'Informe um WhatsApp válido com DDD.'; return; }
-    form.nome = form.nome || nome; form.fone = form.fone || fone; salvaCarrinho();
+    form.nome = form.nome || nome; form.fone = form.fone || fone; salva();
     EX.recarregar(); EX.inscrever({ prod: exProd, nome: nome, fone: fone });
     if (naFila.indexOf(exProd) < 0) naFila.push(exProd); localStorage.setItem('jp_espera', JSON.stringify(naFila));
     var p = prod(exProd);
     $('#exTitulo').textContent = 'Você está na fila';
-    $('#exConteudo').innerHTML = '<div class="ex-corpo"><div class="ok-topo"><h3>Pronto, ' + esc(nome.split(' ')[0]) + '!</h3><p>Avisaremos no seu WhatsApp assim que chegar lote fresco de <b>' + esc(p.nome) + '</b>.</p></div><button class="btn" data-fecha-ex>Fechar</button></div>';
-    desenhaGrade();
+    $('#exConteudo').innerHTML = '<div class="lj-ex-corpo"><div class="lj-aviso ok"><b>Pronto, ' + esc(nome.split(' ')[0]) + '!</b> Avisaremos no seu WhatsApp assim que chegar lote fresco de <b>' + esc(p.nome) + '</b>.</div><button class="lj-btn" data-fecha-ex>Fechar</button></div>';
+    atualizaCards(exProd);
   }
   function abreAtacadoModal() {
-    exModo = 'atacado';
-    abreEx('Sou restaurante', '<div class="ex-corpo"><p>Digite o código do seu restaurante para ver a tabela de preços de atacado e pedir de novo em um toque.</p>' +
-      '<div class="campo"><label for="atCodigo">Código do restaurante</label><input id="atCodigo" autocomplete="off" placeholder="Ex.: MARE" maxlength="12"></div><div id="exErro" class="erro-campo" role="alert"></div>' +
-      '<button class="btn" id="entrarAtacado">Entrar</button><p class="dica">Códigos da demonstração: ' + EX.ler().atacado.restaurantes.map(function (r) { return '<b>' + esc(r.codigo) + '</b>'; }).join(', ') + '.</p></div>');
+    abreEx('Sou restaurante', '<div class="lj-ex-corpo"><p>Digite o código do seu restaurante para ver os preços de atacado.</p>' +
+      '<div class="lj-campo"><label for="atCodigo">Código do restaurante</label><input id="atCodigo" autocomplete="off" maxlength="12"></div><div id="exErro" class="lj-erro" role="alert"></div>' +
+      '<button class="lj-btn" id="entrarAtacado">Entrar</button></div>');
   }
   function entraAtacado(cod) {
     var c = String(cod || '').trim().toUpperCase();
     var r = EX.ler().atacado.restaurantes.filter(function (x) { return x.codigo.toUpperCase() === c; })[0];
     if (!r) { var er = $('#exErro'); if (er) er.textContent = 'Código não encontrado.'; return; }
     atacadoId = r.id; localStorage.setItem('jp_atacado', r.id);
-    Object.assign(form, { nome: r.nome, fone: r.fone, bairro: r.bairro, endereco: r.endereco }); salvaCarrinho();
+    Object.assign(form, { nome: r.nome, fone: r.fone, bairro: r.bairro, endereco: r.endereco }); salva();
     fechaEx(); desenhaTudo();
   }
   function desenhaAtacado() {
     var el = $('#atacadoPainel'), r = atac();
     $('#abrirAtacado').textContent = r ? 'Atacado: ' + r.nome.replace(/^(Restaurante|Bar|Cantina) /, '') : 'Sou restaurante';
     if (!r) { el.hidden = true; el.innerHTML = ''; return; }
-    var its = r.itens.map(function (i) { var p = prod(i.id); return p ? { p: p, qtd: i.qtd } : null; }).filter(Boolean);
-    var tot = its.reduce(function (t, x) { return t + EX.precoAtacado(x.p) * x.qtd; }, 0), varejo = its.reduce(function (t, x) { return t + x.p.preco * x.qtd; }, 0);
     el.hidden = false;
-    el.innerHTML = '<div class="atacado-cab"><div><span class="chip rosa">Atacado</span><h2>' + esc(r.nome) + '</h2><p>Preço fixo da tabela de restaurantes, em todos os produtos da loja.</p></div><button type="button" class="link-btn" id="sairAtacado">Sair do atacado</button></div>' +
-      (its.length ? '<div class="atacado-rec"><div><h3>Seu pedido recorrente' + (r.dias ? ' <small>' + esc(r.dias) + '</small>' : '') + '</h3><ul>' + its.map(function (x) { return '<li><span>' + x.qtd + ' ' + x.p.un + ' · ' + esc(x.p.nome) + '</span><b>' + JP.brl(EX.precoAtacado(x.p) * x.qtd) + '</b></li>'; }).join('') + '</ul>' +
-        '<p class="atacado-tot">Total dos produtos <b>' + JP.brl(tot) + '</b> <small>(varejo: ' + JP.brl(varejo) + ')</small></p><p class="dica">Entrega em ' + esc(r.bairro) + ', ' + esc(r.endereco) + '. Taxa de entrega do bairro à parte.</p></div>' +
-        '<div class="atacado-acoes"><button class="btn verde grande" id="pedirRecorrente">Pedir de novo em 1 toque</button><button class="btn linha" id="editarRecorrente">Ajustar no carrinho</button><div id="atErro" class="erro-campo" role="alert"></div></div></div>'
-        : '<p class="dica">Ainda não há pedido recorrente cadastrado. Monte o pedido no carrinho; a Júlia salva como recorrente.</p>');
+    el.innerHTML = '<div class="lj-atacado-cab"><div><span class="lj-selo">Atacado</span><h2>' + esc(r.nome) + '</h2><p>Preço da tabela de restaurantes, em todos os produtos da loja.</p></div><button type="button" class="lj-link claro" id="sairAtacado">Sair do atacado</button></div>';
   }
-  function desenhaTudo() { desenhaGrade(); desenhaAtacado(); atualizaContador(); if ($('#gaveta').classList.contains('aberta')) desenhaCarrinho(); }
+
+  function desenhaTudo() { monta(); limpaCarrinho(); desenhaStatus(); desenhaCats(); desenhaGrade(); desenhaVitrines(); desenhaAtacado(); desenhaBarra(); desenhaRecompra(); if ($('#gaveta').classList.contains('aberta')) desenhaCarrinho(); }
 
   /* ---------- eventos ---------- */
   document.addEventListener('click', function (e) {
     var t = e.target.closest('button, a'); if (!t) return;
-    if (t.dataset.c) { cat = t.dataset.c; desenhaCats(); desenhaGrade(); }
-    else if (t.dataset.add) add(t.dataset.add, 1);
-    else if (t.dataset.d) { add(t.dataset.id, +t.dataset.d); }
-    else if (t.dataset.tipo) { tipo = t.dataset.tipo; desenhaCarrinho(); }
-    else if (t.dataset.pg) { pagamento = t.dataset.pg; desenhaCarrinho(); }
-    else if (t.id === 'abrirCarrinho') abreGaveta();
-    else if (t.id === 'fecharCarrinho' ) fechaGaveta();
+    var d = t.dataset;
+    if (d.c) { filtro.cat = d.c; filtro.so = ''; desenhaCats(); desenhaGrade(); }
+    else if (d.so) { filtro.so = filtro.so === d.so ? '' : d.so; if (filtro.so) filtro.cat = 'Todos'; desenhaCats(); desenhaGrade(); }
+    else if (t.hasAttribute('data-limpa')) { filtro = { termo: '', cat: 'Todos', ordem: '', so: '' }; $('#busca').value = ''; $('#ordem').value = ''; desenhaCats(); desenhaGrade(); }
+    else if (d.add) { muda(d.add, 1); var f = $('[data-ctrl="' + d.add + '"] [data-d="1"]'); if (f) f.focus(); }
+    else if (d.d) {
+      var dentro = !!t.closest('#corpoCarrinho'); muda(d.id, +d.d);
+      if (dentro) desenhaCarrinho('[data-d="' + d.d + '"][data-id="' + d.id + '"]'); else { var f2 = $('[data-ctrl="' + d.id + '"] [data-d="' + d.d + '"]') || $('[data-ctrl="' + d.id + '"] [data-add]'); if (f2) f2.focus(); }
+    }
+    else if (d.nota) { if (notasAbertas[d.nota]) delete notasAbertas[d.nota]; else notasAbertas[d.nota] = 1; desenhaCarrinho(notasAbertas[d.nota] ? '[data-nota-in="' + d.nota + '"]' : null); }
+    else if (d.tipo) { tipo = d.tipo; desenhaCarrinho(); }
+    else if (d.pg) { pagamento = d.pg; desenhaCarrinho(); }
+    else if (d.quando) { quando.modo = d.quando; desenhaCarrinho(); }
+    else if (d.refaz) refaz(JSON.parse(d.refaz), d.data);
+    else if (t.id === 'abrirCarrinho' || t.id === 'barraAbrir') abreGaveta();
+    else if (t.id === 'fecharCarrinho') fechaGaveta();
+    else if (t.id === 'irCatalogo' || t.id === 'maisProdutos') { fechaGaveta(); $('#catalogo').scrollIntoView(); }
     else if (t.id === 'finalizar') finalizar();
-    else if (t.id === 'abrirAcomp') { var ult = localStorage.getItem('jp_ultimo_pedido'); pedidoAcomp = ult; abreAcomp(false); }
-    else if (t.id === 'fecharAcomp') fechaAcomp();
-    else if (t.dataset.estrela) marcaNota(+t.dataset.estrela);
-    else if (t.id === 'enviarAval') enviaAval();
-    else if (t.dataset.espera) abreEspera(t.dataset.espera);
+    else if (t.id === 'statusLoja') { $('#entrega').scrollIntoView(); }
+    else if (d.espera) abreEspera(d.espera);
     else if (t.id === 'enviarEspera') enviaEspera();
     else if (t.id === 'fecharEx' || t.hasAttribute('data-fecha-ex')) fechaEx();
     else if (t.id === 'abrirAtacado') abreAtacadoModal();
     else if (t.id === 'entrarAtacado') entraAtacado($('#atCodigo').value);
     else if (t.id === 'sairAtacado') { atacadoId = ''; localStorage.removeItem('jp_atacado'); desenhaTudo(); }
-    else if (t.id === 'pedirRecorrente') pedirRecorrente();
-    else if (t.id === 'editarRecorrente') carregaRecorrenteNoCarrinho();
-    else if (t.id === 'pedirDeNovo') { var ul = pedidoAtual(); if (ul) { carrinho = {}; ul.itens.forEach(function (i) { if (prod(i.id)) carrinho[i.id] = Math.min(i.qtd, prod(i.id).estoque); }); salvaCarrinho(); atualizaContador(); fechaAcomp(); abreGaveta(); } }
-    else if (t.id === 'simConf') { JP.confirmarPedido(pedidoAcomp); S = JP.estado(); desenhaAcomp(false); }
   });
   $('#veu').addEventListener('click', fechaGaveta);
   $('#modalEx').addEventListener('click', function (e) { if (e.target.id === 'modalEx') fechaEx(); });
-  $('#modalAcomp').addEventListener('click', function (e) { if (e.target.id === 'modalAcomp') fechaAcomp(); });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { fechaGaveta(); fechaEx(); if (!$('#modalAcomp').hidden) fechaAcomp(); } });
-  $('#busca').addEventListener('input', function (e) { termo = e.target.value.trim().toLowerCase(); desenhaGrade(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') { if (!$('#modalEx').hidden) fechaEx(); else if ($('#gaveta').classList.contains('aberta')) fechaGaveta(); } });
+  $('#formRecompra').addEventListener('submit', buscaRecompra);
+  $('#busca').addEventListener('input', function (e) { filtro.termo = e.target.value; desenhaGrade(); });
+  $('#ordem').addEventListener('change', function (e) { filtro.ordem = e.target.value; desenhaGrade(); });
   $('#corpoCarrinho').addEventListener('input', function (e) {
-    var m = { fNome: 'nome', fFone: 'fone', fEnd: 'endereco', fTroco: 'troco', fObs: 'obs' }[e.target.id];
-    if (m) { form[m] = e.target.value; salvaCarrinho(); }
+    var id = e.target.id, m = { fNome: 'nome', fFone: 'fone', fEnd: 'endereco', fTroco: 'troco', fObs: 'obs' }[id];
+    if (m) { form[m] = e.target.value; salva(); }
+    else if (e.target.dataset.notaIn) { notas[e.target.dataset.notaIn] = e.target.value; salva(); }
   });
   $('#corpoCarrinho').addEventListener('change', function (e) {
-    if (e.target.id === 'fBairro') { form.bairro = e.target.value; salvaCarrinho(); desenhaCarrinho(); }
+    if (e.target.id === 'fBairro') { form.bairro = e.target.value; salva(); desenhaCarrinho('#fBairro'); }
+    else if (e.target.id === 'fDia') { quando.dia = e.target.value; quando.janela = ''; desenhaCarrinho('#fDia'); }
+    else if (e.target.id === 'fJanela') { quando.janela = e.target.value; }
   });
-  // mantém o catálogo atualizado quando o painel dá baixa no estoque em outra aba
-  window.addEventListener('storage', function (e) { if (e.key === 'jp_demo_v1') { S = JP.estado(); desenhaGrade(); } });
+  window.addEventListener('storage', function (e) { if (e.key === EX.CHAVE) { EX.recarregar(); desenhaAtacado(); } });
 
-  window.addEventListener('storage', function (e) { if (e.key === EX.CHAVE) { EX.recarregar(); desenhaAtacado(); faixaCorte(); } });
-  desenhaCats(); desenhaGrade(); desenhaTaxas(); atualizaContador(); desenhaAtacado(); faixaCorte();
-  setInterval(function () { faixaCorte(); }, 30000);
+  desenhaFixos(); desenhaTudo();
+  setInterval(desenhaStatus, 60000);
 
-  // Links dos avisos: ?repetir=<cliente> (recompra), ?add=<produto> (lote fresco, receitas) e ?atacado=<código>
+  // Links dos avisos: ?add=<produto> (lote fresco, receitas) e ?atacado=<código>
   (function () {
     var q = new URLSearchParams(location.search), mudou = false;
-    if (q.get('atacado')) { var r = EX.ler().atacado.restaurantes.filter(function (x) { return x.codigo.toUpperCase() === q.get('atacado').toUpperCase(); })[0]; if (r) { atacadoId = r.id; localStorage.setItem('jp_atacado', r.id); Object.assign(form, { nome: r.nome, fone: r.fone, bairro: r.bairro, endereco: r.endereco }); salvaCarrinho(); desenhaTudo(); mudou = true; } }
-    if (q.get('repetir')) {
-      var c = S.clientes.filter(function (x) { return x.id === q.get('repetir'); })[0];
-      if (c && c.itens && c.itens.length) {
-        carrinho = {}; c.itens.forEach(function (i) { var p = prod(i[0]); if (p && p.estoque > 0) carrinho[i[0]] = Math.min(i[1], p.estoque); });
-        Object.assign(form, { nome: c.nome, fone: c.fone, bairro: c.bairro === 'Retirada' ? '' : c.bairro, endereco: c.endereco || form.endereco });
-        tipo = form.bairro ? 'entrega' : tipo; repetindo = { clienteId: c.id, ref: q.get('ref') || 'recompra', data: new Date(c.ultima).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) };
-        salvaCarrinho(); atualizaContador(); abreGaveta(); mudou = true;
-      }
-    } else if (q.get('add')) {
+    if (q.get('atacado')) { var r = EX.ler().atacado.restaurantes.filter(function (x) { return x.codigo.toUpperCase() === q.get('atacado').toUpperCase(); })[0]; if (r) { atacadoId = r.id; localStorage.setItem('jp_atacado', r.id); Object.assign(form, { nome: r.nome, fone: r.fone, bairro: r.bairro, endereco: r.endereco }); salva(); desenhaTudo(); mudou = true; } }
+    if (q.get('add')) {
       var p0 = prod(q.get('add'));
-      if (p0 && p0.estoque > 0) { add(p0.id, 1); abreGaveta(); }
-      var alvo = $('#prod-' + q.get('add')); if (alvo) setTimeout(function () { alvo.scrollIntoView({ block: 'center' }); alvo.classList.add('destaque'); }, 300);
+      if (p0 && p0.estoque > 0) { muda(p0.id, 1); abreGaveta(); }
+      var alvo = $('#prod-' + q.get('add')); if (alvo) setTimeout(function () { alvo.scrollIntoView({ block: 'center' }); }, 300);
       mudou = true;
     }
     if (mudou && history.replaceState) history.replaceState(null, '', location.pathname);
   })();
-  // Atalho para a demonstração: /?acompanhar abre o último pedido
-  if (/acompanhar/.test(location.search) && pedidoAcomp) abreAcomp(false);
 })();

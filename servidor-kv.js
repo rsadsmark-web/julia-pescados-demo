@@ -2,7 +2,7 @@
    Carrega as chaves compartilhadas de forma síncrona antes dos demais scripts, então o código existente continua igual.
    Chaves por aparelho (carrinho, último pedido etc.) seguem no localStorage normal. */
 (function () {
-  var CHAVES = { jp_demo_v1: 1, jp_crm_v1: 1, jp_ex_v1: 1, jp_pv_v1: 1, jp_rs_ia_v1: 1 };
+  var CHAVES = { jp_demo_v1: 1, jp_crm_v1: 1, jp_ex_v1: 1, jp_pv_v1: 1, jp_rs_ia_v1: 1, jp_loja_v1: 1 };
   var mem = {}, versao = {}, sujo = {}, enviando = {}, timer = null, travado = false;
 
   function aviso(t) {

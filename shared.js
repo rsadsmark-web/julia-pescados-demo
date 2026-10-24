@@ -219,11 +219,15 @@
     if (!p || p.confirmado) return p;
     p.confirmado = true; p.confirmadoEm = agoraMs();
     if (!p.baixa) {
-      p.itens.forEach(function (i) {
-        var pr = s.produtos.filter(function (x) { return x.id === i.id; })[0];
+      var baixa = function (id, qtd) {
+        var pr = s.produtos.filter(function (x) { return x.id === id; })[0];
         if (!pr) return;
-        pr.estoque = Math.max(0, +(pr.estoque - i.qtd).toFixed(1));
-        s.baixas.unshift({ quando: agoraMs(), pedido: p.id, produto: pr.nome, qtd: i.qtd, saldo: pr.estoque });
+        pr.estoque = Math.max(0, +(pr.estoque - qtd).toFixed(2));
+        s.baixas.unshift({ quando: agoraMs(), pedido: p.id, produto: pr.nome, qtd: qtd, saldo: pr.estoque });
+      };
+      p.itens.forEach(function (i) {
+        if (i.combo) i.combo.forEach(function (c) { baixa(c[0], +(c[1] * i.qtd).toFixed(2)); }); // combo: dá baixa em cada item que o compõe
+        else baixa(i.id, i.qtd);
       });
       p.baixa = true;
     }

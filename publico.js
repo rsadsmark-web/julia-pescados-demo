@@ -21,6 +21,7 @@
     if (x.status === 200) srv = JSON.parse(x.responseText);
   } catch (e) {}
   if (srv && srv.corte) window.JP_CORTE = srv.corte;
+  if (srv && srv.loja) window.JP_LOJA_CFG = srv.loja;   // horário, frete, mínimo, combos e textos editados no painel
   if (srv && srv.produtos && srv.produtos.length) {
     var st = null; try { st = JSON.parse(get.call(localStorage, CH) || 'null'); } catch (e) {}
     if (!st || typeof st !== 'object' || !st.produtos) st = { produtos: [], clientes: [], motoboys: [], pedidos: [], leads: [], notas: [], baixas: [], seq: 1000 };

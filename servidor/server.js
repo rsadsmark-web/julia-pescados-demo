@@ -157,7 +157,7 @@ app.post('/api/trocar-senha', async (req, res) => {
 });
 
 /* ---------- estado do sistema (chave/valor) ---------- */
-const CHAVES = new Set(['jp_demo_v1', 'jp_crm_v1', 'jp_ex_v1', 'jp_pv_v1', 'jp_rs_ia_v1']);
+const CHAVES = new Set(['jp_demo_v1', 'jp_crm_v1', 'jp_ex_v1', 'jp_pv_v1', 'jp_rs_ia_v1', 'jp_loja_v1']);
 app.get('/api/entradas/pendentes', async (req, res) => res.json({ n: await pub.pendentes() }));
 app.get('/api/kv', async (req, res) => {
   try { await pub.absorve(); } catch (e) { console.error('absorve', e.message); } // pedidos e inscrições feitos na loja entram no estado antes de o painel carregar
@@ -179,7 +179,7 @@ app.put('/api/kv/:chave', express.text({ type: '*/*', limit: '30mb' }), async (r
       `INSERT INTO kv (chave, valor, versao, atualizado_por) VALUES ($1,$2,$3,$4)
        ON CONFLICT (chave) DO UPDATE SET valor = EXCLUDED.valor, versao = EXCLUDED.versao, atualizado = now(), atualizado_por = EXCLUDED.atualizado_por`, [k, valor, nv, req.usuario.id]);
     await c.query('COMMIT'); res.json({ ok: true, versao: nv });
-    if (k === 'jp_demo_v1' || k === 'jp_ex_v1') pub.agendaPublica(); // catálogo público atualizado
+    if (k === 'jp_demo_v1' || k === 'jp_ex_v1' || k === 'jp_loja_v1') pub.agendaPublica(); // catálogo público atualizado
   } catch (e) { await c.query('ROLLBACK').catch(() => {}); throw e; } finally { c.release(); }
 });
 
