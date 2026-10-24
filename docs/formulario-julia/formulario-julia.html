@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Júlia Pescados — Informações para o sistema</title>
+<style>
+:root{--vinho:#7a1f2b;--laranja:#e8731a;--petroleo:#0f4c5c;--pessego:#fdeee0;--creme:#fffaf4;--linha:#e6d8ca;--texto:#2b2320;--suave:#6f625a}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--texto);background:var(--creme)}
+header{background:var(--vinho);color:#fff;padding:28px 18px 24px}
+header .in,main,.barra .in{max-width:760px;margin:0 auto}
+header h1{margin:0 0 6px;font-size:1.55rem;line-height:1.2}
+header p{margin:0;opacity:.92}
+.aviso{background:var(--pessego);border:1px solid var(--linha);border-left:4px solid var(--laranja);border-radius:10px;padding:12px 14px;margin:18px 0;font-size:.95rem}
+.barra{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--linha);padding:8px 18px}
+.barra .in{display:flex;align-items:center;gap:12px;font-size:.85rem;color:var(--suave)}
+.prog{flex:1;height:8px;background:var(--pessego);border-radius:99px;overflow:hidden}
+.prog i{display:block;height:100%;width:0;background:var(--laranja);transition:width .25s}
+main{padding:6px 16px 90px}
+section{background:#fff;border:1px solid var(--linha);border-radius:14px;margin:18px 0;padding:18px 16px}
+section>h2{margin:0 0 2px;font-size:1.2rem;color:var(--vinho)}
+section>p.sub{margin:0 0 14px;color:var(--suave);font-size:.92rem}
+.q{padding:14px 0;border-top:1px dashed var(--linha)}
+.q:first-of-type{border-top:0}
+.q label.t,.q .t{display:block;font-weight:600;margin-bottom:4px}
+.dica{font-size:.85rem;color:var(--suave);margin:0 0 6px}
+.ass{display:block;font-size:.84rem;background:var(--pessego);color:#7a4a12;border-radius:8px;padding:6px 10px;margin:0 0 8px}
+.ass b{color:var(--vinho)}
+.conf{display:flex;gap:8px;align-items:center;font-size:.88rem;color:var(--petroleo);margin:6px 0 0}
+input[type=text],input[type=tel],input[type=number],input[type=email],input[type=time],textarea,select{width:100%;font:inherit;padding:11px 12px;border:1.5px solid var(--linha);border-radius:10px;background:#fff;color:var(--texto)}
+textarea{min-height:84px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:3px solid #f6c79c;border-color:var(--laranja)}
+.op{display:flex;gap:10px;align-items:flex-start;padding:7px 0}
+.op input{width:20px;height:20px;margin-top:2px;accent-color:var(--laranja);flex:none}
+.lin{display:grid;grid-template-columns:1fr;gap:8px}
+@media(min-width:560px){.lin.d2{grid-template-columns:1fr 1fr}}
+.dia{display:grid;grid-template-columns:92px 1fr 1fr;gap:8px;align-items:center;padding:4px 0}
+.dia span{font-weight:600;font-size:.92rem}
+.tab{width:100%;border-collapse:collapse;font-size:.92rem}
+.tab th{text-align:left;font-size:.8rem;color:var(--suave);padding:4px 6px}
+.tab td{padding:4px 6px;border-top:1px solid var(--linha)}
+.tab input{padding:8px 9px}
+.tab .ref{color:var(--suave);white-space:nowrap}
+.rolar{overflow-x:auto}
+.acoes{background:#fff;border:1px solid var(--linha);border-radius:14px;padding:18px 16px;margin:18px 0}
+button{font:inherit;font-weight:600;border:0;border-radius:12px;padding:14px 18px;cursor:pointer;width:100%;margin-top:10px}
+.b1{background:var(--laranja);color:#fff}.b2{background:var(--petroleo);color:#fff}.b3{background:#fff;color:var(--vinho);border:1.5px solid var(--vinho)}
+button:focus-visible{outline:3px solid #f6c79c;outline-offset:2px}
+#saida{white-space:pre-wrap;font:13px/1.5 ui-monospace,Menlo,monospace;background:var(--creme);border:1px solid var(--linha);border-radius:10px;padding:12px;margin-top:12px;max-height:360px;overflow:auto;display:none}
+.ok{color:var(--petroleo);font-weight:600;min-height:1.4em;margin-top:8px}
+.rod{text-align:center;color:var(--suave);font-size:.82rem;padding:0 16px 30px}
+.imp{display:none}
+@media print{.imp{display:inline}}
+@media print{
+  @page{size:A4;margin:14mm 12mm}
+  body{background:#fff;font-size:11pt}
+  .barra,.acoes,.conf,.nao-imp{display:none!important}
+  header{background:none;color:var(--vinho);padding:0 0 8px;border-bottom:3px solid var(--vinho)}
+  section{border:0;padding:0;margin:14px 0;break-inside:auto}
+  section>h2{border-bottom:2px solid var(--laranja);padding-bottom:3px;break-after:avoid}
+  .q{break-inside:avoid;padding:9px 0}
+  input[type=text],input[type=tel],input[type=number],input[type=email],input[type=time],textarea,select{border:0;border-bottom:1px solid #777;border-radius:0;padding:6px 2px;min-height:26px}
+  textarea{min-height:64px;border:1px solid #999;border-radius:4px}
+  .ass{background:#f6f0e8;border:1px solid #e3d6c6}
+  .op input{appearance:none;-webkit-appearance:none;border:1.5px solid #555;border-radius:3px;width:15px;height:15px}
+  .tab td,.tab th{padding:3px 4px}
+  main{padding:0}
+}
+</style>
+</head>
+<body>
+<header><div class="in">
+  <h1>Júlia Pescados — informações para o sistema</h1>
+  <p>Olá, Júlia! Para deixar a loja online, o painel e o atendimento funcionando do seu jeito, precisamos das respostas abaixo. Onde já colocamos um valor provisório, ele aparece em destaque: é só confirmar ou corrigir.</p>
+</div></header>
+<div class="barra nao-imp"><div class="in"><span id="pct">0% preenchido</span><div class="prog"><i id="barra"></i></div></div></div>
+<main>
+  <div class="aviso"><b>Como preencher:</b> <span class="nao-imp">responda no celular mesmo, no seu tempo. Suas respostas ficam salvas neste aparelho. No fim, toque em <b>“Gerar resumo”</b> e envie pelo WhatsApp.</span><span class="imp">escreva à mão ou digite nos campos, e devolva uma foto ou o arquivo preenchido pelo WhatsApp. Marque “Está certo como está” (☐) quando concordar com o valor provisório.</span> Se não souber algum item, deixe em branco ou escreva “não sei”; o contador pode ajudar nos itens de nota fiscal. <b>Não envie senhas</b> neste formulário (a do certificado digital combinamos por outro canal).</div>
+  <div id="app"></div>
+  <div class="acoes nao-imp">
+    <h2 style="margin:0 0 4px;color:var(--vinho);font-size:1.15rem">Terminou?</h2>
+    <p class="dica">O resumo reúne só o que foi respondido e lista o que ainda ficou em aberto.</p>
+    <button class="b1" id="gerar" type="button">Gerar resumo</button>
+    <button class="b2" id="zap" type="button">Enviar pelo WhatsApp</button>
+    <button class="b3" id="copiar" type="button">Copiar resumo</button>
+    <button class="b3" id="limpar" type="button">Limpar tudo e começar de novo</button>
+    <div class="ok" id="msg" role="status"></div>
+    <div id="saida"></div>
+  </div>
+</main>
+<p class="rod">Júlia Pescados · formulário preparado pela RS Tech Marketing</p>
+
+<script>
+/* Tipos: t texto, tel, n número, e e-mail, h hora, a texto longo, r uma opção, m várias opções.
+   "ass" = o que está assumido hoje no sistema (provisório). */
+var SEC = [
+{ id: 'empresa', t: '1. Dados da empresa', s: 'Aparecem na loja, nos pedidos e na nota fiscal.', q: [
+  { id: 'razao', t: 'Razão social', k: 't', dica: 'Exatamente como está no cartão CNPJ.' },
+  { id: 'fantasia', t: 'Nome fantasia', k: 't', ass: 'Júlia Pescados' },
+  { id: 'cnpj', t: 'CNPJ', k: 't' },
+  { id: 'ie', t: 'Inscrição estadual (IE)', k: 't', dica: 'Se for isenta, escreva “isenta”.' },
+  { id: 'im', t: 'Inscrição municipal', k: 't' },
+  { id: 'end', t: 'Endereço completo (rua, número, bairro, CEP)', k: 'a', ass: 'Rua Ceci, 1129, Fortaleza, CE (sem bairro nem CEP)' },
+  { id: 'fone', t: 'Telefone que aparece na loja', k: 'tel', ass: '(85) 99767-3481' },
+  { id: 'email', t: 'E-mail da empresa', k: 'e' },
+  { id: 'insta', t: 'Instagram', k: 't', ass: '@juliapescados' },
+  { id: 'logo', t: 'Logo e cores', k: 'a', ass: 'Logo atual (círculo com camarão) e paleta pêssego, vinho, laranja e azul-petróleo', dica: 'Se tiver o arquivo original da logo (PNG/SVG em alta), envie junto com este formulário. Quer mudar alguma cor?' },
+  { id: 'resp', t: 'Nome do responsável pelo sistema', k: 't', dica: 'Quem decide e aprova as mudanças no dia a dia.' }
+]},
+{ id: 'horario', t: '2. Funcionamento e prazos', s: 'A loja usa esses horários para avisar “aberto” ou “fechado” e para oferecer agendamento.', q: [
+  { id: 'horarios', t: 'Horário de atendimento por dia', k: 'dias', ass: 'Segunda a sexta, 8h às 17h30 · sábado, 8h às 12h · domingo fechado', dica: 'Preencha abertura e fechamento; deixe em branco os dias fechados.' },
+  { id: 'feriados', t: 'Feriados e datas especiais', k: 'a', dica: 'Abre ou fecha em feriado? Funciona em dezembro (Natal, Ano Novo) e Semana Santa com horário diferente? Hoje não há regra de feriado.' },
+  { id: 'h_entrega', t: 'Horário em que faz entregas', k: 't', ass: 'Mesmo horário de atendimento, com janelas de 2 horas para agendar', dica: 'Ex.: das 9h às 17h. Há dias sem entrega?' },
+  { id: 'h_retirada', t: 'Horário em que o cliente pode retirar na loja', k: 't', ass: 'Mesmo horário de atendimento' },
+  { id: 'corte', t: 'Horário limite para pedir e receber no mesmo dia', k: 'h', ass: '14h (depois disso, o pedido vai para o próximo dia útil)' },
+  { id: 'preparo', t: 'Prazo de preparo / separação do pedido', k: 't', ass: 'Não definido (o sistema não promete prazo ao cliente)', dica: 'Ex.: 1 hora depois de confirmar o pedido. Tem prazo diferente para encomendas grandes?' },
+  { id: 'antec', t: 'Antecedência para encomendas grandes ou para eventos', k: 't', ass: 'Não definida' }
+]},
+{ id: 'entrega', t: '3. Entrega, frete e pedido mínimo', s: 'O valor do frete é calculado pelo bairro do cliente, mais um valor por quilômetro que passar da franquia.', q: [
+  { id: 'area', t: 'Onde a Júlia entrega?', k: 'a', ass: 'Fortaleza e Caucaia (Centro)', dica: 'Há outros municípios? Algum bairro que NÃO atende?' },
+  { id: 'bairros', t: 'Taxa de entrega por bairro', k: 'bairros', ass: 'Tabela abaixo, com valores de EXEMPLO', dica: 'Escreva o valor correto de cada bairro. Se um bairro não é atendido, escreva “não”. Pode acrescentar bairros no final.' },
+  { id: 'franq', t: 'Distância que o frete do bairro já cobre (franquia)', k: 'n', ass: '8 km', dica: 'Em km, a partir da loja.' },
+  { id: 'porkm', t: 'Valor por km que passar da franquia (R$)', k: 'n', ass: 'R$ 1,50 por km' },
+  { id: 'gratis', t: 'Frete grátis a partir de qual valor de compra (R$)?', k: 'n', ass: 'Não existe frete grátis', dica: 'Deixe em branco se não quiser oferecer. Vale para todos os bairros ou só alguns?' },
+  { id: 'minimo', t: 'Pedido mínimo (R$)', k: 'n', ass: 'R$ 50,00 (valor de exemplo)', dica: 'O mínimo é diferente para entrega e para retirada?' },
+  { id: 'entregador', t: 'Quem faz as entregas?', k: 'a', ass: 'Nenhum entregador cadastrado', dica: 'Nome, WhatsApp e se é moto própria, funcionário ou terceirizado. Informe todos.' },
+  { id: 'saida', t: 'De onde saem as entregas?', k: 't', ass: 'Do endereço da loja (Rua Ceci, 1129)', dica: 'O cálculo do km parte desse ponto.' }
+]},
+{ id: 'pagto', t: '4. Formas de pagamento', s: 'Aparecem para o cliente na hora de fechar o pedido.', q: [
+  { id: 'pg', t: 'Quais formas de pagamento a Júlia aceita?', k: 'm', ass: 'Pix, dinheiro, cartão na entrega, cartão na retirada e pagar na retirada', ops: ['Pix', 'Dinheiro', 'Cartão de crédito na entrega', 'Cartão de débito na entrega', 'Cartão na retirada (na loja)', 'Pagar na retirada', 'Link de pagamento / pagamento online', 'Outro (escreva abaixo)'] },
+  { id: 'pix', t: 'Chave Pix e nome do titular', k: 'a', dica: 'Tipo da chave (CNPJ, e-mail, celular ou aleatória) e em nome de quem aparece.' },
+  { id: 'pixdesc', t: 'Dá desconto no Pix ou à vista?', k: 't', ass: 'Não há desconto', dica: 'Se sim, quanto?' },
+  { id: 'troco', t: 'Dinheiro: o entregador leva troco? Até quanto?', k: 't', ass: 'Não definido', dica: 'Ex.: troco para até R$ 100.' },
+  { id: 'cartao', t: 'Cartão: quais bandeiras e quem fornece a maquininha?', k: 't', dica: 'Também cobra taxa extra no cartão? Aceita vale-refeição/alimentação?' },
+  { id: 'sinal', t: 'Pedidos grandes pedem sinal (pagamento adiantado)?', k: 't', ass: 'Não', dica: 'A partir de que valor?' },
+  { id: 'comprov', t: 'Como o cliente confirma o pagamento do Pix?', k: 'r', ops: ['Envia o comprovante pelo WhatsApp', 'Anexa o comprovante na loja', 'Vocês conferem no banco'], ass: 'Comprovante anexado ao pedido no painel' }
+]},
+{ id: 'catalogo', t: '5. Produtos e estoque', s: 'Trouxemos os 54 produtos do catálogo atual (SmartPOS). Precisamos conferir alguns pontos.', q: [
+  { id: 'bandejas', t: 'Quantas unidades vêm em cada bandeja?', k: 'band', ass: '12 unidades em cada uma (a origem cortou o nome e deduzimos)', dica: 'Se não for 12, escreva a quantidade certa.' },
+  { id: 'pesos', t: 'Peso aproximado dos itens vendidos por peça ou pacote', k: 'a', ass: 'Só os vendidos por kg têm aviso de pesagem', dica: 'Ex.: pacote de coxinha pesa cerca de 1 kg? Isso ajuda o cliente a saber quanto está levando.' },
+  { id: 'kg_min', t: 'Produtos por kg: pode vender meio quilo?', k: 'r', ops: ['Sim, de 0,5 em 0,5 kg', 'Só quilo inteiro', 'Outro (escreva abaixo)'], ass: 'De 0,5 em 0,5 kg, com valor ajustado na pesagem' },
+  { id: 'difpeso', t: 'Se o peso real for diferente do pedido, como cobrar?', k: 'a', ass: 'O valor é ajustado pelo peso real separado', dica: 'Avisa o cliente antes? Há limite de diferença?' },
+  { id: 'indisp', t: 'Estoque real de hoje', k: 'a', ass: '10 produtos aparecem como indisponíveis (estoque zero) e 4 estavam negativos no SmartPOS (códigos 218, 2005, 117 e 119)', dica: 'Quais produtos estão em falta agora? Pode mandar uma foto/planilha do estoque contado.' },
+  { id: 'estmin', t: 'Estoque mínimo: avisar quando faltar quanto?', k: 'a', ass: 'Sem mínimo definido (o alerta só dispara em produto esgotado)', dica: 'Ex.: avisar quando restar menos de 5 kg de camarão. Informe por produto ou por categoria.' },
+  { id: 'estquem', t: 'Quem faz a contagem do estoque e com que frequência?', k: 't', dica: 'Ex.: o Fulano, toda segunda-feira.' },
+  { id: 'estaviso', t: 'Quem recebe o aviso de estoque baixo (WhatsApp)?', k: 't' },
+  { id: 'fornec', t: 'Fornecedores principais (opcional)', k: 'a', dica: 'Nome e contato, para o sistema sugerir compras.' },
+  { id: 'combos', t: 'Kit Moqueca e Kit Petiscos: preço e desconto', k: 'a', ass: 'Sem desconto (preço = soma dos itens)', dica: 'Quer manter esses kits? Qual preço? Quer criar outros?' },
+  { id: 'promo', t: 'Promoções e destaques do momento', k: 'a', dica: 'Produtos em oferta, produtos que quer destacar na vitrine.' },
+  { id: 'precos', t: 'Os preços do catálogo estão corretos?', k: 'r', ops: ['Sim, estão corretos', 'Preciso corrigir alguns (escreva abaixo)'], ass: 'Preços copiados do SmartPOS em 23/10' },
+  { id: 'foto252', t: 'Produto código 252 está sem foto', k: 't', dica: 'Pode enviar uma foto dele?' },
+  { id: 'fotos', t: 'Tem fotos próprias melhores dos produtos?', k: 't', ass: 'Usamos as fotos do SmartPOS' }
+]},
+{ id: 'nf', t: '6. Nota fiscal', s: 'A emissão de nota está pronta, mas desligada até recebermos estes dados (o contador pode responder).', q: [
+  { id: 'nf_emitir', t: 'A Júlia quer emitir nota fiscal pelo sistema?', k: 'r', ops: ['Sim, para todos os pedidos', 'Sim, só quando o cliente pedir', 'Não, continua como hoje'], ass: 'Emissão desligada' },
+  { id: 'nf_quem', t: 'Quem emite a nota hoje?', k: 't', dica: 'A própria Júlia, o contador ou outro sistema (qual?). Nome e contato do contador.' },
+  { id: 'nf_regime', t: 'Regime tributário da empresa', k: 'r', ops: ['Simples Nacional', 'Simples Nacional com excesso de sublimite', 'Lucro presumido / Lucro real', 'MEI', 'Não sei (perguntar ao contador)'], ass: 'Simples Nacional' },
+  { id: 'nf_cert', t: 'Certificado digital A1 (arquivo .pfx)', k: 'r', ops: ['Já tenho', 'Preciso comprar', 'O contador tem'], dica: 'O arquivo e a senha serão combinados por canal seguro, nunca neste formulário. Qual a validade?' },
+  { id: 'nf_tipo', t: 'Tipo de nota', k: 'r', ops: ['NF-e (modelo 55)', 'NFC-e (cupom ao consumidor)', 'Não sei (perguntar ao contador)'], ass: 'NF-e, com natureza “Venda de mercadoria”' },
+  { id: 'nf_prov', t: 'Provedor de emissão (já contratado?)', k: 't', ass: 'Focus NFe previsto, mas ainda não contratado', dica: 'Se o contador já usa outro, informe o nome.' },
+  { id: 'nf_trib', t: 'Tributação padrão (CFOP, CSOSN/CST, origem)', k: 't', ass: 'CFOP 5102, CSOSN 102, origem nacional (0), série 1', dica: 'O contador confirma.' },
+  { id: 'nf_ncm', t: 'NCM dos 54 produtos', k: 'a', ass: 'Em branco (obrigatório para emitir)', dica: 'O contador pode enviar a lista de NCM por produto. Podemos mandar a planilha dos produtos para ele preencher.' },
+  { id: 'nf_cnae', t: 'CNAE principal e código IBGE do município', k: 't', ass: 'Fortaleza: 2304400', dica: 'Só para conferir.' }
+]},
+{ id: 'zap', t: '7. WhatsApp, vendedores e equipe', s: 'Define quem atende, quem recebe os avisos e quem entra no painel.', q: [
+  { id: 'zap_num', t: 'Número de WhatsApp para o atendimento do sistema', k: 'tel', ass: '(85) 99767-3481 aparece como contato da loja. A conexão real ainda não foi feita', dica: 'Esse número ficará conectado ao sistema (pelo QR Code). É WhatsApp comum ou Business? Pode ficar só no sistema ou ainda usa no celular?' },
+  { id: 'zap_ok', t: 'Podemos conectar o número ao sistema?', k: 'r', ops: ['Sim', 'Prefiro usar um número novo só para o sistema', 'Preciso pensar'], ass: 'Desligado' },
+  { id: 'vend', t: 'Vendedores e atendentes', k: 'a', ass: 'Nenhum cadastrado', dica: 'Nome, WhatsApp, dias/horários e o que cada um faz (atende, separa, entrega).' },
+  { id: 'aviso', t: 'Quem recebe o aviso de pedido novo?', k: 't', ass: 'Ninguém além do painel' },
+  { id: 'usuarios', t: 'Quem vai usar o painel? (administrador ou operador)', k: 'a', ass: 'Só o usuário administrador criado pela RS Tech', dica: 'O administrador vê tudo (auditoria e configurações); o operador só cuida de pedidos, estoque e conversas.' },
+  { id: 'mass', t: 'Mensagens em massa (promoções para clientes)', k: 'r', ops: ['Quero usar', 'Por enquanto não'], ass: 'Desligadas. Se ligar: envios das 9h às 19h, no máximo 250 por dia (começa com 20 e sobe aos poucos), com pausa de 25 a 60 segundos entre mensagens', dica: 'Concorda com esses limites? Cliente que responder “SAIR” não recebe mais.' },
+  { id: 'base', t: 'Lista de clientes atuais', k: 'r', ops: ['Tenho e posso enviar', 'Não tenho', 'Está no SmartPOS (exportar de lá)'], ass: 'Sistema começou sem clientes' },
+  { id: 'posv', t: 'Mensagem de pós-venda', k: 'r', ops: ['Quero (receita e avaliação após a entrega)', 'Não quero'], ass: 'Receitas e avaliação por WhatsApp depois da entrega' }
+]},
+{ id: 'ia', t: '8. Atendimento por inteligência artificial', s: 'Uma assistente virtual responde dúvidas no WhatsApp. Você decide como ela fala e o que pode dizer.', q: [
+  { id: 'ia_usar', t: 'Quer usar a assistente virtual?', k: 'r', ops: ['Sim', 'Sim, mas só sugerindo respostas para a equipe aprovar', 'Não por enquanto'], ass: 'Desligada (modos: só sugerir ou responder sozinha)' },
+  { id: 'ia_nome', t: 'Nome da assistente', k: 't', ass: 'Assistente virtual da Júlia Pescados', dica: 'Ela sempre avisa que é uma assistente virtual, nunca finge ser uma pessoa.' },
+  { id: 'ia_tom', t: 'Tom de voz', k: 'r', ops: ['Cordial e curto', 'Descontraído e simpático', 'Mais formal'], ass: 'Cordial, até 4 frases, sem formatação' },
+  { id: 'ia_pode', t: 'O que ela PODE responder?', k: 'a', ass: 'Preços, estoque, promoções, horário, frete, pedido mínimo, kits e dicas de preparo, sempre com os dados do sistema', dica: 'Quer acrescentar algo? Ex.: formas de pagamento, como conservar o produto.' },
+  { id: 'ia_nao', t: 'O que ela NÃO pode responder (deve chamar uma pessoa)?', k: 'a', ass: 'Reclamação, cancelamento, reembolso, pedido grande (a partir de 20 kg ou R$ 1.500), áudio e imagem, desconto, promessa de prazo e assuntos que não são da loja', dica: 'Concorda? Algo mais a incluir ou tirar?' },
+  { id: 'ia_modo', t: 'Quando ela responde?', k: 'r', ops: ['O tempo todo', 'Só fora do horário de atendimento', 'Só quando a equipe não responde'], ass: 'Sempre que chega mensagem' },
+  { id: 'ia_quem', t: 'Para quem ela passa a conversa quando não pode responder?', k: 't' },
+  { id: 'ia_frases', t: 'Frases que quer que ela use ou evite', k: 'a', dica: 'Ex.: cumprimento padrão, assinatura, gírias que combinam (ou não) com a marca.' }
+]},
+{ id: 'dominio', t: '9. Endereço do site (domínio)', s: 'Hoje a loja funciona em julia.rstechmarketing.com.br, que é provisório.', q: [
+  { id: 'dom', t: 'Qual endereço (domínio) a Júlia quer?', k: 't', ass: 'Ainda não escolhido (provisório: julia.rstechmarketing.com.br)', dica: 'Ex.: juliapescados.com.br. Dê 2 ou 3 opções, caso a primeira esteja ocupada.' },
+  { id: 'dom_reg', t: 'Esse domínio já existe ou precisa ser registrado?', k: 'r', ops: ['Já tenho', 'Preciso registrar', 'Não sei'], dica: 'Se já tem, em nome de quem está registrado e em qual site (Registro.br, outro)?' },
+  { id: 'dom_cf', t: 'Conta na Cloudflare (proteção e velocidade, plano gratuito)', k: 'r', ops: ['Já tenho', 'A RS Tech cria em nome da Júlia', 'A RS Tech cria na conta da RS Tech'], ass: 'Não existe' },
+  { id: 'dom_mail', t: 'E-mail profissional no domínio', k: 't', ass: 'Não previsto', dica: 'Ex.: contato@seudominio.com.br. Quer?' }
+]},
+{ id: 'pol', t: '10. Políticas da loja', s: 'Entram no site e orientam a assistente e a equipe.', q: [
+  { id: 'cancel', t: 'Cancelamento do pedido', k: 'a', ass: 'Sem regra definida (a assistente passa para uma pessoa)', dica: 'Até quando o cliente pode cancelar? (ex.: antes de começar a separar). Há multa ou devolução do valor? Em quantos dias?' },
+  { id: 'troca', t: 'Troca e devolução (produto com problema)', k: 'a', ass: 'Sem regra definida', dica: 'Por ser alimento congelado, como funciona? Prazo para avisar (ex.: no mesmo dia da entrega), pede foto, troca o produto ou devolve o dinheiro?' },
+  { id: 'ausente', t: 'Cliente ausente na entrega', k: 'a', ass: 'Sem regra definida', dica: 'Tenta de novo? Cobra nova taxa? Por quanto tempo o entregador espera?' },
+  { id: 'cadeia', t: 'Cuidados com o produto congelado/refrigerado', k: 'a', dica: 'Embalagem térmica? Orientação ao cliente? Validade média dos produtos?' },
+  { id: 'dif', t: 'Pedido errado ou faltando item', k: 'a', ass: 'Sem regra definida' },
+  { id: 'lgpd', t: 'Quem é o responsável pelos dados dos clientes (LGPD) e quer texto de privacidade na loja?', k: 't', ass: 'Sem texto de privacidade' }
+]},
+{ id: 'infra', t: '11. Cópia de segurança e outros', s: 'Itens de apoio para o sistema funcionar com segurança.', q: [
+  { id: 'drive', t: 'Conta do Google Drive para guardar a cópia de segurança diária', k: 't', ass: 'A cópia diária fica só no servidor; a cópia no Drive espera a conta', dica: 'Informe o e-mail da conta Google (a autorização é feita com a RS Tech). Sem senhas, por favor.' },
+  { id: 'smart', t: 'O que fazer com o SmartPOS / PDV atual?', k: 'a', ass: 'Continua funcionando em paralelo; não há integração com o sistema novo', dica: 'Vai manter? Por quanto tempo? Quem cuida do estoque do SmartPOS hoje?' },
+  { id: 'imp', t: 'Impressora de pedidos e balança', k: 'a', ass: 'Comanda de 80 mm pronta para impressão', dica: 'Tem impressora térmica? Qual modelo? Usa balança digital?' },
+  { id: 'banner', t: 'Frase de destaque da loja (topo do site)', k: 'a', ass: '“Camarão e pescados frescos, do jeito que a sua mesa merece.”', dica: 'Quer manter ou trocar? Texto sobre a Júlia e a história da empresa também ajudam.' },
+  { id: 'outro', t: 'Mais alguma informação, dúvida ou pedido?', k: 'a' }
+]}
+];
+
+var BAIRROS = [['Aldeota',6],['Meireles',7],['Praia de Iracema',8],['Centro',8],['Joaquim Távora',6],['Dionísio Torres',6],['Varjota',7],['Papicu',8],['Cocó',9],['Fátima',9],['Benfica',9],['Montese',11],['Parangaba',14.5],['Edson Queiroz',12],['Cambeba',16],['Maraponga',21.5],['Messejana',24],['Caucaia (Centro)',42]];
+var BANDEJAS = [['124','Camarão Empanado c/ Cream Cheese - Fritura'],['125','Bolinha de Camarão - Fritura'],['127','Bolinha de Caranguejo - Fritura'],['128','Camarão Empanado Tradicional - Fritura']];
+var DIAS = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+var ABRE = {Segunda:['08:00','17:30'],Terça:['08:00','17:30'],Quarta:['08:00','17:30'],Quinta:['08:00','17:30'],Sexta:['08:00','17:30'],Sábado:['08:00','12:00']};
+var CHAVE = 'julia_form_v1';
+var D = {};
+try { D = JSON.parse(localStorage.getItem(CHAVE) || '{}'); } catch (e) { D = {}; }
+
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+function brl(n) { return 'R$ ' + String(n).replace('.', ','); }
+function campo(id, ph, tipo) { return '<input type="' + (tipo || 'text') + '" data-k="' + id + '" value="' + esc(D[id] || '') + '"' + (ph ? ' placeholder="' + esc(ph) + '"' : '') + '>'; }
+
+function ctl(q) {
+  var id = q.id, v = D[id] || '', h = '', k = q.k;
+  if (k === 't') h = campo(id);
+  else if (k === 'tel') h = campo(id, '(85) 9 0000-0000', 'tel');
+  else if (k === 'e') h = campo(id, '', 'email');
+  else if (k === 'n') h = '<input type="text" inputmode="decimal" data-k="' + id + '" value="' + esc(v) + '">';
+  else if (k === 'h') h = campo(id, '', 'time');
+  else if (k === 'a') h = '<textarea data-k="' + id + '">' + esc(v) + '</textarea>';
+  else if (k === 'r') {
+    h = q.ops.map(function (o, i) {
+      return '<label class="op"><input type="radio" name="' + id + '" data-k="' + id + '" value="' + esc(o) + '"' + (v === o ? ' checked' : '') + '><span>' + esc(o) + '</span></label>';
+    }).join('') + '<input type="text" data-k="' + id + '_obs" placeholder="Observação (opcional)" value="' + esc(D[id + '_obs'] || '') + '">';
+  } else if (k === 'm') {
+    var sel = D[id] || [];
+    h = q.ops.map(function (o) {
+      return '<label class="op"><input type="checkbox" data-m="' + id + '" value="' + esc(o) + '"' + (sel.indexOf(o) > -1 ? ' checked' : '') + '><span>' + esc(o) + '</span></label>';
+    }).join('') + '<input type="text" data-k="' + id + '_obs" placeholder="Outras / observações (opcional)" value="' + esc(D[id + '_obs'] || '') + '">';
+  } else if (k === 'dias') {
+    h = DIAS.map(function (d) {
+      var a = ABRE[d] || ['', ''];
+      return '<div class="dia"><span>' + d + '</span><input type="time" aria-label="' + d + ' abre" data-k="h_' + d + '_a" value="' + esc(D['h_' + d + '_a'] || '') + '"><input type="time" aria-label="' + d + ' fecha" data-k="h_' + d + '_f" value="' + esc(D['h_' + d + '_f'] || '') + '"></div>';
+    }).join('') + '<p class="dica">Primeiro campo: abre. Segundo: fecha.</p>';
+  } else if (k === 'bairros') {
+    h = '<div class="rolar"><table class="tab"><tr><th>Bairro</th><th>Hoje (exemplo)</th><th>Valor correto (R$)</th></tr>' +
+      BAIRROS.map(function (b, i) { return '<tr><td>' + b[0] + '</td><td class="ref">' + brl(b[1]) + '</td><td><input type="text" inputmode="decimal" aria-label="Taxa ' + esc(b[0]) + '" data-k="bairro_' + i + '" value="' + esc(D['bairro_' + i] || '') + '"></td></tr>'; }).join('') +
+      '</table></div><label class="t" style="margin-top:10px">Outros bairros e valores</label><textarea data-k="bairros_extra">' + esc(D.bairros_extra || '') + '</textarea>';
+  } else if (k === 'band') {
+    h = '<div class="rolar"><table class="tab"><tr><th>Código</th><th>Produto</th><th>Unidades</th></tr>' +
+      BANDEJAS.map(function (b) { return '<tr><td>' + b[0] + '</td><td>' + b[1] + '</td><td style="width:90px"><input type="text" inputmode="numeric" aria-label="Unidades da bandeja ' + b[0] + '" data-k="band_' + b[0] + '" value="' + esc(D['band_' + b[0]] || '') + '"></td></tr>'; }).join('') + '</table></div>';
+  }
+  return h;
+}
+
+function monta() {
+  var out = '';
+  SEC.forEach(function (s) {
+    out += '<section id="' + s.id + '"><h2>' + esc(s.t) + '</h2><p class="sub">' + esc(s.s) + '</p>';
+    s.q.forEach(function (q) {
+      out += '<div class="q">';
+      var rot = q.k === 'r' || q.k === 'm' || q.k === 'dias' || q.k === 'bairros' || q.k === 'band';
+      out += (rot ? '<span class="t">' + esc(q.t) + '</span>' : '<label class="t" for="f_' + q.id + '">' + esc(q.t) + '</label>');
+      if (q.dica) out += '<p class="dica">' + esc(q.dica) + '</p>';
+      if (q.ass) out += '<span class="ass"><b>Hoje no sistema:</b> ' + esc(q.ass) + '</span>';
+      var c = ctl(q);
+      if (!rot) c = c.replace('data-k=', 'id="f_' + q.id + '" data-k=');
+      out += c;
+      if (q.ass) out += '<label class="conf"><input type="checkbox" data-c="' + q.id + '"' + (D['c_' + q.id] ? ' checked' : '') + '> Está certo como está</label>';
+      out += '</div>';
+    });
+    out += '</section>';
+  });
+  document.getElementById('app').innerHTML = out;
+}
+
+function salva() { try { localStorage.setItem(CHAVE, JSON.stringify(D)); } catch (e) {} progresso(); }
+
+function respondida(q) {
+  if (D['c_' + q.id]) return true;
+  var k = q.k;
+  if (k === 'dias') return DIAS.some(function (d) { return D['h_' + d + '_a'] || D['h_' + d + '_f']; });
+  if (k === 'bairros') return BAIRROS.some(function (b, i) { return D['bairro_' + i]; }) || !!D.bairros_extra;
+  if (k === 'band') return BANDEJAS.some(function (b) { return D['band_' + b[0]]; });
+  if (k === 'm') return (D[q.id] || []).length > 0 || !!D[q.id + '_obs'];
+  return !!(D[q.id] && String(D[q.id]).trim());
+}
+
+function progresso() {
+  var tot = 0, ok = 0;
+  SEC.forEach(function (s) { s.q.forEach(function (q) { tot++; if (respondida(q)) ok++; }); });
+  var p = Math.round(ok * 100 / tot);
+  document.getElementById('pct').textContent = p + '% preenchido (' + ok + ' de ' + tot + ')';
+  document.getElementById('barra').style.width = p + '%';
+}
+
+function valor(q) {
+  var k = q.k, id = q.id, obs = D[id + '_obs'] ? ' (' + D[id + '_obs'] + ')' : '';
+  if (k === 'dias') {
+    var l = DIAS.map(function (d) { var a = D['h_' + d + '_a'], f = D['h_' + d + '_f']; return a || f ? d + ': ' + (a || '?') + ' às ' + (f || '?') : ''; }).filter(Boolean);
+    return l.length ? '\n   ' + l.join('\n   ') : '';
+  }
+  if (k === 'bairros') {
+    var b = BAIRROS.map(function (x, i) { return D['bairro_' + i] ? x[0] + ': R$ ' + D['bairro_' + i] : ''; }).filter(Boolean);
+    if (D.bairros_extra) b.push('Outros: ' + D.bairros_extra);
+    return b.length ? '\n   ' + b.join('\n   ') : '';
+  }
+  if (k === 'band') {
+    var u = BANDEJAS.map(function (x) { return D['band_' + x[0]] ? x[0] + ' (' + x[1] + '): ' + D['band_' + x[0]] + ' un' : ''; }).filter(Boolean);
+    return u.length ? '\n   ' + u.join('\n   ') : '';
+  }
+  if (k === 'm') return ((D[id] || []).join(', ') + obs).replace(/^ \(/, '(');
+  var v = D[id] ? String(D[id]).trim() : '';
+  if (k === 'r') return v ? v + obs : (D[id + '_obs'] || '');
+  return v;
+}
+
+function resumo() {
+  var L = ['*JÚLIA PESCADOS — RESPOSTAS DO FORMULÁRIO*', ''], falta = [];
+  SEC.forEach(function (s) {
+    var linhas = [];
+    s.q.forEach(function (q) {
+      var v = valor(q);
+      if (v) linhas.push('• ' + q.t + ': ' + v);
+      if (D['c_' + q.id] && !v) linhas.push('• ' + q.t + ': OK, confirmado como está (' + q.ass + ')');
+      else if (D['c_' + q.id] && v) linhas[linhas.length - 1] += '  [também confirmou o valor atual]';
+      if (!v && !D['c_' + q.id]) falta.push(q.t);
+    });
+    if (linhas.length) { L.push('*' + s.t + '*'); L = L.concat(linhas); L.push(''); }
+  });
+  if (falta.length) { L.push('*AINDA EM ABERTO (' + falta.length + ')*'); falta.forEach(function (f) { L.push('- ' + f); }); }
+  return L.join('\n').trim();
+}
+
+var saida = document.getElementById('saida'), msg = document.getElementById('msg');
+function gera() { var t = resumo(); saida.style.display = 'block'; saida.textContent = t; return t; }
+function dizer(t) { msg.textContent = t; }
+
+document.getElementById('app').addEventListener('input', function (e) {
+  var t = e.target;
+  if (t.dataset.k) D[t.dataset.k] = t.value;
+  else if (t.dataset.c) D['c_' + t.dataset.c] = t.checked;
+  else if (t.dataset.m) {
+    var a = [].slice.call(document.querySelectorAll('input[data-m="' + t.dataset.m + '"]:checked')).map(function (x) { return x.value; });
+    D[t.dataset.m] = a;
+  }
+  salva();
+});
+document.getElementById('gerar').onclick = function () { gera(); dizer('Resumo gerado abaixo. Confira e envie.'); saida.scrollIntoView({ behavior: 'smooth', block: 'center' }); };
+document.getElementById('zap').onclick = function () {
+  var t = gera();
+  window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank', 'noopener');
+  dizer('Escolha o contato no WhatsApp para enviar. Se o texto não abrir, use “Copiar resumo”.');
+};
+document.getElementById('copiar').onclick = function () {
+  var t = gera();
+  function fallback() { var r = document.createRange(); r.selectNodeContents(saida); var s = getSelection(); s.removeAllRanges(); s.addRange(r); try { document.execCommand('copy'); dizer('Resumo copiado.'); } catch (e) { dizer('Selecione o texto abaixo e copie.'); } }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { dizer('Resumo copiado. É só colar no WhatsApp.'); }, fallback); else fallback();
+};
+document.getElementById('limpar').onclick = function () {
+  if (!confirm('Apagar todas as respostas deste aparelho?')) return;
+  D = {}; try { localStorage.removeItem(CHAVE); } catch (e) {} monta(); progresso(); saida.style.display = 'none'; dizer('Formulário limpo.');
+};
+monta(); progresso();
+</script>
+</body>
+</html>
