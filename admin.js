@@ -17,7 +17,7 @@
   function ha(ms) { var d = dias(ms); return d <= 0 ? 'hoje' : d === 1 ? 'ontem' : 'há ' + d + ' dias'; }
   function chipSit(p) {
     var st = JPD.statusDe(p), sit = JP.situacao(p);
-    var cls = { novo: 'alerta', confirmado: 'cinza', separando: 'laranja', pronto: 'laranja', saiu: 'laranja', entregue: 'ok', cancelado: 'alerta' }[st];
+    var cls = { novo: 'alerta', confirmado: 'cinza', separando: 'laranja', pronto: 'laranja', saiu: 'laranja', entregue: 'ok', falhou: 'alerta', cancelado: 'alerta' }[st];
     var r = JPD.rotulo(p, st) + (st === 'saiu' && sit.prog > 0 ? ' · ' + Math.round(sit.prog * 100) + '%' : '');
     return '<span class="chip ' + cls + '" data-sit="' + p.id + '">' + esc(r) + '</span>';
   }
@@ -71,7 +71,7 @@
   var FILTROS_PED = [['abertos', 'Em andamento'], ['novo', 'Novos'], ['saiu', 'Na rua'], ['entregue', 'Entregues'], ['cancelado', 'Cancelados'], ['todos', 'Todos']];
   function pedidosTela() {
     tela.innerHTML = '<div class="cab"><div><h1>Pedidos e delivery</h1><p>Do pedido novo à entrega: confirme, separe, mande para a rua e acompanhe. O estoque baixa ao confirmar e volta se o pedido for cancelado.</p></div></div>' +
-      '<div class="mapa-linha"><div class="painel"><h2>Mapa dos entregadores <small>posição estimada na rota</small></h2><div id="mapaAdmin"></div></div>' +
+      '<div class="mapa-linha"><div class="painel"><h2>Mapa dos entregadores <small>posição real quando o entregador compartilha; senão, estimada</small></h2><div id="rastAviso"></div><div id="mapaAdmin"></div></div>' +
       '<div class="painel"><h2>Entregadores <small>equipe própria</small></h2><div class="rotas" id="rotas"></div><form id="formEntregador" class="form-linha" autocomplete="off"><input name="nome" placeholder="Nome" required maxlength="40" aria-label="Nome do entregador"><input name="fone" placeholder="WhatsApp" maxlength="20" aria-label="WhatsApp do entregador"><input name="moto" placeholder="Veículo" maxlength="30" aria-label="Veículo"><button class="btn pequeno" type="submit">Cadastrar</button></form></div></div>' +
       '<div class="painel" style="margin-top:18px"><h2>Pedidos <small>os feitos pela loja aparecem aqui · clique em “Ver itens” para abrir o pedido</small><button class="btn pequeno claro" id="pdfDia" type="button">Baixar pedidos do dia (PDF)</button></h2>' +
       '<div class="filtros" id="filtrosPed"></div>' +
@@ -113,7 +113,7 @@
       var pagar = st === 'cancelado' ? '' : p.pago ? '<button class="btn pequeno claro" data-estorna="' + p.id + '">Estornar</button>' : '<button class="btn pequeno claro" data-pagar="' + p.id + '">Marcar pago</button>';
       var cancelar = !final ? '<button class="btn pequeno claro" data-cancela="' + p.id + '">Cancelar</button>' : '';
       return '<tr><td><b>' + p.id + '</b>' + (p.atacadoId ? ' <span class="chip rosa">Atacado</span>' : '') + (p.recompra ? ' <span class="chip ok">Recompra</span>' : '') + (p.agendado ? ' <span class="chip alerta">' + esc(p.agendado) + '</span>' : '') + '<small>' + JP.dataHora(p.criado) + '</small></td><td>' + esc(p.cliente) + '<small>' + esc(p.pagamento) + '</small></td><td>' + ent + '</td>' +
-        '<td class="num">' + JP.brl(JP.totalPedido(p)) + '</td><td>' + chipSit(p) + ' ' + chipPago(p) + '</td><td>' + sel + '</td><td><div class="acoes">' + avancar + '<button class="btn pequeno claro" type="button" data-itens="' + p.id + '" aria-expanded="' + !!abertos[p.id] + '">' + (abertos[p.id] ? 'Ocultar' : 'Itens (' + p.itens.length + ')') + '</button><button class="btn pequeno claro" type="button" data-imprimir="' + p.id + '">Imprimir</button>' + pagar + cancelar + '</div></td></tr>' +
+        '<td class="num">' + JP.brl(JP.totalPedido(p)) + '</td><td>' + chipSit(p) + ' ' + chipPago(p) + '</td><td>' + sel + '</td><td><div class="acoes">' + avancar + '<button class="btn pequeno claro" type="button" data-itens="' + p.id + '" aria-expanded="' + !!abertos[p.id] + '">' + (abertos[p.id] ? 'Ocultar' : 'Itens (' + p.itens.length + ')') + '</button><button class="btn pequeno claro" type="button" data-imprimir="' + p.id + '">Imprimir</button>' + pagar + cancelar + (window.JPEA ? JPEA.botao(p) : '') + '</div></td></tr>' +
         (abertos[p.id] ? '<tr class="linha-det"><td colspan="7">' + detalhePedido(p) + '</td></tr>' : '');
     }).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--suave);padding:22px">Nenhum pedido nesta lista.</td></tr>';
   }
@@ -149,7 +149,8 @@
       });
       if (at.length) { var all = []; at.forEach(function (p) { all = all.concat(mapa._motos[p.id] ? mapa._motos[p.id].pts : []); }); try { mapa.fitBounds(L.latLngBounds(all), { padding: [30, 30] }); } catch (e) {} }
     }
-    at.forEach(function (p) { var o = mapa._motos[p.id]; if (o) o.m.setLatLng(JP.pontoNaRota(o.pts, JP.situacao(p).prog)); });
+    at.forEach(function (p) { var o = mapa._motos[p.id], real = window.JPEA && JPEA.temReal(p.id); if (o) { o.m.setOpacity(real ? 0 : 1); o.m.setLatLng(JP.pontoNaRota(o.pts, JP.situacao(p).prog)); } });
+    if (window.JPEA) JPEA.desenha(mapa);
     var r = $('#rotas');
     if (r) {
       var res = JPD.resumoEntregadores(S, new Date(JP.agora()).setHours(0, 0, 0, 0));
@@ -384,6 +385,7 @@
     totalPedido: JP.totalPedido, categoria: categoria, selos: selos, modulo: function () { return modulo; }
   });
   PVA.init({ estado: function () { return S; }, esc: esc, toast: toast, ha: ha, dataHora: JP.dataHora, selos: selos, modulo: function () { return modulo; } });
+  if (window.JPEA) JPEA.init({ estado: function () { return S; }, recarrega: recarrega, esc: esc, toast: toast, mudaStatus: mudaStatus, modulo: function () { return modulo; }, redesenha: function () { if (modulo === 'pedidos') { desenhaPedidos(); atualizaMapaAdmin(); } }, selos: selos });
   EXP.init({ estado: function () { return S; }, recarrega: recarrega, esc: esc, toast: toast, ha: ha, brl: JP.brl, dataHora: JP.dataHora, selos: selos, modulo: function () { return modulo; } });
   WAA.init({ esc: esc, toast: toast });
   NFA.init({ esc: esc, toast: toast, estado: function () { return S; } });
