@@ -193,7 +193,7 @@
   // pedido com status real (fluxo do painel): a situação segue o status, sem relógio de demonstração
   function situacaoReal(p) {
     var st = window.JPD ? window.JPD.statusDe(p) : null, r = window.JPD ? window.JPD.rotulo(p, st) : '';
-    if (st === 'cancelado') return { cod: 'cancelado', rotulo: r, prog: 0 };
+    if (st === 'cancelado' || st === 'falhou') return { cod: 'cancelado', rotulo: r, prog: 0 };
     if (st === 'entregue') return { cod: 'chegou', rotulo: r, prog: 1 };
     if (st === 'saiu') { var v = (agoraMs() - (p.saiuEm || agoraMs())) / T_VIAGEM; return { cod: 'saiu', rotulo: r, prog: Math.min(0.95, Math.max(0, v)) }; }
     if (st === 'pronto') return { cod: p.tipo === 'retirada' ? 'chegou' : 'preparando', rotulo: r, prog: p.tipo === 'retirada' ? 1 : 0 };

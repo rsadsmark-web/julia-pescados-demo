@@ -3,8 +3,8 @@
 (function (raiz, fabrica) {
   if (typeof module === 'object' && module.exports) module.exports = fabrica(); else raiz.JPD = fabrica();
 })(this, function () {
-  var STATUS = ['novo', 'confirmado', 'separando', 'pronto', 'saiu', 'entregue', 'cancelado'];
-  var ROTULO = { novo: 'Aguardando confirmação', confirmado: 'Confirmado', separando: 'Separando', pronto: 'Pronto', saiu: 'Saiu para entrega', entregue: 'Entregue', cancelado: 'Cancelado' };
+  var STATUS = ['novo', 'confirmado', 'separando', 'pronto', 'saiu', 'entregue', 'falhou', 'cancelado'];
+  var ROTULO = { novo: 'Aguardando confirmação', confirmado: 'Confirmado', separando: 'Separando', pronto: 'Pronto', saiu: 'Saiu para entrega', entregue: 'Entregue', falhou: 'Entrega não realizada', cancelado: 'Cancelado' };
   var limpa = function (v, n) { return String(v == null ? '' : v).replace(/[\u0000-\u001f<>]/g, ' ').trim().slice(0, n); };
   var brl = function (v) { return 'R$ ' + (Math.round(+v * 100) / 100).toFixed(2).replace('.', ','); };
   var num = function (v) { return (Math.round(v * 100) / 100).toString().replace('.', ','); };
@@ -19,7 +19,7 @@
   }
   function proximos(p, de) {
     de = de || statusDe(p);
-    var m = { novo: ['confirmado'], confirmado: ['separando'], separando: ['pronto'], pronto: [p.tipo === 'retirada' ? 'entregue' : 'saiu'], saiu: ['entregue'], entregue: [], cancelado: [] }[de] || [];
+    var m = { novo: ['confirmado'], confirmado: ['separando'], separando: ['pronto'], pronto: [p.tipo === 'retirada' ? 'entregue' : 'saiu'], saiu: ['entregue', 'falhou'], falhou: ['saiu'], entregue: [], cancelado: [] }[de] || [];
     return m.concat(de === 'entregue' || de === 'cancelado' ? [] : ['cancelado']);
   }
   function rotulo(p, st) {
@@ -78,12 +78,15 @@
       p.saiuEm = agora;
     } else if (para === 'entregue') {
       p.fixo = 'entregue'; p.entregueEm = agora;
+    } else if (para === 'falhou') {
+      if (!motivo) return { ok: false, erro: 'Informe o motivo da entrega não realizada.' };
+      p.motivoFalha = motivo; p.falhouEm = agora;
     } else if (para === 'cancelado') {
       if (p.baixa) { mexeEstoque(S, p, -1, agora); p.baixa = false; }
       p.motivoCancelamento = motivo; p.canceladoEm = agora;
     }
     p.status = para;
-    (p.historico = p.historico || []).push({ st: para, em: agora, por: limpa(op.por, 40) || undefined, motivo: para === 'cancelado' ? motivo : undefined });
+    (p.historico = p.historico || []).push({ st: para, em: agora, por: limpa(op.por, 40) || undefined, motivo: para === 'cancelado' || para === 'falhou' ? motivo : undefined });
     return { ok: true };
   }
 
