@@ -21,12 +21,6 @@
 	}
 }
 
-(servir) {
-	file_server {
-		precompressed br gzip
-	}
-}
-
 julia.rstechmarketing.com.br, julia.157-173-206-42.sslip.io {
 	encode zstd gzip
 
@@ -39,14 +33,20 @@ julia.rstechmarketing.com.br, julia.157-173-206-42.sslip.io {
 	}
 
 	# endereços limpos: o antigo com .html (e /index) redireciona com 301 para o limpo, mantendo a consulta (?x=1)
-	map {query} {qs} {
-		~.+ "?{query}"
-		default ""
+	@indiceq {
+		path /index.html /index
+		expression `{http.request.uri.query} != ""`
 	}
+	redir @indiceq /?{http.request.uri.query} 301
 	@indice path /index.html /index
-	redir @indice /{qs} 301
+	redir @indice / 301
+	@antigaq {
+		path_regexp antigaq ^/(.+)\.html$
+		expression `{http.request.uri.query} != ""`
+	}
+	redir @antigaq /{re.antigaq.1}?{http.request.uri.query} 301
 	@antiga path_regexp antiga ^/(.+)\.html$
-	redir @antiga /{re.antiga.1}{qs} 301
+	redir @antiga /{re.antiga.1} 301
 
 	root * /opt/julia-pescados/publico
 
@@ -73,6 +73,8 @@ julia.rstechmarketing.com.br, julia.157-173-206-42.sslip.io {
 			try_files {path} {path}.html {path}/index.html
 		}
 		handle @estatico {
+			# /receitas serve receitas.html (o file_server não procura a extensão sozinho)
+			rewrite * {http.matchers.file.relative}
 			# cada classe de arquivo tem o seu cache (handles não se somam: vale o primeiro que casar)
 			@versionado query v=*
 			handle @versionado {
@@ -84,7 +86,7 @@ julia.rstechmarketing.com.br, julia.157-173-206-42.sslip.io {
 				header Cache-Control "public, max-age=2592000, stale-while-revalidate=86400"
 				import servir
 			}
-			@paginas path / /receitas /login /manifest.webmanifest
+			@paginas path / /index.html /receitas /receitas.html /login /login.html /manifest.webmanifest
 			handle @paginas {
 				header Cache-Control "public, max-age=60, s-maxage=300, stale-while-revalidate=600, stale-if-error=86400"
 				import servir
