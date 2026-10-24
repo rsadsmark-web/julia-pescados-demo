@@ -27,3 +27,6 @@ As telas respondem sem extensão: `/` (loja), `/receitas`, `/login`, `/trocar-se
 - `servidor/pedido.js`: o servidor refaz preço, frete, mínimo e estoque do pedido; `/api/ultimo-pedido` serve a recompra por WhatsApp (limite por IP, sem endereço).
 - `loja-admin.js` (menu "Loja online" do painel): preço, promoção, estoque, destaque, fração, descrição e dica, combos, frete por bairro, mínimo, horário, banner e contato. Fica na chave `jp_loja_v1` e vai para `/estado-publico.json`.
 - Testes: `node tests/loja.test.mjs "$PWD"` e `node tests/smartpos.test.mjs "$PWD"`.
+
+## Pedidos e delivery (etapa 3)
+`pedidos-lib.js` (testado em `tests/pedidos.test.mjs`) concentra as regras: fluxo novo → confirmado → separando → pronto → saiu (entrega) ou entregue (retirada), cancelamento com motivo (devolve o estoque), entregador (menos ocupado primeiro), pagamento com referência do comprovante e comanda de 80 mm. O frete é a taxa do bairro mais R$ 1,50 por km acima de 8 km (editável em Loja online → Frete e mínimo). Estoque baixa ao confirmar. Cada mudança fica no histórico do pedido.

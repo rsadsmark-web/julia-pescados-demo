@@ -40,13 +40,13 @@ function validaPedido(b, catalogo, config, opcoes) {
   if (!nome) return { erro: 'Pedido incompleto: informe o nome.' };
 
   const entrega = b.tipo === 'entrega';
-  let taxa = 0, bairro = '', endereco = '';
+  let taxa = 0, bairro = '', endereco = '', kmEntrega;
   if (entrega) {
     const f = L.frete(cfg, b.bairro);
     if (!f) return { erro: 'Escolha um bairro da lista de entrega.' };
     endereco = txt(b.endereco, 200);
     if (!endereco) return { erro: 'Informe o endereço de entrega.' };
-    taxa = f.taxa; bairro = f.bairro.nome;
+    taxa = f.taxa; bairro = f.bairro.nome; kmEntrega = Math.round(f.km * 10) / 10;
   }
   const sub = itens.reduce((t, i) => t + Math.round(i.preco * 100) * i.qtd, 0) / 100;
   const m = L.minimo(cfg, sub);
@@ -54,8 +54,8 @@ function validaPedido(b, catalogo, config, opcoes) {
 
   return {
     id: codigo, cliente: nome, fone: txt(b.fone, 20), tipo: entrega ? 'entrega' : 'retirada', bairro, endereco, obs: txt(b.obs, 300),
-    pagamento: PAGAMENTOS.includes(b.pagamento) ? b.pagamento : txt(b.pagamento, 30), itens, taxa,
-    criado: Date.now(), confirmado: false, baixa: false, motoboy: null, fixo: null, origemSite: true,
+    pagamento: PAGAMENTOS.includes(b.pagamento) ? b.pagamento : txt(b.pagamento, 30), itens, taxa, km: kmEntrega,
+    criado: Date.now(), status: 'novo', confirmado: false, baixa: false, pago: false, motoboy: null, fixo: null, origemSite: true,
     agendado: txt(b.agendado, 60) || undefined, recompra: b.recompra ? true : undefined, atacadoId: atacado ? txt(b.atacadoId, 20) || undefined : undefined
   };
 }

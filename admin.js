@@ -16,9 +16,14 @@
   function dias(ms) { return Math.floor((JP.agora() - ms) / 86400000); }
   function ha(ms) { var d = dias(ms); return d <= 0 ? 'hoje' : d === 1 ? 'ontem' : 'há ' + d + ' dias'; }
   function chipSit(p) {
-    var s = JP.situacao(p), cls = { recebido: p.confirmado ? 'cinza' : 'alerta', preparando: 'laranja', saiu: 'laranja', chegou: 'ok' }[s.cod];
-    var r = !p.confirmado ? 'Aguardando confirmação' : (p.tipo === 'retirada' && s.cod === 'chegou') ? 'Pronto para retirada' : s.rotulo;
-    return '<span class="chip ' + cls + '" data-sit="' + p.id + '">' + r + '</span>';
+    var st = JPD.statusDe(p), sit = JP.situacao(p);
+    var cls = { novo: 'alerta', confirmado: 'cinza', separando: 'laranja', pronto: 'laranja', saiu: 'laranja', entregue: 'ok', cancelado: 'alerta' }[st];
+    var r = JPD.rotulo(p, st) + (st === 'saiu' && sit.prog > 0 ? ' · ' + Math.round(sit.prog * 100) + '%' : '');
+    return '<span class="chip ' + cls + '" data-sit="' + p.id + '">' + esc(r) + '</span>';
+  }
+  function chipPago(p) {
+    var pg = JPD.resumoPagamento(p);
+    return p.pago ? '<span class="chip ok" title="' + esc(p.comprovante || '') + '">Pago</span>' : p.status === 'cancelado' ? '' : '<span class="chip cinza" title="Cobrar ' + pg.quando + '">A receber</span>';
   }
 
   /* ---------- categoria automática da carteira ---------- */
@@ -31,7 +36,7 @@
 
   /* ---------- selos do menu ---------- */
   function selos() {
-    var pend = S.pedidos.filter(function (p) { return !p.confirmado; }).length;
+    var pend = S.pedidos.filter(function (p) { return JPD.statusDe(p) === 'novo'; }).length;
     var baixo = S.produtos.filter(function (p) { return p.estoque <= p.min; }).length;
     $('#seloPedidos').textContent = pend || ''; $('#seloEstoque').textContent = baixo || '';
     var nl = window.CRM ? CRM.naoLidas() : 0; $('#seloConversas').textContent = nl || '';
@@ -43,14 +48,14 @@
   function visao() {
     var hoje = S.pedidos.filter(function (p) { return dias(p.criado) < 1; });
     var fat = hoje.reduce(function (s, p) { return s + JP.totalPedido(p); }, 0);
-    var abertos = S.pedidos.filter(function (p) { return p.confirmado && p.fixo !== 'entregue' && JP.situacao(p).cod !== 'chegou'; }).length;
-    var pend = S.pedidos.filter(function (p) { return !p.confirmado; }).length;
+    var abertos = S.pedidos.filter(function (p) { return JPD.ativo(p) && JPD.statusDe(p) !== 'novo'; }).length;
+    var pend = S.pedidos.filter(function (p) { return JPD.statusDe(p) === 'novo'; }).length;
     var baixo = S.produtos.filter(function (p) { return p.estoque <= p.min; });
     tela.innerHTML = '<div class="cab"><div><h1>Bom dia, Júlia</h1><p>Resumo da operação de hoje.</p></div></div>' +
       '<div class="kpis">' +
       kpi('Pedidos hoje', hoje.length, JP.brl(fat) + ' faturados') +
       kpi('Aguardando confirmação', pend, 'confirme para dar baixa no estoque', pend ? 'alerta' : '') +
-      kpi('Entregas em andamento', abertos, S.motoboys.length + ' motoboys na equipe') +
+      kpi('Entregas em andamento', abertos, S.motoboys.filter(function (m) { return m.ativo !== false; }).length + ' entregadores ativos') +
       kpi('Estoque baixo', baixo.length, baixo.length ? 'repor em breve' : 'tudo em dia', baixo.length ? 'alerta' : '') + '</div>' +
       '<div class="duas"><div class="painel"><h2>Últimos pedidos <a class="btn pequeno claro" href="#pedidos">Ver todos</a></h2><div class="rolagem"><table><thead><tr><th>Pedido</th><th>Cliente</th><th class="num">Total</th><th>Situação</th></tr></thead><tbody>' +
       S.pedidos.slice(0, 6).map(function (p) { return '<tr><td><b>' + p.id + '</b></td><td>' + esc(p.cliente) + '</td><td class="num">' + JP.brl(JP.totalPedido(p)) + '</td><td>' + chipSit(p) + '</td></tr>'; }).join('') +
@@ -62,12 +67,20 @@
   function kpi(t, v, s, cls) { return '<div class="kpi ' + (cls || '') + '"><span>' + t + '</span><b>' + v + '</b><small>' + s + '</small></div>'; }
 
   /* ---------- Pedidos e delivery ---------- */
+  var filtroPed = 'abertos';
+  var FILTROS_PED = [['abertos', 'Em andamento'], ['novo', 'Novos'], ['saiu', 'Na rua'], ['entregue', 'Entregues'], ['cancelado', 'Cancelados'], ['todos', 'Todos']];
   function pedidosTela() {
-    tela.innerHTML = '<div class="cab"><div><h1>Pedidos e delivery</h1><p>Confirme pedidos, escolha o motoboy e acompanhe as rotas no mapa.</p></div></div>' +
-      '<div class="mapa-linha"><div class="painel"><h2>Mapa dos motoboys <small>Fortaleza — rota simulada</small></h2><div id="mapaAdmin"></div></div>' +
-      '<div class="painel"><h2>Rotas de entrega <small>equipe própria</small></h2><div class="rotas" id="rotas"></div></div></div>' +
-      '<div class="painel" style="margin-top:18px"><h2>Pedidos <small>os feitos pela loja aparecem aqui na hora · clique em “Ver itens” para abrir o pedido</small><button class="btn pequeno claro" id="pdfDia" type="button">Baixar pedidos do dia (PDF)</button></h2><div class="rolagem"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Entrega</th><th class="num">Total</th><th>Situação</th><th>Motoboy</th><th>Ações</th></tr></thead><tbody id="corpoPedidos"></tbody></table></div></div>';
+    tela.innerHTML = '<div class="cab"><div><h1>Pedidos e delivery</h1><p>Do pedido novo à entrega: confirme, separe, mande para a rua e acompanhe. O estoque baixa ao confirmar e volta se o pedido for cancelado.</p></div></div>' +
+      '<div class="mapa-linha"><div class="painel"><h2>Mapa dos entregadores <small>posição estimada na rota</small></h2><div id="mapaAdmin"></div></div>' +
+      '<div class="painel"><h2>Entregadores <small>equipe própria</small></h2><div class="rotas" id="rotas"></div><form id="formEntregador" class="form-linha" autocomplete="off"><input name="nome" placeholder="Nome" required maxlength="40" aria-label="Nome do entregador"><input name="fone" placeholder="WhatsApp" maxlength="20" aria-label="WhatsApp do entregador"><input name="moto" placeholder="Veículo" maxlength="30" aria-label="Veículo"><button class="btn pequeno" type="submit">Cadastrar</button></form></div></div>' +
+      '<div class="painel" style="margin-top:18px"><h2>Pedidos <small>os feitos pela loja aparecem aqui · clique em “Ver itens” para abrir o pedido</small><button class="btn pequeno claro" id="pdfDia" type="button">Baixar pedidos do dia (PDF)</button></h2>' +
+      '<div class="filtros" id="filtrosPed"></div>' +
+      '<div class="rolagem"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Entrega</th><th class="num">Total</th><th>Status</th><th>Entregador</th><th>Ações</th></tr></thead><tbody id="corpoPedidos"></tbody></table></div></div>';
     desenhaPedidos(); montaMapaAdmin(); atualizaMapaAdmin();
+  }
+  function passaFiltro(p) {
+    var st = JPD.statusDe(p);
+    return filtroPed === 'todos' || (filtroPed === 'abertos' ? JPD.ativo(p) : st === filtroPed);
   }
   function detalhePedido(p) {
     var ent = p.tipo === 'retirada';
@@ -76,22 +89,39 @@
       '</tbody><tfoot><tr><td colspan="3">Subtotal</td><td class="num">' + JP.brl(JP.subtotal(p)) + '</td></tr><tr><td colspan="3">' + (ent ? 'Retirada' : 'Taxa de entrega' + (p.bairro ? ' (' + esc(p.bairro) + ')' : '')) + '</td><td class="num">' + JP.brl(p.taxa || 0) + '</td></tr><tr class="tot"><td colspan="3">Total do pedido</td><td class="num">' + JP.brl(JP.totalPedido(p)) + '</td></tr></tfoot></table></div>' +
       '<dl class="det-dados"><div><dt>Cliente</dt><dd>' + esc(p.cliente) + '</dd></div><div><dt>WhatsApp</dt><dd>' + esc(p.fone) + '</dd></div>' +
       '<div><dt>' + (ent ? 'Retirada' : 'Endereço de entrega') + '</dt><dd>' + (ent ? 'Retirada no local' : esc(p.endereco) + (p.bairro ? ' — ' + esc(p.bairro) : '')) + '</dd></div>' +
-      '<div><dt>Forma de pagamento</dt><dd>' + esc(p.pagamento) + '</dd></div>' +
+      '<div><dt>Forma de pagamento</dt><dd>' + esc(p.pagamento) + ' · ' + (p.pago ? 'pago' + (p.comprovante ? ' (' + esc(p.comprovante) + ')' : '') : 'a receber ' + JPD.resumoPagamento(p).quando) + '</dd></div>' +
+      (p.motivoCancelamento ? '<div class="largo"><dt>Cancelamento</dt><dd>' + esc(p.motivoCancelamento) + '</dd></div>' : '') +
+      (p.historico && p.historico.length ? '<div class="largo"><dt>Histórico</dt><dd>' + p.historico.map(function (h) { return esc(JPD.rotulo(p, h.st)) + ' — ' + JP.dataHora(h.em) + (h.por ? ' (' + esc(h.por) + ')' : ''); }).join('<br>') + '</dd></div>' : '') +
       '<div class="largo"><dt>Observações</dt><dd>' + (p.obs ? esc(p.obs) : '<i>Sem observações.</i>') + '</dd></div>' +
-      '<div class="largo"><button class="btn pequeno" type="button" data-pdf="' + p.id + '">Baixar pedido em PDF</button></div></dl></div>';
+      '<div class="largo"><button class="btn pequeno" type="button" data-pdf="' + p.id + '">Baixar pedido em PDF</button> <button class="btn pequeno claro" type="button" data-imprimir="' + p.id + '">Imprimir comanda</button></div></dl></div>';
   }
   function desenhaPedidos() {
-    $('#corpoPedidos').innerHTML = S.pedidos.map(function (p) {
-      var ent = p.tipo === 'retirada' ? 'Retirada' : esc(p.bairro);
-      var sel = p.tipo === 'retirada' ? '<span class="chip cinza">—</span>' :
-        '<select class="peq" data-moto="' + p.id + '" aria-label="Motoboy do pedido ' + p.id + '"' + (p.fixo === 'entregue' ? ' disabled' : '') + '><option value="">Atribuir</option>' +
-        S.motoboys.map(function (m) { return '<option value="' + m.id + '"' + (p.motoboy === m.id ? ' selected' : '') + '>' + m.nome + '</option>'; }).join('') + '</select>';
-      var acao = !p.confirmado ? '<button class="btn pequeno" data-conf="' + p.id + '">Confirmar</button>'
-        : '<button class="btn pequeno claro" data-venda="' + p.id + '"' + (p.vendaConfirmada ? ' disabled' : '') + '>' + (p.vendaConfirmada ? 'Venda registrada' : 'Confirmar venda') + '</button>';
-      return '<tr><td><b>' + p.id + '</b>' + (p.atacadoId ? ' <span class="chip rosa">Atacado</span>' : '') + (p.recompra ? ' <span class="chip ok">Recompra</span>' : '') + (p.agendado ? ' <span class="chip alerta">' + esc(p.agendado) + '</span>' : '') + '<small>' + JP.dataHora(p.criado) + '</small></td><td>' + esc(p.cliente) + '<small>' + esc(p.pagamento) + '</small></td><td>' + ent + '</td>' +
-        '<td class="num">' + JP.brl(JP.totalPedido(p)) + '</td><td>' + chipSit(p) + '</td><td>' + sel + '</td><td><div class="acoes"><button class="btn pequeno claro" type="button" data-itens="' + p.id + '" aria-expanded="' + !!abertos[p.id] + '">' + (abertos[p.id] ? 'Ocultar itens' : 'Ver itens (' + p.itens.length + ')') + '</button>' + acao + '</div></td></tr>' +
-        (abertos[p.id] ? '<tr class="linha-det"><td colspan="7">' + detalhePedido(p) + '</td></tr>' : '');
+    var fl = $('#filtrosPed');
+    if (fl) fl.innerHTML = FILTROS_PED.map(function (f) {
+      var n = S.pedidos.filter(function (p) { var o = filtroPed; filtroPed = f[0]; var r = passaFiltro(p); filtroPed = o; return r; }).length;
+      return '<button type="button" class="filtro' + (filtroPed === f[0] ? ' ativo' : '') + '" data-fped="' + f[0] + '">' + f[1] + ' (' + n + ')</button>';
     }).join('');
+    var lista = S.pedidos.filter(passaFiltro);
+    $('#corpoPedidos').innerHTML = lista.length ? lista.map(function (p) {
+      var st = JPD.statusDe(p), ent = p.tipo === 'retirada' ? 'Retirada' : esc(p.bairro);
+      var final = st === 'entregue' || st === 'cancelado';
+      var sel = p.tipo === 'retirada' ? '<span class="chip cinza">—</span>' :
+        '<select class="peq" data-moto="' + p.id + '" aria-label="Entregador do pedido ' + p.id + '"' + (final || st === 'saiu' ? ' disabled' : '') + '><option value="">Atribuir</option>' +
+        S.motoboys.filter(function (m) { return m.ativo !== false || p.motoboy === m.id; }).map(function (m) { return '<option value="' + m.id + '"' + (p.motoboy === m.id ? ' selected' : '') + '>' + esc(m.nome) + '</option>'; }).join('') + '</select>';
+      var prox = JPD.proximos(p, st).filter(function (x) { return x !== 'cancelado'; })[0];
+      var avancar = prox ? '<button class="btn pequeno" data-avanca="' + p.id + '" data-para="' + prox + '">' + { confirmado: 'Confirmar', separando: 'Começar a separar', pronto: 'Marcar pronto', saiu: 'Saiu para entrega', entregue: p.tipo === 'retirada' ? 'Cliente retirou' : 'Entregue' }[prox] + '</button>' : '';
+      var pagar = st === 'cancelado' ? '' : p.pago ? '<button class="btn pequeno claro" data-estorna="' + p.id + '">Estornar</button>' : '<button class="btn pequeno claro" data-pagar="' + p.id + '">Marcar pago</button>';
+      var cancelar = !final ? '<button class="btn pequeno claro" data-cancela="' + p.id + '">Cancelar</button>' : '';
+      return '<tr><td><b>' + p.id + '</b>' + (p.atacadoId ? ' <span class="chip rosa">Atacado</span>' : '') + (p.recompra ? ' <span class="chip ok">Recompra</span>' : '') + (p.agendado ? ' <span class="chip alerta">' + esc(p.agendado) + '</span>' : '') + '<small>' + JP.dataHora(p.criado) + '</small></td><td>' + esc(p.cliente) + '<small>' + esc(p.pagamento) + '</small></td><td>' + ent + '</td>' +
+        '<td class="num">' + JP.brl(JP.totalPedido(p)) + '</td><td>' + chipSit(p) + ' ' + chipPago(p) + '</td><td>' + sel + '</td><td><div class="acoes">' + avancar + '<button class="btn pequeno claro" type="button" data-itens="' + p.id + '" aria-expanded="' + !!abertos[p.id] + '">' + (abertos[p.id] ? 'Ocultar' : 'Itens (' + p.itens.length + ')') + '</button><button class="btn pequeno claro" type="button" data-imprimir="' + p.id + '">Imprimir</button>' + pagar + cancelar + '</div></td></tr>' +
+        (abertos[p.id] ? '<tr class="linha-det"><td colspan="7">' + detalhePedido(p) + '</td></tr>' : '');
+    }).join('') : '<tr><td colspan="7" style="text-align:center;color:var(--suave);padding:22px">Nenhum pedido nesta lista.</td></tr>';
+  }
+  function imprimeComanda(p) {
+    var w = window.open('', '_blank', 'width=420,height=640'); if (!w) { toast('O navegador bloqueou a janela de impressão. Libere pop-ups para este site.'); return; }
+    var cfg = {}; try { cfg = JSON.parse(localStorage.getItem('jp_loja_v1') || 'null') || {}; } catch (e) {}
+    w.document.write(JPD.comandaHtml(p, JPL.mescla(cfg))); w.document.close(); w.focus();
+    setTimeout(function () { w.print(); }, 250);
   }
   function montaMapaAdmin() {
     if (mapa) { mapa.remove(); mapa = null; }
@@ -102,7 +132,7 @@
     setTimeout(function () { mapa && mapa.invalidateSize(); }, 150);
   }
   function ativasMapa() {
-    return S.pedidos.filter(function (p) { return p.tipo === 'entrega' && p.confirmado && p.motoboy && p.fixo !== 'entregue' && JP.situacao(p).cod !== 'chegou'; });
+    return S.pedidos.filter(function (p) { return p.tipo === 'entrega' && p.motoboy && JPD.ativo(p) && JPD.statusDe(p) !== 'novo'; });
   }
   function atualizaMapaAdmin() {
     if (!mapa) return;
@@ -121,11 +151,14 @@
     }
     at.forEach(function (p) { var o = mapa._motos[p.id]; if (o) o.m.setLatLng(JP.pontoNaRota(o.pts, JP.situacao(p).prog)); });
     var r = $('#rotas');
-    if (r) r.innerHTML = S.motoboys.map(function (m) {
-      var ps = at.filter(function (p) { return p.motoboy === m.id; });
-      var info = ps.length ? ps.map(function (p) { var s = JP.situacao(p); return p.id + ' → ' + p.bairro + ' · ' + (s.cod === 'saiu' ? Math.round(s.prog * 100) + '% do trajeto' : 'separando'); }).join('<br>') : 'Livre, aguardando pedido';
-      return '<div class="rota"><span class="ponto" style="background:' + CORES[m.id] + '"></span><div><b>' + m.nome + '</b> <small style="display:inline">' + esc(m.moto) + '</small><br><span style="color:var(--suave)">' + info + '</span></div><span class="chip ' + (ps.length ? 'laranja' : 'ok') + '">' + (ps.length ? 'Em rota' : 'Livre') + '</span></div>';
-    }).join('');
+    if (r) {
+      var res = JPD.resumoEntregadores(S, new Date(JP.agora()).setHours(0, 0, 0, 0));
+      r.innerHTML = S.motoboys.length ? S.motoboys.map(function (m) {
+        var ps = at.filter(function (p) { return p.motoboy === m.id; }), ativo = m.ativo !== false, o = res[m.id] || {};
+        var info = ps.length ? ps.map(function (p) { var s = JP.situacao(p); return p.id + ' → ' + esc(p.bairro) + ' · ' + (s.cod === 'saiu' ? 'na rua' : 'separando'); }).join('<br>') : (ativo ? 'Livre, aguardando pedido' : 'Desativado');
+        return '<div class="rota"><span class="ponto" style="background:' + (CORES[m.id] || '#0b4a5c') + '"></span><div><b>' + esc(m.nome) + '</b> <small style="display:inline">' + esc(m.moto || '') + (m.fone ? ' · ' + esc(m.fone) : '') + '</small><br><span style="color:var(--suave)">' + info + '</span><br><small>Hoje: ' + (o.entregues || 0) + ' entregas · ' + JP.brl(o.taxas || 0) + ' em taxas</small></div><span><span class="chip ' + (!ativo ? 'cinza' : ps.length ? 'laranja' : 'ok') + '">' + (!ativo ? 'Inativo' : ps.length ? 'Em rota' : 'Livre') + '</span> <button type="button" class="btn pequeno claro" data-ent-toggle="' + m.id + '">' + (ativo ? 'Desativar' : 'Reativar') + '</button></span></div>';
+      }).join('') : '<p class="vazio">Nenhum entregador cadastrado. Cadastre abaixo para poder mandar pedidos para a rua.</p>';
+    }
   }
 
   /* ---------- Carteira de clientes ---------- */
@@ -234,16 +267,39 @@
     });
   }
 
+  function mudaStatus(id, para, op) {
+    op = op || {}; op.por = (window.JP_USUARIO || {}).usuario;
+    var r = JP.mudarStatus(id, para, op); recarrega();
+    if (!r.ok) { toast(r.erro); return; }
+    toast(para === 'confirmado' ? 'Pedido ' + id + ' confirmado. Estoque baixado.' : para === 'cancelado' ? 'Pedido ' + id + ' cancelado e estoque devolvido.' : 'Pedido ' + id + ': ' + JPD.rotulo(pedido(id), para).toLowerCase() + '.');
+    desenhaPedidos(); atualizaMapaAdmin(); selos();
+  }
+
   /* ---------- eventos ---------- */
   document.addEventListener('click', function (e) {
     var t = e.target.closest('button'); if (!t) return;
     if (t.dataset.itens) { abertos[t.dataset.itens] = !abertos[t.dataset.itens]; desenhaPedidos(); }
     else if (t.dataset.pdf) baixaPdf('pedido', t.dataset.pdf);
     else if (t.id === 'pdfDia') baixaPdf('dia');
-    else if (t.dataset.conf) { JP.confirmarPedido(t.dataset.conf); recarrega(); toast('Pedido ' + t.dataset.conf + ' confirmado. Estoque baixado e motoboy atribuído.'); desenhaPedidos(); atualizaMapaAdmin(); selos(); }
-    else if (t.dataset.venda) {
-      var p = pedido(t.dataset.venda); p.vendaConfirmada = true; JP.salvar();
-      recarrega(); toast('Venda de ' + JP.brl(JP.totalPedido(p)) + ' confirmada.'); desenhaPedidos();
+    else if (t.dataset.avanca) mudaStatus(t.dataset.avanca, t.dataset.para);
+    else if (t.dataset.cancela) {
+      var mot = window.prompt('Motivo do cancelamento do pedido ' + t.dataset.cancela + ':'); if (mot === null) return;
+      mudaStatus(t.dataset.cancela, 'cancelado', { motivo: mot });
+    }
+    else if (t.dataset.pagar) {
+      var pp = pedido(t.dataset.pagar), ref = window.prompt('Pagamento do pedido ' + pp.id + ' (' + JP.brl(JP.totalPedido(pp)) + ', ' + pp.pagamento + ').\nReferência do comprovante (opcional, ex.: código do Pix):', ''); if (ref === null) return;
+      var rp = JPD.registraPagamento(pp, { agora: JP.agora(), por: (window.JP_USUARIO || {}).usuario, ref: ref, total: JP.totalPedido(pp) });
+      if (rp.ok) { JP.salvar(); toast('Pagamento do ' + pp.id + ' registrado.'); } else toast(rp.erro); desenhaPedidos(); selos();
+    }
+    else if (t.dataset.estorna) {
+      var pe = pedido(t.dataset.estorna), me = window.prompt('Motivo do estorno do pagamento ' + pe.id + ':'); if (me === null) return;
+      var re = JPD.estornaPagamento(pe, { agora: JP.agora(), motivo: me });
+      if (re.ok) { JP.salvar(); toast('Pagamento estornado.'); } else toast(re.erro); desenhaPedidos();
+    }
+    else if (t.dataset.imprimir) imprimeComanda(pedido(t.dataset.imprimir));
+    else if (t.dataset.fped) { filtroPed = t.dataset.fped; desenhaPedidos(); }
+    else if (t.dataset.entToggle) {
+      var en = motoboy(t.dataset.entToggle); en.ativo = en.ativo === false; JP.salvar(); toast(en.nome + (en.ativo ? ' reativado.' : ' desativado; não recebe novos pedidos.')); atualizaMapaAdmin(); desenhaPedidos();
     }
     else if (t.dataset.fcli) { filtroCli = t.dataset.fcli; desenhaClientes(); }
     else if (t.dataset.entrada) {
@@ -255,8 +311,14 @@
   });
   document.addEventListener('change', function (e) {
     if (e.target.dataset.moto !== undefined) {
-      var p = pedido(e.target.dataset.moto); p.motoboy = e.target.value || null; JP.salvar(); toast(p.motoboy ? 'Motoboy ' + motoboy(p.motoboy).nome + ' atribuído ao ' + p.id + '.' : 'Motoboy removido do ' + p.id + '.'); atualizaMapaAdmin();
+      var p = pedido(e.target.dataset.moto), ra = JPD.atribui(S, p, e.target.value); if (!ra.ok) { toast(ra.erro); desenhaPedidos(); return; } JP.salvar(); toast(p.motoboy ? 'Entregador ' + motoboy(p.motoboy).nome + ' atribuído ao ' + p.id + '.' : 'Entregador removido do ' + p.id + '.'); atualizaMapaAdmin();
     } else if (e.target.id === 'nfPedido') { nfSel = e.target.value; nf(); }
+  });
+  document.addEventListener('submit', function (e) {
+    if (e.target.id !== 'formEntregador') return; e.preventDefault();
+    var f = e.target, nome = f.nome.value.trim(); if (!nome) return;
+    S.motoboys.push({ id: 'm' + Date.now().toString(36), nome: nome.slice(0, 40), fone: f.fone.value.trim().slice(0, 20), moto: f.moto.value.trim().slice(0, 30), ativo: true });
+    JP.salvar(); toast('Entregador ' + nome + ' cadastrado.'); f.reset(); atualizaMapaAdmin(); desenhaPedidos();
   });
   document.addEventListener('input', function (e) { if (e.target.id === 'buscaCli') { buscaCli = e.target.value; var pos = e.target.selectionStart; desenhaClientes(); var b = $('#buscaCli'); b.focus(); b.setSelectionRange(pos, pos); } });
 

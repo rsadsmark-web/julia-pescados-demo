@@ -31,7 +31,7 @@
   /* ================= Entregas do dia ================= */
   function bairroDe(nome) { return JP.BAIRROS.filter(function (b) { return b.nome === nome; })[0]; }
   function entregasHoje() {
-    return S().pedidos.filter(function (p) { return p.tipo === 'entrega' && !p.agendado && p.fixo !== 'entregue' && JP.situacao(p).cod !== 'chegou' && (!F.moto || p.motoboy === F.moto); });
+    return S().pedidos.filter(function (p) { return p.tipo === 'entrega' && !p.agendado && JPD.ativo(p) && JP.situacao(p).cod !== 'chegou' && (!F.moto || p.motoboy === F.moto); });
   }
   // Ordena pelo vizinho mais próximo a partir da base, uma volta para Fortaleza e outra para Caucaia.
   function ordenaRota(lista) {
@@ -112,8 +112,15 @@
     var feitos = 0;
     ids.forEach(function (id) {
       var p = pedido(id); if (!p || p.fixo === 'entregue' || p.saiuEm) return;
-      if (!p.confirmado) { JP.confirmarPedido(id); ctx.recarrega(); }
-      p = pedido(id); p.saiuEm = Date.now(); JP.salvar(); ctx.recarrega();
+      var etapas = ['confirmado', 'separando', 'pronto', 'saiu'], erro = null;
+      for (var k = 0; k < etapas.length && !erro; k++) { // "saiu" na tela de entregas passa pelas etapas que faltam
+        var atual = JPD.statusDe(pedido(id));
+        if (atual === 'saiu') break;
+        if (etapas.indexOf(atual) >= k) continue;
+        var r = JP.mudarStatus(id, etapas[k], { por: 'entregas do dia' }); ctx.recarrega();
+        if (!r.ok) erro = r.erro;
+      }
+      if (erro) { ctx.toast(erro); return; }
       feitos++;
     });
     if (feitos) { vigia(); ctx.toast(feitos === 1 ? 'Saiu para entrega. O cliente foi avisado no WhatsApp (simulado).' : feitos + ' entregas saíram. Os clientes foram avisados no WhatsApp (simulado).'); }

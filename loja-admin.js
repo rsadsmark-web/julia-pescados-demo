@@ -110,7 +110,8 @@
   /* ---------- frete e mínimo ---------- */
   function entrega(c) {
     c.innerHTML = '<div class="painel"><h2>Pedido mínimo</h2><div class="lja-grade2"><div class="campo"><label for="ljaMin">Valor mínimo do pedido (R$, sem contar o frete)</label><input id="ljaMin" inputmode="decimal" value="' + esc(String(cfg.minimo).replace('.', ',')) + '"></div></div><p class="lja-dica">Zero desliga o mínimo. O cliente vê quanto falta antes de preencher qualquer dado, e o servidor também confere.</p></div>' +
-      '<div class="painel" style="margin-top:18px"><h2>Frete por bairro <small>valor único por bairro</small></h2>' +
+      '<div class="painel" style="margin-top:18px"><h2>Distância <small>acréscimo por quilômetro</small></h2><div class="lja-grade2"><div class="campo"><label for="ljaFranquia">Até quantos km vale só o frete do bairro</label><input id="ljaFranquia" inputmode="decimal" value="' + esc(String(cfg.frete.franquiaKm).replace('.', ',')) + '"></div><div class="campo"><label for="ljaPorKm">Valor por km que passar (R$)</label><input id="ljaPorKm" inputmode="decimal" value="' + esc(String(cfg.frete.porKm).replace('.', ',')) + '"></div></div><p class="lja-dica">Frete final = frete do bairro + valor por km acima da franquia (distância de rua estimada a partir da base; o acréscimo é arredondado para cima em R$ 0,50). Bairros novos, sem posição no mapa, cobram só o valor do bairro. Zero no valor por km desliga o acréscimo.</p></div>' +
+      '<div class="painel" style="margin-top:18px"><h2>Frete por bairro <small>valor do bairro, sem o acréscimo por km</small></h2>' +
       '<div class="rolagem"><table class="lja-tab"><thead><tr><th>Bairro</th><th class="num">Frete (R$)</th><th></th></tr></thead><tbody>' +
       cfg.bairros.map(function (b, i) { return '<tr data-bi="' + i + '"><td><input class="peq lja-nome" data-bc="nome" aria-label="Nome do bairro" value="' + esc(b.nome) + '"></td><td class="num"><input class="peq lja-num" inputmode="decimal" data-bc="taxa" aria-label="Frete de ' + esc(b.nome) + '" value="' + esc(String(b.taxa).replace('.', ',')) + '"></td><td><button type="button" class="btn pequeno claro" data-lja-del-bairro="' + i + '">Remover</button></td></tr>'; }).join('') +
       '</tbody></table></div><div class="lja-add"><input class="peq lja-nome" id="nbNome" placeholder="Novo bairro" aria-label="Novo bairro"><input class="peq lja-num" id="nbTaxa" inputmode="decimal" placeholder="Frete" aria-label="Frete do novo bairro"><button type="button" class="btn pequeno" data-lja-add-bairro>Adicionar bairro</button></div>' +
@@ -187,6 +188,11 @@
         var tr = el.closest('[data-cj]'), sec = el.closest('[data-ci]'), it = cfg.combos[+sec.dataset.ci].itens[+tr.dataset.cj], q = numero(el.value);
         if (!(q > 0)) { ctx.toast('A quantidade precisa ser maior que zero.'); el.value = String(it[1]).replace('.', ','); return; }
         it[1] = q; cfgSalvar('Quantidade salva.'); desenha();
+      }
+      else if (el.id === 'ljaFranquia' || el.id === 'ljaPorKm') {
+        var vk = numero(el.value), campo = el.id === 'ljaFranquia' ? 'franquiaKm' : 'porKm';
+        if (vk === null || vk < 0) { ctx.toast('Informe um valor de 0 ou mais.'); el.value = String(cfg.frete[campo]).replace('.', ','); return; }
+        cfg.frete[campo] = Math.round(vk * 100) / 100; cfgSalvar('Cálculo de frete salvo.');
       }
       else if (el.id === 'ljaMin') { var m = numero(el.value); if (m === null || m < 0) { ctx.toast('Informe um valor de 0 ou mais.'); el.value = String(cfg.minimo).replace('.', ','); return; } cfg.minimo = Math.round(m * 100) / 100; cfgSalvar('Pedido mínimo salvo.'); }
       else if (el.dataset.bc) {

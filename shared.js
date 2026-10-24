@@ -190,7 +190,18 @@
 
   // Demonstração acelerada: 5 s recebido, 10 s preparando, 40 s em rota.
   var T_PREP = 5000, T_ROTA = 15000, T_VIAGEM = 40000;
+  // pedido com status real (fluxo do painel): a situação segue o status, sem relógio de demonstração
+  function situacaoReal(p) {
+    var st = window.JPD ? window.JPD.statusDe(p) : null, r = window.JPD ? window.JPD.rotulo(p, st) : '';
+    if (st === 'cancelado') return { cod: 'cancelado', rotulo: r, prog: 0 };
+    if (st === 'entregue') return { cod: 'chegou', rotulo: r, prog: 1 };
+    if (st === 'saiu') { var v = (agoraMs() - (p.saiuEm || agoraMs())) / T_VIAGEM; return { cod: 'saiu', rotulo: r, prog: Math.min(0.95, Math.max(0, v)) }; }
+    if (st === 'pronto') return { cod: p.tipo === 'retirada' ? 'chegou' : 'preparando', rotulo: r, prog: p.tipo === 'retirada' ? 1 : 0 };
+    if (st === 'separando') return { cod: 'preparando', rotulo: r, prog: 0 };
+    return { cod: 'recebido', rotulo: p.agendado && st === 'confirmado' ? (p.tipo === 'retirada' ? 'Retirada ' : 'Entrega ') + p.agendado : r, prog: 0 };
+  }
   function situacao(p) {
+    if (p.status && window.JPD) return situacaoReal(p);
     if (p.fixo === 'entregue') return { cod: 'chegou', rotulo: 'Entregue', prog: 1 };
     if (!p.confirmado) return { cod: 'recebido', rotulo: 'Aguardando confirmação', prog: 0 };
     var agora = agoraMs();
@@ -213,30 +224,20 @@
     return { cod: 'chegou', rotulo: 'Entregue', prog: 1 };
   }
 
-  // Confirma o pedido: dá baixa no estoque, atribui motoboy livre, registra cliente.
+  // Confirma o pedido (status "confirmado"): dá baixa no estoque e atribui entregador livre. Regras em pedidos-lib.js.
   function confirmarPedido(id) {
     var s = carregar(), p = s.pedidos.filter(function (x) { return x.id === id; })[0];
     if (!p || p.confirmado) return p;
-    p.confirmado = true; p.confirmadoEm = agoraMs();
-    if (!p.baixa) {
-      var baixa = function (id, qtd) {
-        var pr = s.produtos.filter(function (x) { return x.id === id; })[0];
-        if (!pr) return;
-        pr.estoque = Math.max(0, +(pr.estoque - qtd).toFixed(2));
-        s.baixas.unshift({ quando: agoraMs(), pedido: p.id, produto: pr.nome, qtd: qtd, saldo: pr.estoque });
-      };
-      p.itens.forEach(function (i) {
-        if (i.combo) i.combo.forEach(function (c) { baixa(c[0], +(c[1] * i.qtd).toFixed(2)); }); // combo: dá baixa em cada item que o compõe
-        else baixa(i.id, i.qtd);
-      });
-      p.baixa = true;
-    }
-    if (p.tipo === 'entrega' && !p.motoboy) {
-      var ocup = s.pedidos.filter(function (x) { return x.confirmado && x.fixo !== 'entregue' && x.motoboy && situacao(x).cod !== 'chegou'; }).map(function (x) { return x.motoboy; });
-      var livre = s.motoboys.filter(function (m) { return ocup.indexOf(m.id) < 0; })[0] || s.motoboys[0];
-      p.motoboy = livre.id;
-    }
-    salvar(); return p;
+    var r = window.JPD.muda(s, p, 'confirmado', { agora: agoraMs() });
+    if (r.ok) salvar(); return p;
+  }
+  // Muda o status de um pedido pelo fluxo (confirmado → separando → pronto → saiu → entregue, ou cancelado).
+  function mudarStatus(id, para, op) {
+    var s = carregar(), p = s.pedidos.filter(function (x) { return x.id === id; })[0];
+    if (!p) return { ok: false, erro: 'Pedido não encontrado.' };
+    op = op || {}; op.agora = agoraMs();
+    var r = window.JPD.muda(s, p, para, op);
+    if (r.ok) salvar(); return r;
   }
 
   // Quanto custaria comprar os itens do kit separados (para mostrar a economia).
@@ -248,7 +249,7 @@
     WHATS: WHATS, BASE: BASE, BAIRROS: BAIRROS, CATEGORIAS: CATEGORIAS,
     estado: carregar, salvar: salvar, resetar: resetar,
     brl: brl, dataHora: dataHora, km: km, frete: frete, subtotal: subtotal, totalPedido: totalPedido,
-    rota: rota, pontoNaRota: pontoNaRota, situacao: situacao,
+    rota: rota, pontoNaRota: pontoNaRota, situacao: situacao, mudarStatus: mudarStatus,
     confirmarPedido: confirmarPedido, precoSeparado: precoSeparado,
     agora: agoraMs, T_PREP: T_PREP, T_ROTA: T_ROTA, T_VIAGEM: T_VIAGEM
   };

@@ -18,6 +18,8 @@
       nome: 'Júlia Pescados',
       horario: { 0: null, 1: ['08:00', '17:30'], 2: ['08:00', '17:30'], 3: ['08:00', '17:30'], 4: ['08:00', '17:30'], 5: ['08:00', '17:30'], 6: ['08:00', '12:00'] },
       minimo: 50,
+      // frete = taxa do bairro + valor por km que passar da franquia (distância de rua estimada = linha reta × 1,3)
+      frete: { franquiaKm: 8, porKm: 1.5, base: { lat: -3.7392, lng: -38.5058 } },
       bairros: [
         ['Aldeota', -3.738, -38.5, 6], ['Meireles', -3.7265, -38.493, 7], ['Praia de Iracema', -3.72, -38.51, 8], ['Centro', -3.726, -38.526, 8],
         ['Joaquim Távora', -3.74, -38.51, 6], ['Dionísio Torres', -3.745, -38.5, 6], ['Varjota', -3.729, -38.485, 7], ['Papicu', -3.7385, -38.485, 8],
@@ -43,6 +45,7 @@
     if (p.nome) c.nome = p.nome;
     if (p.horario) Object.keys(p.horario).forEach(function (d) { c.horario[d] = p.horario[d]; });
     if (p.minimo !== undefined && p.minimo !== null && p.minimo !== '') c.minimo = Math.max(0, +p.minimo || 0);
+    if (p.frete) Object.keys(p.frete).forEach(function (k) { c.frete[k] = p.frete[k]; });
     if (Array.isArray(p.bairros)) c.bairros = p.bairros;
     if (p.banner) Object.keys(p.banner).forEach(function (k) { c.banner[k] = p.banner[k]; });
     if (p.contato) Object.keys(p.contato).forEach(function (k) { c.contato[k] = p.contato[k]; });
@@ -153,10 +156,22 @@
   }
 
   /* ---------- frete e pedido mínimo ---------- */
+  function kmEntre(a, b, c, d) {
+    var R = 6371, r = Math.PI / 180, dLa = (c - a) * r, dLo = (d - b) * r;
+    var x = Math.sin(dLa / 2) * Math.sin(dLa / 2) + Math.cos(a * r) * Math.cos(c * r) * Math.sin(dLo / 2) * Math.sin(dLo / 2);
+    return 2 * R * Math.asin(Math.sqrt(x));
+  }
+  // taxa = taxa do bairro + porKm por km acima da franquia (excedente arredondado para cima em R$ 0,50)
   function frete(cfg, nome) {
     var alvo = semAcento(nome).trim(); if (!alvo) return null;
     var b = (cfg.bairros || []).filter(function (x) { return semAcento(x.nome) === alvo; })[0];
-    return b ? { bairro: b, taxa: +b.taxa || 0 } : null;
+    if (!b) return null;
+    var f = cfg.frete || {}, base = f.base || {}, fr = +f.franquiaKm, por = +f.porKm;
+    if (!(fr >= 0)) fr = 8; if (!(por >= 0)) por = 1.5;
+    var km = b.lat != null && base.lat != null ? kmEntre(base.lat, base.lng, b.lat, b.lng) * 1.3 : 0;
+    var extra = km > fr && por > 0 ? Math.ceil((km - fr) * por * 2 - 1e-9) / 2 : 0;
+    var taxaBairro = +b.taxa || 0;
+    return { bairro: b, km: km, taxaBairro: taxaBairro, extra: extra, taxa: Math.round((taxaBairro + extra) * 100) / 100 };
   }
   function minimo(cfg, subtotal) {
     var m = +cfg.minimo || 0, ok = subtotal + 1e-9 >= m;
@@ -215,7 +230,7 @@
   return {
     padrao: padrao, mescla: mescla, unidade: unidade, arredonda: arredonda, arredondaBaixo: arredondaBaixo, fmtQtd: fmtQtd, avisoPeso: avisoPeso,
     precoEfetivo: precoEfetivo, emPromocao: emPromocao, totalLinha: totalLinha, agora: agora, situacaoLoja: situacaoLoja, resumoHorario: resumoHorario,
-    janelas: janelas, diasAgendaveis: diasAgendaveis, textoAgendado: textoAgendado, frete: frete, minimo: minimo, filtra: filtra,
+    janelas: janelas, diasAgendaveis: diasAgendaveis, textoAgendado: textoAgendado, frete: frete, kmEntre: kmEntre, minimo: minimo, filtra: filtra,
     precoSeparado: precoSeparado, comboDisponivel: comboDisponivel, comboComoProduto: comboComoProduto, combosAtivos: combosAtivos, refazPedido: refazPedido,
     semAcento: semAcento, num: num
   };
