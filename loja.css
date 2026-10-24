@@ -26,7 +26,7 @@
 
 /* medalhão: foto em círculo, anel de texto girando, selo do horário */
 .heroi-foto { grid-area: foto; align-self: center; position: relative; aspect-ratio: 1; width: 100%; z-index: 3; }
-.heroi-foto::before { content: ''; position: absolute; inset: 11%; border-radius: 50%; background: var(--marinho) url('img/frutos-do-mar.jpg') 30% center / cover; border: 6px solid var(--ouro); box-shadow: 0 0 0 3px var(--marinho); }
+.heroi-foto::before { content: ''; position: absolute; inset: 11%; border-radius: 50%; background: var(--marinho) url('img/frutos-do-mar.webp') 30% center / cover; border: 6px solid var(--ouro); box-shadow: 0 0 0 3px var(--marinho); }
 .heroi-foto .anel { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; animation: gira 40s linear infinite; }
 .anel text { font-family: var(--rotulo); font-weight: 700; font-size: 25px; letter-spacing: .08em; fill: var(--papel); }
 .heroi-selo { position: absolute; left: 13%; bottom: 13%; transform: rotate(-9deg); background: var(--ouro); color: var(--marinho); border: 3px solid var(--marinho); border-radius: 50%; width: clamp(104px, 10vw, 138px); aspect-ratio: 1.15; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; line-height: 1.05; animation: carimba .8s .5s var(--suave-ease) both; }

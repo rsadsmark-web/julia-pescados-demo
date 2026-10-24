@@ -88,7 +88,7 @@
     }
     if ((l = lead('l2'))) { l.msgs[1].ia = 1; meta(l).ia = 'ia'; }
     if ((l = lead('l3'))) {
-      insere(l, { d: 'j', k: 'img', src: 'img/lula.jpg', t: 'Lula fresca que chegou hoje.', ts: min(71), st: 'lida' });
+      insere(l, { d: 'j', k: 'img', src: 'img/lula.webp', t: 'Lula fresca que chegou hoje.', ts: min(71), st: 'lida' });
       insere(l, { d: 'c', k: 'audio', dur: 23, t: '', ts: min(11) }); l.nao = 3;
       meta(l).obs = 'Compra toda semana. Prefere entrega à tarde, depois das 15h. Pagamento sempre no Pix.';
     }
@@ -541,7 +541,7 @@
   function anexar(tipo) {
     var l = lead(X.sel), ta = $('#xTexto'); if (!l) return;
     var legenda = ta ? ta.value.trim() : ''; if (ta) { ta.value = ''; rascunhos[l.id] = ''; cresce(ta); }
-    var fotos = ['img/camarao-cru.jpg', 'img/file-tilapia.jpg', 'img/salmao.jpg', 'img/frutos-do-mar.jpg', 'img/camarao-descascado.jpg'], spec;
+    var fotos = ['img/camarao-cru.webp', 'img/file-tilapia.webp', 'img/salmao.webp', 'img/frutos-do-mar.webp', 'img/camarao-descascado.webp'], spec;
     if (tipo === 'img') spec = { k: 'img', src: fotos[Math.floor(Math.random() * fotos.length)], t: legenda };
     else spec = { k: 'doc', arq: tipo === 'orc' ? { nome: 'orcamento-' + norm(primeiro(l.nome)) + '.pdf', tam: '92 KB' } : { nome: 'tabela-de-precos-do-dia.pdf', tam: '61 KB' }, t: legenda };
     fechaPop(); enviarMsg(l, spec); atualizaMsgs(l.id, true); desenhaLista(); atualizaCab(l.id); desenhaSug();
