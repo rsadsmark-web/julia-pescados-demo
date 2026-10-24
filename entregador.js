@@ -2,7 +2,7 @@
    Compartilha a posição a cada poucos segundos, guarda numa fila quando falta sinal e manda tudo quando volta. */
 (function () {
   var TOKEN = location.pathname.split('/')[2] || '', API = '/api/e/' + encodeURIComponent(TOKEN);
-  var E = window.JPE, $ = function (id) { return document.getElementById(id); };
+  var E = window.JPR, $ = function (id) { return document.getElementById(id); };
   var CHAVE_FILA = 'jpe_fila_' + TOKEN.slice(0, 12);
   var estado = null, mapa = null, pinMoto = null, pinCasa = null, watchId = null, fila = [], ultimoEnviado = null, ultimoAceito = null, ultimoGps = 0;
   var enviando = false, falhasRede = 0, timerEnvio = null, timerSinal = null, wake = null, parado = false;

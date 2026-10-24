@@ -35,7 +35,7 @@
       if (r.trilha && r.trilha.length > 1) L.polyline(r.trilha, { color: cor, weight: 4, opacity: .8 }).addTo(camada);
       L.marker([r.destino.lat, r.destino.lng], { icon: JPM.icones.casa() }).addTo(camada).bindTooltip(r.pedido + ' · ' + (r.bairro || '') + (r.destino.exato ? '' : ' (aproximado)'));
       if (r.posicao) {
-        var eta = r.etaSeg != null ? ' · ' + JPE.textoEta(r.etaSeg) : '';
+        var eta = r.etaSeg != null ? ' · ' + JPR.textoEta(r.etaSeg) : '';
         L.marker([r.posicao.lat, r.posicao.lng], { icon: JPM.icones.moto(cor) }).addTo(camada).bindTooltip((r.entregador || '') + ' → ' + r.pedido + eta + (r.semSinal ? ' · sem sinal' : ''));
       }
     });

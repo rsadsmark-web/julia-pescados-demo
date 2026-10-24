@@ -1,7 +1,7 @@
 /* Júlia Pescados — regras do rastreio de entrega, sem tela e sem rede: distância, tempo estimado, filtro de pontos do GPS,
-   fila offline do entregador, texto de cada estado e o que o cliente pode ver. Roda no navegador (window.JPE) e no Node. */
+   fila offline do entregador, texto de cada estado e o que o cliente pode ver. Roda no navegador (window.JPR) e no Node. */
 (function (raiz, fabrica) {
-  if (typeof module === 'object' && module.exports) module.exports = fabrica(); else raiz.JPE = fabrica();
+  if (typeof module === 'object' && module.exports) module.exports = fabrica(); else raiz.JPR = fabrica();
 })(this, function () {
   var RAIO_TERRA = 6371000;
   var LIMITES = {

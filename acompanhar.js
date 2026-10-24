@@ -2,7 +2,7 @@
    Mostra o estado, o entregador no mapa e o tempo estimado; atualiza sozinho e avisa se a internet cair. */
 (function () {
   var TOKEN = location.pathname.split('/')[2] || '', API = '/api/r/' + encodeURIComponent(TOKEN);
-  var E = window.JPE, $ = function (id) { return document.getElementById(id); };
+  var E = window.JPR, $ = function (id) { return document.getElementById(id); };
   var mapa = null, pinMoto = null, pinCasa = null, linhaRota = null, linhaTrilha = null, ajustou = false, mexeuNoMapa = false, falhas = 0, timer = null, ultimo = null, ultimoOk = 0;
 
   function mostra(id) { ['carregando', 'erro', 'app'].forEach(function (i) { $(i).classList.toggle('ent-oculto', id !== i); }); }
