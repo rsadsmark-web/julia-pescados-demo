@@ -1,5 +1,6 @@
 'use strict';
 // Servidor da Júlia Pescados: login, usuários e armazenamento do estado (Postgres) + arquivos do site.
+require('./async-erros');
 const express = require('express');
 const crypto = require('crypto');
 const path = require('path');
@@ -221,6 +222,7 @@ app.post('/api/usuarios', soAdmin, async (req, res) => {
 });
 app.patch('/api/usuarios/:id', soAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10), b = req.body || {};
+  if (!(id > 0)) return res.status(400).json({ erro: 'Usuário inválido.' });
   auditar(req, 'usuario.alterado', 'id ' + id + (b.ativo === false ? ': desativado' : b.ativo === true ? ': reativado' : '') + (b.senha !== undefined ? ': senha provisória redefinida' : ''));
   if (b.ativo === false) {
     const a = await pool.query("SELECT count(*)::int n FROM usuarios WHERE papel='admin' AND ativo AND id <> $1", [id]);
@@ -241,7 +243,12 @@ app.get('/api/auditoria', soAdmin, async (req, res) => {
 
 /* ---------- arquivos do site ---------- */
 app.use(express.static(SITE, { dotfiles: 'ignore', index: 'index.html', extensions: ['html'], redirect: false, setHeaders: (res, f) => { if (/\.(png|jpe?g|webp|svg|ico)$/i.test(f)) res.set('Cache-Control', 'private, max-age=86400'); } }));
-app.use((err, req, res, next) => { console.error(err); res.status(500).json({ erro: 'Erro interno.' }); });
+app.use((err, req, res, next) => {
+  if (res.headersSent) return next(err);
+  const st = err && err.status >= 400 && err.status < 500 ? err.status : 500;
+  if (st === 500) console.error(err); // erro de entrada do cliente (JSON quebrado, corpo grande) não polui o registro
+  res.status(st).json({ erro: st === 413 ? 'Dados grandes demais.' : st === 500 ? 'Erro interno.' : 'Requisição inválida.' });
+});
 
 module.exports = { pool, hashSenha, iniciaBanco };
 if (require.main === module) {
